@@ -15,7 +15,6 @@ using Abp.Extensions;
 using JK.Configuration;
 using JK.Identity;
 
-using Abp.AspNetCore.SignalR.Hubs;
 
 namespace JK.Web.Host.Startup
 {
@@ -40,7 +39,6 @@ namespace JK.Web.Host.Startup
             IdentityRegistrar.Register(services);
             AuthConfigurer.Configure(services, _appConfiguration);
 
-            services.AddSignalR();
 
             // Configure CORS for angular2 UI
             services.AddCors(
@@ -97,11 +95,6 @@ namespace JK.Web.Host.Startup
 
             app.UseAbpRequestLocalization();
 
-
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<AbpCommonHub>("/signalr");
-            });
 
             app.UseMvc(routes =>
             {

@@ -12,7 +12,6 @@ using JK.Authentication.JwtBearer;
 using JK.Configuration;
 using JK.Identity;
 using JK.Web.Resources;
-using Abp.AspNetCore.SignalR.Hubs;
 
 
 namespace JK.Web.Startup
@@ -38,7 +37,6 @@ namespace JK.Web.Startup
 
             services.AddScoped<IWebResourceManager, WebResourceManager>();
 
-            services.AddSignalR();
 
             // Configure Abp and Dependency Injection
             return services.AddAbp<JKWebMvcModule>(
@@ -68,10 +66,6 @@ namespace JK.Web.Startup
 
             app.UseJwtTokenMiddleware();
 
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<AbpCommonHub>("/signalr");
-            });
 
             app.UseMvc(routes =>
             {

@@ -16,6 +16,7 @@
     <RootNamespace>JK</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\zero\Abp.ZeroCore\Abp.ZeroCore.csproj" />
     <ProjectReference Include="..\JK.Application\JK.Application.csproj" />
     <ProjectReference Include="..\JK.EntityFrameworkCore\JK.EntityFrameworkCore.csproj" />
   </ItemGroup>
@@ -24,8 +25,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="3.0.0" />
     <PackageReference Include="Abp.AspNetCore" Version="4.1.0" />
-    <PackageReference Include="Abp.ZeroCore" Version="4.1.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
-    <PackageReference Include="Abp.AspNetCore.SignalR" Version="4.1.0" />
   </ItemGroup>
 </Project>
