@@ -16,7 +16,20 @@
     <None Remove="App_Data\**" />
   </ItemGroup>
   <ItemGroup>
+    <Content Remove="appMenus.config" />
+    <Content Remove="appPermissions.config" />
+    <Content Remove="wwwroot\view-resources\Views\_Bundles\common-scripts.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\view-resources\Views\_Bundles\common-scripts.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="appMenus.config" />
+    <EmbeddedResource Include="appPermissions.config" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="app.config" />
+    <None Include="wwwroot\view-resources\Views\_Bundles\common-scripts.js" />
     <None Update="Dockerfile">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -52,8 +65,5 @@
     <PackageReference Include="Abp.RedisCache" Version="4.1.0" />
     <PackageReference Include="Abp.Castle.Log4Net" Version="4.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.2.0" PrivateAssets="All" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="wwwroot\view-resources\Views\_Bundles\" />
   </ItemGroup>
 </Project>

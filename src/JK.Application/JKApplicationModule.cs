@@ -12,7 +12,7 @@ namespace JK
     {
         public override void PreInitialize()
         {
-            Configuration.Authorization.Providers.Add<JKAuthorizationProvider>();
+            Configuration.Authorization.Providers.Add<AppXmlAuthorizationProvider>();
         }
 
         public override void Initialize()

@@ -1,0 +1,62 @@
+﻿@{
+    CurrentPageName = "LoginLogs";
+}
+@using JK.Web.Models.Logs
+@model JK.Web.Models.Logs.LoginLogViewModel
+@section scripts
+    {
+    <environment names="Development">
+        <script src="~/view-resources/Views/LoginLogs/Index.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production,Docker">
+        <script src="~/view-resources/Views/LoginLogs/Index.min.js" asp-append-version="true"></script>
+    </environment>
+}
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    登录日志
+                </h2>
+            </div>
+            <div class="table-search">
+                <form id="LoginLogsFilter">
+                    <button id="QueryButton" class="btn btn-default pull-right" type="button">
+                        <i class="material-icons">search</i>
+                    </button>
+                    @if (!AbpSession.TenantId.HasValue)
+                    {
+                        <label>租户：</label>
+                        <select name="TenantId" asp-items="Model.Tenants">
+                            <option value="">HOST</option>
+                        </select>
+                    }
+                    @if (IsGranted("Pages.LoginLogs"))
+                    {
+                        <label>用户名：</label>
+                        <input asp-for="UserNmae" />
+                    }
+                    <label>登录时间：</label>
+                    <input type="text" id="datetimeRange" />
+                    <input type="hidden" asp-for="StartTime" />
+                    <input type="hidden" asp-for="EndTime" />
+                </form>
+            </div>
+
+            <div class="body table-responsive">
+                <table class="display table table-striped table-bordered table-hover dt-responsive nowrap" id="DataTable">
+                    <thead>
+                        <tr>
+                            <th>用户名</th>
+                            <th>登录IP</th>
+                            <th>浏览器信息</th>
+                            <th>登录结果</th>
+                            <th>登录时间</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2396,7 +2396,7 @@ a {
   animation: none !important; }
 
 section.content {
-  margin: 100px 15px 0 315px;
+  margin: 70px 0 0 250px;
   -moz-transition: 0.5s;
   -o-transition: 0.5s;
   -webkit-transition: 0.5s;
@@ -2939,7 +2939,7 @@ section.content {
       color: #555; }
   .card .header {
     color: #555;
-    padding: 20px;
+    padding:15px 20px;
     position: relative;
     border-bottom: 1px solid rgba(204, 204, 204, 0.35); }
     .card .header .header-dropdown {
@@ -2979,7 +2979,7 @@ section.content {
   .card .body {
     font-size: 14px;
     color: #555;
-    padding: 20px; }
+    padding:5px 20px 10px 20px  }
     .card .body .col-xs-1,
     .card .body .col-sm-1,
     .card .body .col-md-1,
@@ -4933,7 +4933,14 @@ section.content {
   -moz-border-radius: 0;
   -ms-border-radius: 0;
   border-radius: 0; }
-
+.table-search {
+    width: 100%;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+}
+.table-search button {
+    margin-right:5px;
+}
 /* Input Group ================================= */
 .input-group {
   width: 100%;
@@ -7461,7 +7468,7 @@ fieldset[disabled] .form-control {
   transition: all 0.5s;
   font-family: "Roboto", sans-serif;
   background: #fdfdfd;
-  width: 300px;
+  width: 250px;
   overflow: hidden;
   display: inline-block;
   height: calc(100vh - 70px);

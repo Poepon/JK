@@ -96,8 +96,47 @@
     <text name="DefaultPasswordIs">默认密码为：{0}</text>
     <text name="DeleteTenantConfirm">确认删除该租户？</text>
     <text name="EditTenant">编辑租户</text>
-    
-    
+
+    <text name="AuditLogs">审计日志</text>
+    <text name="Success">成功</text>
+    <text name="Time">时间</text>
+    <text name="Service">服务</text>
+    <text name="Action">操作</text>
+    <text name="Duration">持续时间</text>
+    <text name="IpAddress">IP地址</text>
+    <text name="Client">客户端</text>
+    <text name="Browser">浏览器</text>
+    <text name="Xms">{0} ms</text>
+    <text name="ErrorState">错误状态</text>
+    <text name="HasError">出现错误</text>
+    <text name="ShowAdvancedFilters">显示高级过滤</text>
+    <text name="HideAdvancedFilters">隐藏高级过滤</text>
+    <text name="AuditLogDetail">审计日志详情</text>
+    <text name="Parameters">参数</text>
+    <text name="DateRange">日期范围</text>
+    <text name="ActionInformations">操作信息</text>
+    <text name="OperationLogs">操作日志</text>
+    <text name="ChangeLogs">更改日志</text>
+    <text name="ExportToExcel">导出Excel</text>
+    <text name="Export">导出</text>
+    <text name="Reason">原因</text>
+    <text name="Object">对象</text>
+    <text name="Property">属性</text>
+    <text name="OriginalValue">原值</text>
+    <text name="NewValue">新值</text>
+    <text name="Detail">详情</text>
+    <text name="UserInformations">用户信息</text>
+    <text name="CustomData">自定义数据</text>
+    <text name="None">没有</text>
+    <text name="CreatedAtByUser"><![CDATA[由<b>{1}</b>创建于<b>{0}</b>]]></text>
+    <text name="Created">创建</text>
+    <text name="Updated">修改</text>
+    <text name="Deleted">删除</text>
+    <text name="AuditLogImpersonatedOperationInfo">注意:此操作是由另一个用户模拟该用户.</text>
+    <text name="RequestedFileDoesNotExists">请求的文件不存在!</text>
+    <text name="Close">关闭</text>
+    <text name="LoginLogs">登录日志</text>
+    <text name="HangFire">HangFire</text>
   </texts>
 </localizationDictionary>
 

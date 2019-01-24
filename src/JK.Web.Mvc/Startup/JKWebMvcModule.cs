@@ -20,7 +20,7 @@ namespace JK.Web.Startup
 
         public override void PreInitialize()
         {
-            Configuration.Navigation.Providers.Add<JKNavigationProvider>();
+            Configuration.Navigation.Providers.Add<AppXmlNavigationProvider>();
         }
 
         public override void Initialize()

@@ -91,5 +91,47 @@
     <text name="StartTyping">Start Typing</text>
     <text name="Skins">Skins</text>
     <text name="Settings">Settings</text>
+
+    <text name="AuditLogs">Audit logs</text>
+    <text name="Success">Success</text>
+    <text name="Time">Time</text>
+    <text name="Service">Service</text>
+    <text name="Action">Action</text>
+    <text name="Duration">Duration</text>
+    <text name="IpAddress">Ip address</text>
+    <text name="Client">Client</text>
+    <text name="Browser">Browser</text>
+    <text name="Xms">{0} ms</text>
+    <text name="ErrorState">Error state</text>
+    <text name="All">All</text>
+    <text name="HasError">Has error</text>
+    <text name="ShowAdvancedFilters">Show advanced filters</text>
+    <text name="HideAdvancedFilters">Hide advanced filters</text>
+    <text name="AuditLogDetail">Audit log detail</text>
+    <text name="Parameters">Parameters</text>
+    <text name="DateRange">Date range</text>
+    <text name="ActionInformations">Action information</text>
+    <text name="OperationLogs">Operation logs</text>
+    <text name="ChangeLogs">Change logs</text>
+    <text name="ExportToExcel">Export to excel</text>
+    <text name="Export">Export</text>
+    <text name="Reason">Reason</text>
+    <text name="Object">Object</text>
+    <text name="Property">Property</text>
+    <text name="OriginalValue">Original value</text>
+    <text name="NewValue">New value</text>
+    <text name="Detail">Detail</text>
+    <text name="UserInformations">User informations</text>
+    <text name="CustomData">Custom data</text>
+    <text name="None">None</text>
+    <text name="CreatedAtByUser"><![CDATA[Created at <b>{0}</b> by <b>{1}</b>]]></text>
+    <text name="Created">Created</text>
+    <text name="Updated">Updated</text>
+    <text name="Deleted">Deleted</text>
+    <text name="AuditLogImpersonatedOperationInfo">Note: This operation is performed by another user on behalf of this user.</text>
+    <text name="RequestedFileDoesNotExists">Requested file does not exist!</text>
+    <text name="Close">Close</text>
+    <text name="LoginLogs">Login Logs</text>
+    <text name="HangFire">HangFire</text>
   </texts>
 </localizationDictionary>

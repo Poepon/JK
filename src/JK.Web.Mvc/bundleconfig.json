@@ -1,5 +1,12 @@
 [
   {
+    "outputFileName": "wwwroot/view-resources/Views/_Bundles/common-scripts.js",
+    "inputFiles": [
+      "wwwroot/Common/Scripts/**/*.js",
+      "!wwwroot/Common/Scripts/**/*min.js"
+    ]
+  },
+  {
     "outputFileName": "wwwroot/view-resources/Views/_Bundles/account-layout.min.css",
     "inputFiles": [
       "wwwroot/fonts/roboto/roboto.css",
@@ -42,9 +49,13 @@
   {
     "outputFileName": "wwwroot/view-resources/Views/_Bundles/shared-layout.min.css",
     "inputFiles": [
+      "wwwroot/Common/Scripts/Datatables/datatables.css",
+      "wwwroot/lib/datatables.net-bs/css/dataTables.bootstrap.css",
+      "wwwroot/lib/datatables.net-responsive-bs/css/responsive.bootstrap.css",
       "wwwroot/fonts/roboto/roboto.css",
       "wwwroot/fonts/material-icons/materialicons.css",
       "wwwroot/lib/bootstrap/dist/css/bootstrap.css",
+      "wwwroot/lib/daterangepicker/daterangepicker.css",
       "wwwroot/lib/bootstrap-select/dist/css/bootstrap-select.css",
       "wwwroot/lib/toastr/toastr.css",
       "wwwroot/lib/famfamfam-flags/dist/sprite/famfamfam-flags.css",
@@ -70,8 +81,10 @@
       "wwwroot/lib/sweetalert/dist/sweetalert.min.js",
       "wwwroot/lib/spin.js/spin.js",
       "wwwroot/lib/spin.js/jquery.spin.js",
+      "wwwroot/lib/daterangepicker/daterangepicker.js",
       "wwwroot/lib/bootstrap-select/dist/js/bootstrap-select.js",
       "wwwroot/lib/jquery-slimscroll/jquery.slimscroll.js",
+      "wwwroot/lib/jquery-serializejson/jquery.serializejson.js",
       "wwwroot/lib/Waves/dist/waves.js",
       "wwwroot/lib/push.js/push.js",
       "wwwroot/lib/abp-web-resources/Abp/Framework/scripts/abp.js",
@@ -80,6 +93,11 @@
       "wwwroot/lib/abp-web-resources/Abp/Framework/scripts/libs/abp.blockUI.js",
       "wwwroot/lib/abp-web-resources/Abp/Framework/scripts/libs/abp.spin.js",
       "wwwroot/lib/abp-web-resources/Abp/Framework/scripts/libs/abp.sweet-alert.js",
+      "wwwroot/lib/datatables.net/js/jquery.dataTables.js",
+      "wwwroot/lib/datatables.net-bs/js/dataTables.bootstrap.js",
+      "wwwroot/lib/datatables.net-select/js/dataTables.select.js",
+      "wwwroot/lib/datatables.net-responsive/js/dataTables.responsive.js",
+      "wwwroot/lib/datatables.net-responsive-bs/js/responsive.bootstrap.js",
       "wwwroot/js/admin.js",
       "wwwroot/js/main.js",
       "wwwroot/view-resources/Views/Shared/_Layout.js"
@@ -147,6 +165,18 @@
     "outputFileName": "wwwroot/view-resources/Views/Shared/Components/TenantChange/Default.min.js",
     "inputFiles": [
       "wwwroot/view-resources/Views/Shared/Components/TenantChange/Default.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/view-resources/Views/AuditLogs/Index.min.js",
+    "inputFiles": [
+      "wwwroot/view-resources/Views/AuditLogs/Index.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/view-resources/Views/LoginLogs/Index.min.js",
+    "inputFiles": [
+      "wwwroot/view-resources/Views/LoginLogs/Index.js"
     ]
   }
 ]

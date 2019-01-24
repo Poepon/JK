@@ -1,0 +1,48 @@
+﻿@{
+    Layout = null;
+}
+@inject JK.Timing.AppTimes AppTimes
+<environment names="Development">
+    <script asp-append-version="true" src="~/lib/json2/json2.js"></script>
+    <script asp-append-version="true" src="~/lib/jquery/dist/jquery.js"></script>
+    <script asp-append-version="true" src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+    <script asp-append-version="true" src="~/lib/moment/min/moment.min.js"></script>
+    <script asp-append-version="true" src="~/lib/moment/locale/zh-cn.js"></script>
+    <script asp-append-version="true" src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script asp-append-version="true" src="~/lib/jquery-validation/src/localization/messages_zh_Hans.js"></script>
+    <script asp-append-version="true" src="~/lib/blockUI/jquery.blockUI.js"></script>
+    <script asp-append-version="true" src="~/lib/toastr/toastr.js"></script>
+    <script asp-append-version="true" src="~/lib/sweetalert/dist/sweetalert.min.js"></script>
+    <script asp-append-version="true" src="~/lib/spin.js/spin.js"></script>
+    <script asp-append-version="true" src="~/lib/spin.js/jquery.spin.js"></script>
+    <script asp-append-version="true" src="~/lib/daterangepicker/daterangepicker.js"></script>
+    <script asp-append-version="true" src="~/lib/bootstrap-select/dist/js/bootstrap-select.js"></script>
+    <script asp-append-version="true" src="~/lib/jquery-slimscroll/jquery.slimscroll.js"></script>
+    <script asp-append-version="true" src="~/lib/jquery-serializejson/jquery.serializejson.js"></script>
+    <script asp-append-version="true" src="~/lib/Waves/dist/waves.js"></script>
+    <script asp-append-version="true" src="~/lib/push.js/push.js"></script>
+    <script asp-append-version="true" src="~/lib/abp-web-resources/Abp/Framework/scripts/abp.js"></script>
+    <script asp-append-version="true" src="~/lib/abp-web-resources/Abp/Framework/scripts/libs/abp.jquery.js"></script>
+    <script asp-append-version="true" src="~/lib/abp-web-resources/Abp/Framework/scripts/libs/abp.toastr.js"></script>
+    <script asp-append-version="true" src="~/lib/abp-web-resources/Abp/Framework/scripts/libs/abp.blockUI.js"></script>
+    <script asp-append-version="true" src="~/lib/abp-web-resources/Abp/Framework/scripts/libs/abp.spin.js"></script>
+    <script asp-append-version="true" src="~/lib/abp-web-resources/Abp/Framework/scripts/libs/abp.sweet-alert.js"></script>
+    <script asp-append-version="true" src="~/lib/datatables.net/js/jquery.dataTables.js"></script>
+    <script asp-append-version="true" src="~/lib/datatables.net-bs/js/dataTables.bootstrap.js"></script>
+    <script asp-append-version="true" src="~/lib/datatables.net-select/js/dataTables.select.js"></script>
+    <script asp-append-version="true" src="~/lib/datatables.net-responsive/js/dataTables.responsive.js"></script>
+    <script asp-append-version="true" src="~/lib/datatables.net-responsive-bs/js/responsive.bootstrap.js"></script>
+    <script asp-append-version="true" src="~/js/admin.js"></script>
+    <script asp-append-version="true" src="~/js/main.js"></script>
+    <script asp-append-version="true" src="~/view-resources/Views/Shared/_Layout.js"></script>
+    
+</environment>
+<environment names="Staging,Production,Docker">
+    <script src="~/view-resources/Views/_Bundles/shared-layout.min.js" asp-append-version="true"></script>
+</environment>
+<script src="~/view-resources/Views/_Bundles/common-scripts.min.js" asp-append-version="true"></script>
+<!-- Dynamic scripts of ABP system (They are created on runtime and can not be bundled) -->
+<script src="~/AbpServiceProxies/GetAll?v=@(AppTimes.StartupTime.Ticks)" type="text/javascript"></script>
+<script src="~/AbpScripts/GetScripts?v=@(AppTimes.StartupTime.Ticks)" type="text/javascript"></script>
+@*<script src="~/lib/signalr-client/signalr.min.js" asp-append-version="true"></script>*@
+@*<script src="~/lib/abp-web-resources/Abp/Framework/scripts/libs/abp.signalr-client.js" asp-append-version="true"></script>*@

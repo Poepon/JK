@@ -1,0 +1,23 @@
+version: '3.4'
+
+services:
+
+  abp_redis:
+      image: redis
+      ports: 
+          - '6379:6379'
+      container_name: abpredis
+
+  payments.web.mvc: 
+      image: jkwebmvc
+      ports: 
+          - '5000:80'
+      environment: 
+          - ASPNETCORE_ENVIRONMENT=Docker
+      depends_on: 
+          - abp_redis
+      build: 
+        context: .
+        dockerfile: Dockerfile
+      expose:
+      - "5000"

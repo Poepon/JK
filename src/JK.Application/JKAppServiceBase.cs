@@ -6,9 +6,17 @@ using Abp.IdentityFramework;
 using Abp.Runtime.Session;
 using JK.Authorization.Users;
 using JK.MultiTenancy;
+using Abp;
 
 namespace JK
 {
+    public abstract class JKServiceBase : AbpServiceBase
+    {
+        protected JKServiceBase()
+        {
+            LocalizationSourceName = JKConsts.LocalizationSourceName;
+        }
+    }
     /// <summary>
     /// Derive your application services from this class.
     /// </summary>
