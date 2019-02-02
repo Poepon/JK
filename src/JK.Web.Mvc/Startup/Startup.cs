@@ -66,6 +66,7 @@ namespace JK.Web.Startup
 
             app.UseJwtTokenMiddleware();
 
+            app.UseWebSockets();
 
             app.UseMvc(routes =>
             {
