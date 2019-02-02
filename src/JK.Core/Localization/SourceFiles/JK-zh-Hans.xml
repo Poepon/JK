@@ -137,6 +137,8 @@
     <text name="Close">关闭</text>
     <text name="LoginLogs">登录日志</text>
     <text name="HangFire">HangFire</text>
+    <text name="AdminPassword">管理员密码</text>
+    
   </texts>
 </localizationDictionary>
 

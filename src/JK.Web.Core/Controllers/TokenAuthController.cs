@@ -136,12 +136,8 @@ namespace JK.Controllers
         private async Task<User> RegisterExternalUserAsync(ExternalAuthUserInfo externalUser)
         {
             var user = await _userRegistrationManager.RegisterAsync(
-                externalUser.Name,
-                externalUser.Surname,
-                externalUser.EmailAddress,
-                externalUser.EmailAddress,
-                Authorization.Users.User.CreateRandomPassword(),
-                true
+                externalUser.UserName,
+                Authorization.Users.User.CreateRandomPassword()
             );
 
             user.Logins = new List<UserLogin>

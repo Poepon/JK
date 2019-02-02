@@ -76,7 +76,6 @@ namespace JK.EntityFrameworkCore.Seed.Host
                     UserName = AbpUserBase.AdminUserName,
                     Name = "admin",
                     Surname = "admin",
-                    EmailAddress = "admin@aspnetboilerplate.com",
                     IsEmailConfirmed = true,
                     IsActive = true
                 };

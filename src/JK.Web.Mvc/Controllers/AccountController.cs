@@ -168,7 +168,7 @@ namespace JK.Web.Controllers
                         throw new Exception("Can not external login!");
                     }
 
-                    model.UserName = model.EmailAddress;
+                    model.UserName = model.UserName;
                     model.Password = Authorization.Users.User.CreateRandomPassword();
                 }
                 else
@@ -180,12 +180,8 @@ namespace JK.Web.Controllers
                 }
 
                 var user = await _userRegistrationManager.RegisterAsync(
-                    model.Name,
-                    model.Surname,
-                    model.EmailAddress,
                     model.UserName,
-                    model.Password,
-                    true // Assumed email address is always confirmed. Change this if you want to implement email confirmation.
+                    model.Password
                 );
 
                 // Getting tenant-specific settings
@@ -194,11 +190,6 @@ namespace JK.Web.Controllers
                 if (model.IsExternalLogin)
                 {
                     Debug.Assert(externalLoginInfo != null);
-                    
-                    if (string.Equals(externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email), model.EmailAddress, StringComparison.OrdinalIgnoreCase))
-                    {
-                        user.IsEmailConfirmed = true;
-                    }
 
                     user.Logins = new List<UserLogin>
                     {
@@ -332,9 +323,6 @@ namespace JK.Web.Controllers
 
             var viewModel = new RegisterViewModel
             {
-                EmailAddress = email,
-                Name = nameinfo.name,
-                Surname = nameinfo.surname,
                 IsExternalLogin = true,
                 ExternalLoginAuthSchema = externalLoginInfo.LoginProvider
             };

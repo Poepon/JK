@@ -133,5 +133,6 @@
     <text name="Close">Close</text>
     <text name="LoginLogs">Login Logs</text>
     <text name="HangFire">HangFire</text>
+    <text name="AdminPassword">Admin Password</text>
   </texts>
 </localizationDictionary>

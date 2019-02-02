@@ -18,8 +18,12 @@ namespace JK.MultiTenancy.Dto
         public string Name { get; set; }
 
         [Required]
-        [StringLength(AbpUserBase.MaxEmailAddressLength)]
-        public string AdminEmailAddress { get; set; }
+        [StringLength(AbpUserBase.MaxUserNameLength)]
+        public string AdminUserName { get; set; }
+
+        [Required]
+        [StringLength(AbpUserBase.MaxPlainPasswordLength)]
+        public string AdminPassword{ get; set; }
 
         [StringLength(AbpTenantBase.MaxConnectionStringLength)]
         public string ConnectionString { get; set; }
