@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace JK.Chat
@@ -42,9 +43,13 @@ namespace JK.Chat
             var socketId = WebSocketConnectionManager.GetId(socket);
             await WebSocketConnectionManager.RemoveSocket(socketId).ConfigureAwait(false);
         }
-        
 
-        public abstract Task ReceiveJsonAsync(WebSocket socket, WebSocketReceiveResult result, JsonMessage  receivedMessage);
+        public async Task SendAsync(WebSocket socket, WebSocketMessageType messageType, byte[] data)
+        {
+            await socket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), messageType, true, CancellationToken.None);
+        }
+
+        public abstract Task ReceiveJsonAsync(WebSocket socket, WebSocketReceiveResult result, JsonMessage receivedMessage);
 
         public abstract Task ReceiveBinaryAsync(WebSocket socket, WebSocketReceiveResult result, BinaryMessage receivedMessage);
 

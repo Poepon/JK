@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace JK.Chat.Dto
+﻿namespace JK.Chat.Dto
 {
-    public class JsonMessage
+    public class JsonMessage : IMessage<string>
     {
         public int MessageType { get; set; }
 

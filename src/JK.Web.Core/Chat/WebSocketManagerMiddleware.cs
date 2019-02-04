@@ -16,9 +16,7 @@ namespace JK.Chat
         private readonly RequestDelegate _next;
         private WebSocketHandler _webSocketHandler { get; set; }
 
-
-        public WebSocketManagerMiddleware(RequestDelegate next,
-                                          WebSocketHandler webSocketHandler)
+        public WebSocketManagerMiddleware(RequestDelegate next, WebSocketHandler webSocketHandler)
         {
             _next = next;
             _webSocketHandler = webSocketHandler;
@@ -34,53 +32,16 @@ namespace JK.Chat
 
             var socket = await context.WebSockets.AcceptWebSocketAsync();
             string key = Guid.NewGuid().ToString();
-            await _webSocketHandler.OnConnected(key, socket).ConfigureAwait(false);
+            await _webSocketHandler.OnConnected(key, socket);
 
-            await Receive(socket, async (result, data) =>
-            {
-                if (result.MessageType == WebSocketMessageType.Text)
-                {
-                    string serializedMessage = Encoding.UTF8.GetString(data);
-                    JsonMessage message = JsonConvert.DeserializeObject<JsonMessage>(serializedMessage);
-                    await _webSocketHandler.ReceiveJsonAsync(socket, result, message).ConfigureAwait(false);
-                    return;
-                }
-                else if (result.MessageType == WebSocketMessageType.Binary)
-                {
-                    MemoryStream ms = new MemoryStream(data);
-                    BinaryReader binaryReader = new BinaryReader(ms, Encoding.UTF8);
-
-                    //TODO 处理二进制消息
-                    var message = new BinaryMessage();
-                    message.MessageType = binaryReader.ReadInt32();
-                    message.DataLength = binaryReader.ReadInt32();
-                    message.Data = binaryReader.ReadBytes(message.DataLength);
-
-                    await _webSocketHandler.ReceiveBinaryAsync(socket, result, message).ConfigureAwait(false);
-                    return;
-                }
-                else if (result.MessageType == WebSocketMessageType.Close)
-                {
-                    try
-                    {
-                        await _webSocketHandler.OnDisconnected(socket);
-                    }
-                    catch (WebSocketException)
-                    {
-                        throw; //let's not swallow any exception for now
-                    }
-
-                    return;
-                }
-            });
+            await Receive(socket);
         }
 
-        private async Task Receive(WebSocket socket, Action<WebSocketReceiveResult, byte[]> handleMessage)
+        private async Task Receive(WebSocket socket)
         {
             while (socket.State == WebSocketState.Open)
             {
-                ArraySegment<Byte> buffer = new ArraySegment<byte>(new Byte[1024 * 4]);
-                byte[] data = null;
+                ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[1024 * 4]);
                 WebSocketReceiveResult result = null;
                 try
                 {
@@ -89,15 +50,53 @@ namespace JK.Chat
                         do
                         {
                             result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+
                             ms.Write(buffer.Array, buffer.Offset, result.Count);
                         }
                         while (!result.EndOfMessage);
 
                         ms.Seek(0, SeekOrigin.Begin);
-                        data = ms.ToArray();
-                    }
 
-                    handleMessage(result, data);
+                        if (result.MessageType == WebSocketMessageType.Text)
+                        {
+                            using (var reader = new StreamReader(ms, Encoding.UTF8))
+                            {
+                                string serializedMessage = await reader.ReadToEndAsync();
+                                JsonMessage message = JsonConvert.DeserializeObject<JsonMessage>(serializedMessage);
+                                await _webSocketHandler.ReceiveJsonAsync(socket, result, message);
+                                return;
+                            }
+                        }
+                        else if (result.MessageType == WebSocketMessageType.Binary)
+                        {
+                            using (BinaryReader binaryReader = new BinaryReader(ms, Encoding.UTF8))
+                            {
+                                //TODO 处理二进制消息
+                                var message = new BinaryMessage
+                                {
+                                    MessageType = binaryReader.ReadInt32(),
+                                    DataLength = binaryReader.ReadInt32()
+                                };
+                                message.Data = binaryReader.ReadBytes(message.DataLength);
+
+                                await _webSocketHandler.ReceiveBinaryAsync(socket, result, message);
+                                return;
+                            }
+                        }
+                        else if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            try
+                            {
+                                await _webSocketHandler.OnDisconnected(socket);
+                            }
+                            catch (WebSocketException)
+                            {
+                                throw; //let's not swallow any exception for now
+                            }
+
+                            return;
+                        }
+                    }
                 }
                 catch (WebSocketException e)
                 {

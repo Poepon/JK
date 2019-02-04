@@ -31,6 +31,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abp.ZeroCore", "zero\Abp.Ze
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abp.ZeroCore.EntityFrameworkCore", "zero\Abp.ZeroCore.EntityFrameworkCore\Abp.ZeroCore.EntityFrameworkCore.csproj", "{2C0D77B2-9E8C-4B37-B5B1-15FABB2CE3B1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extension", "extension", "{A09E5FEA-F460-4B3F-919E-485D5A6A34B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abp.Castle.Exceptionless", "extension\Abp.Castle.Exceptionless\Abp.Castle.Exceptionless.csproj", "{34D625E9-02AF-463C-8912-77CA6AA14F0C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +85,10 @@ Global
 		{2C0D77B2-9E8C-4B37-B5B1-15FABB2CE3B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C0D77B2-9E8C-4B37-B5B1-15FABB2CE3B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C0D77B2-9E8C-4B37-B5B1-15FABB2CE3B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34D625E9-02AF-463C-8912-77CA6AA14F0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34D625E9-02AF-463C-8912-77CA6AA14F0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34D625E9-02AF-463C-8912-77CA6AA14F0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34D625E9-02AF-463C-8912-77CA6AA14F0C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +105,7 @@ Global
 		{09B32ABD-6651-42DB-A4E7-063C6AD1B37D} = {B494BEAE-1893-4615-8F47-0E90EDACD965}
 		{38F79B15-1B0C-4C3A-BFCA-3E7752DE56DE} = {B494BEAE-1893-4615-8F47-0E90EDACD965}
 		{2C0D77B2-9E8C-4B37-B5B1-15FABB2CE3B1} = {B494BEAE-1893-4615-8F47-0E90EDACD965}
+		{34D625E9-02AF-463C-8912-77CA6AA14F0C} = {A09E5FEA-F460-4B3F-919E-485D5A6A34B5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {810793D3-755F-4D97-9CA4-2F96D2723FEC}

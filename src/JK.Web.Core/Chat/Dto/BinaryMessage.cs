@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace JK.Chat.Dto
+﻿namespace JK.Chat.Dto
 {
-    public class BinaryMessage
+    public class BinaryMessage : IMessage<byte[]>
     {
         public int MessageType { get; set; }
 
