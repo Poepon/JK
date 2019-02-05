@@ -36,7 +36,6 @@ namespace Abp.Castle.Exceptionless
 
         public void Debug(string message, Exception exception)
         {
-            exception.ToExceptionless().Client.CreateLog(, LogLevel.Debug)
             throw new NotImplementedException();
         }
 
