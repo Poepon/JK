@@ -74,7 +74,7 @@ namespace JK.Chat
                                 //TODO 处理二进制消息
                                 var message = new BinaryMessage
                                 {
-                                    MessageType = binaryReader.ReadInt32(),
+                                    MessageType = (MessageType)binaryReader.ReadInt32(),
                                     DataLength = binaryReader.ReadInt32()
                                 };
                                 message.Data = binaryReader.ReadBytes(message.DataLength);

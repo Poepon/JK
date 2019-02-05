@@ -2,7 +2,7 @@
 {
     public class BinaryMessage : IMessage<byte[]>
     {
-        public int MessageType { get; set; }
+        public MessageType MessageType { get; set; }
 
         public int DataLength { get; set; }
 
