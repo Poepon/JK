@@ -12,7 +12,7 @@ using JK.Authentication.JwtBearer;
 using JK.Configuration;
 using JK.Identity;
 using JK.Web.Resources;
-
+using JK.Chat;
 
 namespace JK.Web.Startup
 {
@@ -47,7 +47,7 @@ namespace JK.Web.Startup
             );
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider service, ILoggerFactory loggerFactory)
         {
             app.UseAbp(); // Initializes ABP framework.
 
@@ -67,7 +67,7 @@ namespace JK.Web.Startup
             app.UseJwtTokenMiddleware();
 
             app.UseWebSockets();
-
+            app.MapWebSocketManager("/chat", service.GetService<ChatHandler>());
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

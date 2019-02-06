@@ -11,13 +11,15 @@ using Abp.Zero.Configuration;
 using JK.Authentication.JwtBearer;
 using JK.Configuration;
 using JK.EntityFrameworkCore;
+using Abp.Runtime.Caching.Redis;
 
 namespace JK
 {
     [DependsOn(
          typeof(JKApplicationModule),
          typeof(JKEntityFrameworkModule),
-         typeof(AbpAspNetCoreModule)
+         typeof(AbpAspNetCoreModule),
+         typeof(AbpRedisCacheModule)
      )]
     public class JKWebCoreModule : AbpModule
     {
@@ -43,6 +45,12 @@ namespace JK
                  .CreateControllersForAppServices(
                      typeof(JKApplicationModule).GetAssembly()
                  );
+
+            Configuration.Caching.UseRedis(options =>
+            {
+                options.ConnectionString = _appConfiguration["RedisCache:ConnectionString"];
+                options.DatabaseId = _appConfiguration.GetValue<int>("RedisCache:DatabaseId");
+            });
 
             ConfigureTokenAuth();
         }

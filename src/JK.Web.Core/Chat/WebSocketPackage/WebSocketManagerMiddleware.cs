@@ -29,15 +29,15 @@ namespace JK.Chat
                 await _next.Invoke(context);
                 return;
             }
-
+            CancellationToken ct = context.RequestAborted;
             var socket = await context.WebSockets.AcceptWebSocketAsync();
             string key = Guid.NewGuid().ToString();
             await _webSocketHandler.OnConnected(key, socket);
 
-            await Receive(socket);
+            await Receive(socket,ct);
         }
 
-        private async Task Receive(WebSocket socket)
+        private async Task Receive(WebSocket socket, CancellationToken cancellationToken)
         {
             while (socket.State == WebSocketState.Open)
             {
@@ -49,7 +49,7 @@ namespace JK.Chat
                     {
                         do
                         {
-                            result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+                            result = await socket.ReceiveAsync(buffer, cancellationToken);
 
                             ms.Write(buffer.Array, buffer.Offset, result.Count);
                         }
@@ -62,9 +62,8 @@ namespace JK.Chat
                             using (var reader = new StreamReader(ms, Encoding.UTF8))
                             {
                                 string serializedMessage = await reader.ReadToEndAsync();
-                                JsonMessage message = JsonConvert.DeserializeObject<JsonMessage>(serializedMessage);
+                                TextMessage message = JsonConvert.DeserializeObject<TextMessage>(serializedMessage);
                                 await _webSocketHandler.ReceiveJsonAsync(socket, result, message);
-                                return;
                             }
                         }
                         else if (result.MessageType == WebSocketMessageType.Binary)
@@ -78,7 +77,6 @@ namespace JK.Chat
                                     DataLength = binaryReader.ReadInt32()
                                 };
                                 message.Data = binaryReader.ReadBytes(message.DataLength);
-
                                 await _webSocketHandler.ReceiveBinaryAsync(socket, result, message);
                                 return;
                             }
@@ -93,8 +91,6 @@ namespace JK.Chat
                             {
                                 throw; //let's not swallow any exception for now
                             }
-
-                            return;
                         }
                     }
                 }

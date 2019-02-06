@@ -27,9 +27,9 @@ namespace JK.Chat
         /// </summary>
         /// <param name="socket">The web-socket of the client.</param>
         /// <returns>Awaitable Task.</returns>
-        public virtual Task OnConnected(string socketId, WebSocket socket)
+        public virtual Task OnConnected(string userId, WebSocket socket)
         {
-            WebSocketConnectionManager.AddSocket(socketId, socket);
+            WebSocketConnectionManager.AddSocket(userId, socket);
             return Task.CompletedTask;
         }
 
@@ -41,15 +41,15 @@ namespace JK.Chat
         public virtual async Task OnDisconnected(WebSocket socket)
         {
             var socketId = WebSocketConnectionManager.GetId(socket);
-            await WebSocketConnectionManager.RemoveSocket(socketId).ConfigureAwait(false);
+            await WebSocketConnectionManager.RemoveSocket(socketId);
         }
 
-        public async Task SendAsync(WebSocket socket, WebSocketMessageType messageType, byte[] data)
+        public async Task SendAsync(WebSocket socket, WebSocketMessageType messageType, byte[] data, CancellationToken? cancellationToken = null)
         {
-            await socket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), messageType, true, CancellationToken.None);
+            await socket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), messageType, true, cancellationToken ?? CancellationToken.None);
         }
 
-        public abstract Task ReceiveJsonAsync(WebSocket socket, WebSocketReceiveResult result, JsonMessage receivedMessage);
+        public abstract Task ReceiveJsonAsync(WebSocket socket, WebSocketReceiveResult result, TextMessage receivedMessage);
 
         public abstract Task ReceiveBinaryAsync(WebSocket socket, WebSocketReceiveResult result, BinaryMessage receivedMessage);
 

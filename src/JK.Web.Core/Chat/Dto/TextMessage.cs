@@ -1,6 +1,6 @@
 ﻿namespace JK.Chat.Dto
 {
-    public class JsonMessage : IMessage<string>
+    public class TextMessage : IMessage<string>
     {
         public MessageType MessageType { get; set; }
 
