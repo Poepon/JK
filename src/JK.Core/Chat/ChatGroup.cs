@@ -1,6 +1,7 @@
 ﻿using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Chat
@@ -13,7 +14,8 @@ namespace JK.Chat
     {
         public string Name { get; set; }
 
-        public string Notice { get; set; }
+        [StringLength(2048)]
+        public string Description { get; set; }
 
         public ChatGroupType GroupType { get; set; }
 

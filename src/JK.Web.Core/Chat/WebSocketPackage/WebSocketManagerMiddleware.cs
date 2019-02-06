@@ -34,7 +34,7 @@ namespace JK.Chat
             string key = Guid.NewGuid().ToString();
             await _webSocketHandler.OnConnected(key, socket);
 
-            await Receive(socket,ct);
+            await Receive(socket, ct);
         }
 
         private async Task Receive(WebSocket socket, CancellationToken cancellationToken)
@@ -70,13 +70,13 @@ namespace JK.Chat
                         {
                             using (BinaryReader binaryReader = new BinaryReader(ms, Encoding.UTF8))
                             {
-                                //TODO 处理二进制消息
                                 var message = new BinaryMessage
                                 {
                                     MessageType = (MessageType)binaryReader.ReadInt32(),
-                                    DataLength = binaryReader.ReadInt32()
+                                    DataType = (MessageDataType)binaryReader.ReadByte(),
                                 };
-                                message.Data = binaryReader.ReadBytes(message.DataLength);
+                                var dataLength = binaryReader.ReadInt32();
+                                message.Data = binaryReader.ReadBytes(dataLength);
                                 await _webSocketHandler.ReceiveBinaryAsync(socket, result, message);
                                 return;
                             }
