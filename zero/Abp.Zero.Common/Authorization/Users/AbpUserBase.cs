@@ -221,11 +221,6 @@ namespace Abp.Authorization.Users
         /// </summary>
         public virtual bool IsActive { get; set; }
 
-        /// <summary>
-        /// The last time this user entered to the system.
-        /// </summary>
-        public virtual DateTime? LastLoginTime { get; set; }
-
         protected AbpUserBase()
         {
             IsActive = true;

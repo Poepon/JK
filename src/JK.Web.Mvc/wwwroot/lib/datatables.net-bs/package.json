@@ -22,7 +22,6 @@
   "_resolved": "https://registry.npmjs.org/datatables.net-bs/-/datatables.net-bs-1.10.19.tgz",
   "_shasum": "08763b4e4d0cef1a427d019dc15e717c7ed67a4d",
   "_spec": "datatables.net-bs",
-  "_where": "E:\\DotNet\\PaymentCenter\\src\\Payments.Web.Mvc",
   "author": {
     "name": "SpryMedia Ltd",
     "url": "http://datatables.net"

@@ -13,6 +13,7 @@ using JK.Configuration;
 using JK.Identity;
 using JK.Web.Resources;
 using JK.Chat;
+using Abp.Exceptionless;
 
 namespace JK.Web.Startup
 {
@@ -68,6 +69,9 @@ namespace JK.Web.Startup
 
             app.UseWebSockets();
             app.MapWebSocketManager("/chat", service.GetService<ChatHandler>());
+
+            app.UseExceptionless("LVk6YzNKOHm4E0eGrCJpWvPtdQG3ONptcNWCJuMz");
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

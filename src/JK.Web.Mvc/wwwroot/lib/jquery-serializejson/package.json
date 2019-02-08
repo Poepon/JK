@@ -22,7 +22,6 @@
   "_resolved": "https://registry.npmjs.org/jquery-serializejson/-/jquery-serializejson-2.8.1.tgz",
   "_shasum": "fc40dd11e5d9a6fd2a3614fdcba89e4af794f0a8",
   "_spec": "jquery-serializejson@2.8.1",
-  "_where": "E:\\DotNet\\PaymentCenter\\src\\Payments.Web.Mvc",
   "author": {
     "name": "Mario Izquierdo"
   },

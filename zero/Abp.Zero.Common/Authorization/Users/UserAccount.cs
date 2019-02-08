@@ -35,6 +35,5 @@ namespace Abp.Authorization.Users
         [StringLength(MaxEmailAddressLength)]
         public virtual string EmailAddress { get; set; }
 
-        public virtual DateTime? LastLoginTime { get; set; }
     }
 }
