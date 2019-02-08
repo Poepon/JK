@@ -11,5 +11,9 @@ namespace JK.Web.Controllers
         {
             return View();
         }
-	}
+        public ActionResult TestExceptionless()
+        {
+            throw new System.Exception("Test Exceptionless.");
+        }
+    }
 }

@@ -45,12 +45,15 @@ namespace JK
                  .CreateControllersForAppServices(
                      typeof(JKApplicationModule).GetAssembly()
                  );
-
-            Configuration.Caching.UseRedis(options =>
+            if (_appConfiguration.GetValue("RedisCache:Enable", false))
             {
-                options.ConnectionString = _appConfiguration["RedisCache:ConnectionString"];
-                options.DatabaseId = _appConfiguration.GetValue<int>("RedisCache:DatabaseId");
-            });
+                Configuration.Caching.UseRedis(options =>
+                {
+                    options.ConnectionString = _appConfiguration["RedisCache:ConnectionString"];
+                    options.DatabaseId = _appConfiguration.GetValue<int>("RedisCache:DatabaseId");
+                });
+            }
+
 
             ConfigureTokenAuth();
         }

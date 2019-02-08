@@ -129,10 +129,10 @@ namespace Abp.Auditing
         public virtual string CustomData { get; set; }
 
         /// <summary>
-        /// Creates a new CreateFromAuditInfo from given <see cref="auditInfo"/>.
+        /// Creates a new CreateFromAuditInfo from given <see cref="AuditInfo"/>.
         /// </summary>
         /// <param name="auditInfo">Source <see cref="AuditInfo"/> object</param>
-        /// <returns>The <see cref="AuditLog"/> object that is created using <see cref="auditInfo"/></returns>
+        /// <returns>The <see cref="AuditLog"/> object that is created using <see cref="AuditInfo"/></returns>
         public static AuditLog CreateFromAuditInfo(AuditInfo auditInfo)
         {
             var exceptionMessage = GetAbpClearException(auditInfo.Exception);
