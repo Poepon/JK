@@ -1,86 +1,98 @@
 ﻿namespace JK.Chat.Dto
 {
-    public enum MessageType : int
+    public enum CommandType : int
     {
+        /// <summary>
+        /// 已连接
+        /// </summary>
+        Connected = 1,
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        Disconnected = 3,
         #region 用户
         /// <summary>
         /// 上线
         /// </summary>
-        Online = 1,
+        Online = 101,
         /// <summary>
         /// 下线
         /// </summary>
-        Offline = 2,
+        Offline = 102,
         /// <summary>
         /// 屏蔽
         /// </summary>
-        BlockUser = 3,
+        BlockUser = 103,
         /// <summary>
         /// 解除屏蔽
         /// </summary>
-        UnblockUser = 4,
+        UnblockUser = 104,
         #endregion
 
         #region 消息
         /// <summary>
         /// 输入中
         /// </summary>
-        Typing = 10,
+        Typing = 201,
         /// <summary>
         /// 发送消息
         /// </summary>
-        SendMessage = 11,
+        SendMessage = 202,
         /// <summary>
         /// 接收消息
         /// </summary>
-        GetMessage = 12,
+        GetMessage = 203,
         /// <summary>
         /// 阅读消息
         /// </summary>
-        ReadMessage = 13,
+        ReadMessage = 204,
         /// <summary>
         /// 置顶消息
         /// </summary>
-        PinMessageToTop = 14,
+        PinMessageToTop = 205,
         /// <summary>
         /// 解除置顶消息
         /// </summary>
-        UnpinMessageFromTop = 15,
+        UnpinMessageFromTop = 206,
         /// <summary>
         /// 上传文件
         /// </summary>
-        UploadFile = 16,
+        UploadFile = 207,
         /// <summary>
         /// 下载文件
         /// </summary>
-        DownloadFile = 17,
+        DownloadFile = 208,
         #endregion
 
         #region 群组
         /// <summary>
-        /// 创建群
+        /// 创建群组
         /// </summary>
-        CreateGroup = 20,
+        CreateGroup = 301,
         /// <summary>
-        /// 删除群
+        /// 删除群组
         /// </summary>
-        DeleteGroup = 21,
+        DeleteGroup = 302,
         /// <summary>
-        /// 加入群
+        /// 加入群组
         /// </summary>
-        JoinGroup = 22,
+        JoinGroup = 303,
         /// <summary>
-        /// 离开群
+        /// 离开群组
         /// </summary>
-        LeaveGroup = 23,
+        LeaveGroup = 304,
+        /// <summary>
+        /// 获取群组
+        /// </summary>
+        GetGroups = 305,
         /// <summary>
         /// 置顶
         /// </summary>
-        PinToTop = 24,
+        PinToTop = 306,
         /// <summary>
         /// 解除置顶
         /// </summary>
-        UnpinFromTop = 25,
+        UnpinFromTop = 307,
         #endregion
 
     }

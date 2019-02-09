@@ -68,7 +68,8 @@ namespace JK.Web.Startup
             app.UseJwtTokenMiddleware();
 
             app.UseWebSockets();
-            app.MapWebSocketManager("/chat", service.GetService<ChatHandler>());
+
+            app.MapWebSocketManager("/chatws", service.GetService<ChatHandler>());
 
             app.UseExceptionless("LVk6YzNKOHm4E0eGrCJpWvPtdQG3ONptcNWCJuMz");
 

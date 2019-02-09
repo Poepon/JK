@@ -1,84 +1,100 @@
-﻿using Abp.Runtime.Caching.Redis;
+﻿using Abp.Auditing;
+using Abp.Dependency;
+using Abp.Json;
+using Abp.RealTime;
+using Abp.Runtime.Caching.Redis;
+using Abp.Runtime.Session;
 using JK.Chat.Dto;
+using JK.Chat.Dto.Input;
+using MessagePack;
 using StackExchange.Redis;
 using System;
+using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Abp.Dependency;
-using Abp.Json;
-using MessagePack;
-using JK.Chat.Dto.Input;
-using System.IO;
 
 namespace JK.Chat
 {
-    public sealed class ChatHandler : WebSocketHandler, ISingletonDependency
+    public class ChatHandler : WebSocketHandler, ISingletonDependency
     {
         private readonly IAbpRedisCacheDatabaseProvider databaseProvider;
 
-        public ChatHandler(WebSocketConnectionManager webSocketConnectionManager, IAbpRedisCacheDatabaseProvider databaseProvider) : base(webSocketConnectionManager)
+        protected IOnlineClientManager<ChatChannel> OnlineClientManager { get; }
+        protected IClientInfoProvider ClientInfoProvider { get; }
+        public IAbpSession AbpSession { get; set; }
+
+        public ChatHandler(WebSocketConnectionManager webSocketConnectionManager,
+            IOnlineClientManager<ChatChannel> onlineClientManager,
+            IClientInfoProvider clientInfoProvider,
+            IAbpRedisCacheDatabaseProvider databaseProvider) : base(webSocketConnectionManager)
         {
+            this.OnlineClientManager = onlineClientManager;
+            ClientInfoProvider = clientInfoProvider;
             this.databaseProvider = databaseProvider;
+            AbpSession = NullAbpSession.Instance;
         }
 
         public override Task ReceiveBinaryAsync(WebSocket socket, WebSocketReceiveResult result, BinaryMessage receivedMessage)
         {
-            switch (receivedMessage.MessageType)
+            switch (receivedMessage.CommandType)
             {
-                case MessageType.Online:
+                case CommandType.Online:
                     var onlineInput = ConvertData<OnlineInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.Offline:
+                case CommandType.Offline:
                     var offlineInput = ConvertData<OfflineInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.Typing:
+                case CommandType.Typing:
                     var typingInput = ConvertData<TypingInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.SendMessage:
+                case CommandType.SendMessage:
                     var messageInput = ConvertData<SendMessageInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.GetMessage:
+                case CommandType.GetMessage:
                     var getMessageInput = ConvertData<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.PinMessageToTop:
+                case CommandType.PinMessageToTop:
                     var pinMessageToTopInput = ConvertData<PinMessageToTopInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.UnpinMessageFromTop:
+                case CommandType.UnpinMessageFromTop:
                     var unpinMessageFromTopInput = ConvertData<UnpinMessageFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.ReadMessage:
+                case CommandType.ReadMessage:
                     var readMessageInput = ConvertData<ReadMessageInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.CreateGroup:
+                case CommandType.CreateGroup:
                     var createGroupInput = ConvertData<CreateGroupInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.DeleteGroup:
+                case CommandType.DeleteGroup:
                     var deleteGroupInput = ConvertData<DeleteGroupInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.JoinGroup:
+                case CommandType.JoinGroup:
                     var joinGroupInput = ConvertData<JoinGroupInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.LeaveGroup:
+                case CommandType.LeaveGroup:
                     var leaveGroupInput = ConvertData<LeaveGroupInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.PinToTop:
+                case CommandType.GetGroups:
+                    var getGroupsInput = ConvertData<GetGroupsInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.PinToTop:
                     var pinToTopInput = ConvertData<PinToTopInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.UnpinFromTop:
+                case CommandType.UnpinFromTop:
                     var unpinFromTopInput = ConvertData<UnpinFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.BlockUser:
+                case CommandType.BlockUser:
                     var blockUserInput = ConvertData<BlockUserInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.UnblockUser:
+                case CommandType.UnblockUser:
                     var unblockUserInput = ConvertData<UnblockUserInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.UploadFile:
+                case CommandType.UploadFile:
                     var uploadFileInput = ConvertData<UploadFileInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
-                case MessageType.DownloadFile:
+                case CommandType.DownloadFile:
                     var downloadFileInput = ConvertData<DownloadFileInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 default:
@@ -86,6 +102,73 @@ namespace JK.Chat
             }
 
             return Task.CompletedTask;
+        }
+
+        public override async Task ReceiveJsonAsync(WebSocket socket, WebSocketReceiveResult result, TextMessage receivedMessage)
+        {
+            switch (receivedMessage.CommandType)
+            {
+                case CommandType.Online:
+                    var onlineInput = ConvertData<OnlineInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.Offline:
+                    var offlineInput = ConvertData<OfflineInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.Typing:
+                    var typingInput = ConvertData<TypingInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.SendMessage:
+                    var messageInput = ConvertData<SendMessageInput>(receivedMessage.DataType, receivedMessage.Data);
+                    await SendAsync(socket, WebSocketMessageType.Text, messageInput.Message.ToBytes());
+                    break;
+                case CommandType.GetMessage:
+                    var getMessageInput = ConvertData<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.PinMessageToTop:
+                    var pinMessageToTopInput = ConvertData<PinMessageToTopInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.UnpinMessageFromTop:
+                    var unpinMessageFromTopInput = ConvertData<UnpinMessageFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.ReadMessage:
+                    var readMessageInput = ConvertData<ReadMessageInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.CreateGroup:
+                    var createGroupInput = ConvertData<CreateGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.DeleteGroup:
+                    var deleteGroupInput = ConvertData<DeleteGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.JoinGroup:
+                    var joinGroupInput = ConvertData<JoinGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.LeaveGroup:
+                    var leaveGroupInput = ConvertData<LeaveGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.GetGroups:
+                    var getGroupsInput = ConvertData<GetGroupsInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.PinToTop:
+                    var pinToTopInput = ConvertData<PinToTopInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.UnpinFromTop:
+                    var unpinFromTopInput = ConvertData<UnpinFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.BlockUser:
+                    var blockUserInput = ConvertData<BlockUserInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.UnblockUser:
+                    var unblockUserInput = ConvertData<UnblockUserInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.UploadFile:
+                    var uploadFileInput = ConvertData<UploadFileInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                case CommandType.DownloadFile:
+                    var downloadFileInput = ConvertData<DownloadFileInput>(receivedMessage.DataType, receivedMessage.Data);
+                    break;
+                default:
+                    break;
+            }
         }
 
         private T ConvertData<T>(MessageDataType dataType, string data) where T : class
@@ -135,83 +218,44 @@ namespace JK.Chat
             return value;
         }
 
-        public override Task ReceiveJsonAsync(WebSocket socket, WebSocketReceiveResult result, TextMessage receivedMessage)
+        public override async Task OnConnected(string connectionId, WebSocket socket)
         {
-            switch (receivedMessage.MessageType)
+            var client = CreateClientForCurrentConnection(connectionId);
+            OnlineClientManager.Add(client);
+
+            await base.OnConnected(client.ConnectionId, socket);
+            await SendTextAsync(socket, CommandType.Connected, MessageDataType.Json, new { client.ConnectionId }.ToJsonString());
+        }
+
+        protected virtual IOnlineClient CreateClientForCurrentConnection(string connectionId)
+        {
+            return new OnlineClient(
+                connectionId,
+                GetIpAddressOfClient(),
+                AbpSession.TenantId,
+                AbpSession.UserId
+            );
+        }
+
+        protected virtual string GetIpAddressOfClient()
+        {
+            try
             {
-                case MessageType.Online:
-                    var onlineInput = ConvertData<OnlineInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.Offline:
-                    var offlineInput = ConvertData<OfflineInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.Typing:
-                    var typingInput = ConvertData<TypingInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.SendMessage:
-                    var messageInput = ConvertData<SendMessageInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.GetMessage:
-                    var getMessageInput = ConvertData<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.PinMessageToTop:
-                    var pinMessageToTopInput = ConvertData<PinMessageToTopInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.UnpinMessageFromTop:
-                    var unpinMessageFromTopInput = ConvertData<UnpinMessageFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.ReadMessage:
-                    var readMessageInput = ConvertData<ReadMessageInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.CreateGroup:
-                    var createGroupInput = ConvertData<CreateGroupInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.DeleteGroup:
-                    var deleteGroupInput = ConvertData<DeleteGroupInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.JoinGroup:
-                    var joinGroupInput = ConvertData<JoinGroupInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.LeaveGroup:
-                    var leaveGroupInput = ConvertData<LeaveGroupInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.PinToTop:
-                    var pinToTopInput = ConvertData<PinToTopInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.UnpinFromTop:
-                    var unpinFromTopInput = ConvertData<UnpinFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.BlockUser:
-                    var blockUserInput = ConvertData<BlockUserInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.UnblockUser:
-                    var unblockUserInput = ConvertData<UnblockUserInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.UploadFile:
-                    var uploadFileInput = ConvertData<UploadFileInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case MessageType.DownloadFile:
-                    var downloadFileInput = ConvertData<DownloadFileInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                default:
-                    break;
+                return ClientInfoProvider.ClientIpAddress;
             }
-            return Task.CompletedTask;
+            catch (Exception ex)
+            {
+                return "";
+            }
         }
 
-        public override Task OnConnected(string userId, WebSocket socket)
+        public override async Task OnDisconnected(WebSocket socket)
         {
-
-            return base.OnConnected(userId, socket);
-        }
-
-        public override Task OnDisconnected(WebSocket socket)
-        {
-            return base.OnDisconnected(socket);
+            await base.OnDisconnected(socket);
         }
 
         public async Task SendBinaryAsync(WebSocket webSocket,
-            MessageType messageType,
+            CommandType messageType,
             MessageDataType dataType,
             byte[] msgdata,
             CancellationToken? cancellationToken = null)
@@ -224,9 +268,19 @@ namespace JK.Chat
             await SendAsync(webSocket, WebSocketMessageType.Binary, packagedata, cancellationToken);
         }
 
-        public async Task SendTextAsync(WebSocket webSocket, MessageType messageType, string msgdata, CancellationToken? cancellationToken = null)
+        public async Task SendTextAsync(WebSocket webSocket,
+            CommandType messageType,
+            MessageDataType dataType,
+            string msgdata,
+            CancellationToken? cancellationToken = null)
         {
-            var packagedata = Encoding.UTF8.GetBytes(msgdata);
+            var message = new TextMessage
+            {
+                CommandType = messageType,
+                DataType = dataType,
+                Data = msgdata
+            };
+            var packagedata = message.ToJsonString().ToBytes();
             await SendAsync(webSocket, WebSocketMessageType.Text, packagedata, cancellationToken);
         }
 

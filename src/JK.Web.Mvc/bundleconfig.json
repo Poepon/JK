@@ -178,5 +178,11 @@
     "inputFiles": [
       "wwwroot/view-resources/Views/LoginLogs/Index.js"
     ]
+  },
+  {
+    "outputFileName": "wwwroot/lib/websocket/reconnecting-websocket.min.js",
+    "inputFiles": [
+      "wwwroot/lib/websocket/reconnecting-websocket.js"
+    ]
   }
 ]

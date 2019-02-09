@@ -6,7 +6,7 @@ namespace JK.Chat.Dto
 {
     public interface IMessage<T>
     {
-        MessageType MessageType { get; set; }
+        CommandType CommandType { get; set; }
 
         T Data { get; set; }
     }

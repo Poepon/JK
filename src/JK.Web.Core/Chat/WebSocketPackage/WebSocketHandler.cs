@@ -1,8 +1,6 @@
 ﻿using JK.Chat.Dto;
 using System;
-using System.Collections.Generic;
 using System.Net.WebSockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,9 +25,9 @@ namespace JK.Chat
         /// </summary>
         /// <param name="socket">The web-socket of the client.</param>
         /// <returns>Awaitable Task.</returns>
-        public virtual Task OnConnected(string userId, WebSocket socket)
+        public virtual Task OnConnected(string connectionId, WebSocket socket)
         {
-            WebSocketConnectionManager.AddSocket(userId, socket);
+            WebSocketConnectionManager.AddSocket(connectionId, socket);
             return Task.CompletedTask;
         }
 
@@ -40,7 +38,7 @@ namespace JK.Chat
         /// <returns>Awaitable Task.</returns>
         public virtual async Task OnDisconnected(WebSocket socket)
         {
-            var socketId = WebSocketConnectionManager.GetId(socket);
+            var socketId = WebSocketConnectionManager.GetConnectionId(socket);
             await WebSocketConnectionManager.RemoveSocket(socketId);
         }
 

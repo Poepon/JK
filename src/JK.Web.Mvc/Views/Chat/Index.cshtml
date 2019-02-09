@@ -1,5 +1,109 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿
 @{
+    CurrentPageName = "Chat";
 }
+@section scripts
+    {
+    <script src="~/lib/websocket/reconnecting-websocket.js" asp-append-version="true"></script>
+    <script src="~/js/chatWebSocket.js" asp-append-version="true"></script>
+}
+<div class="row clearfix">
+    <br />
+    <div class="col-xs-12 col-sm-3">
+        <div class="card" style="height:85vh">
+            <div class="body">
+                <div id="ChatSessionAndFriendPanel" class="tabbable-line">
+                    <ul class="nav nav-tabs tab-nav-right" role="tablist">
+                        <li role="presentation" class="active">
+                            <a href="#SessionsTab" data-toggle="tab" role="tab">
+                                Sessions
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#FriendsTab" data-toggle="tab" role="tab">
+                                Friends
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="SessionsTab" role="tabpanel">
+                            <div class="list-group">
+                                <a href="#" class="list-group-item">
+                                    <div class="media">
+                                        <div class="media-left">
+                                            <img src="~/images/user.png" class="img-circle">
+                                        </div>
+                                        <div class="media-body">
+                                            <h4 class="media-heading">张一疯</h4>
+                                            <span>Hi,Can i help you ?</span>
+                                        </div>
+                                        <div class="media-right">
+                                            <span class="right">Fri</span>
+                                            <span class="badge bg-pink">14</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="FriendsTab" role="tabpanel">
+                            <div class="list-group">
+                                <a href="#" class="list-group-item">
+                                    <img src="~/images/user.png" class="img-circle">
+                                    <span>张一疯</span>
+                                </a>
+                                <a href="#" class="list-group-item">
+                                    <img src="~/images/user.png" class="img-circle">
+                                    <span>张三疯</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-9">
+        <div class="card" style="height:85vh">
+            <div class="header">
+                FriendName or GroupName
+                <button type="button" id="btnOpen" class="btn btn-primary">上线</button>
+                <button type="button" id="btnClose" class="btn btn-primary">下线</button>
+            </div>
+            <div class="body">
+                <div class="panel" style="height:65vh">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <div class="media">
+                                <div class="media-left">
+                                    <a href="#">
+                                        <img src="~/images/user.png" class="img-circle">
+                                    </a>
+                                </div>
+                                <div class="media-body">
+                                    <h4 class="media-heading">&nbsp;</h4>
+                                    <span>Hi,Can i help you ?</span>
+                                </div>
+                                <div class="media-right">
+                                    <time datetime="@DateTime.Now"></time>
+                                    @*<i class="material-icons col-green">done</i>*@
+                                    <i class="material-icons col-green">done_all</i>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <div class="input-group">
+                        <input type="text" id="message" name="message" class="form-control" placeholder="Write a message..." />
+                        <span class="input-group-btn">
+                            <input type="button" id="btnSend" class="btn btn-primary" value="Send"/>
+                        </span>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

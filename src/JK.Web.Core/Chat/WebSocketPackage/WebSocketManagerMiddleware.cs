@@ -31,8 +31,8 @@ namespace JK.Chat
             }
             CancellationToken ct = context.RequestAborted;
             var socket = await context.WebSockets.AcceptWebSocketAsync();
-            string key = Guid.NewGuid().ToString();
-            await _webSocketHandler.OnConnected(key, socket);
+            string connectionId = Guid.NewGuid().ToString("N");
+            await _webSocketHandler.OnConnected(connectionId, socket);
 
             await Receive(socket, ct);
         }
@@ -72,7 +72,7 @@ namespace JK.Chat
                             {
                                 var message = new BinaryMessage
                                 {
-                                    MessageType = (MessageType)binaryReader.ReadInt32(),
+                                    CommandType = (CommandType)binaryReader.ReadInt32(),
                                     DataType = (MessageDataType)binaryReader.ReadByte(),
                                 };
                                 var dataLength = binaryReader.ReadInt32();
