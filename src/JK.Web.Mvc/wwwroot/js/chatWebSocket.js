@@ -99,7 +99,7 @@ $(function () {
     var port = document.location.port ? (":" + document.location.port) : "";
 
     var connectionUrl = scheme + "://" + document.location.hostname + port + "/chatws";
-    var ws = new ReconnectingWebSocket(connectionUrl);
+    var ws = new ReconnectingWebSocket(connectionUrl, null, { binaryType: "arraybuffer" });
     ws.onconnecting = function () {
         console.log("onconnecting", ws.readyState);
     };
@@ -109,16 +109,47 @@ $(function () {
         console.log("onopen", ws.readyState);
     };
     ws.onmessage = function (event) {
-        console.log("onmessage", event.data);
-        var dto = JSON.parse(event.data);
-        switch (dto.CommandType) {
-            case chat.commandType.Connected:
-                var message = JSON.parse(dto.Data);
-                abp.utils.setCookieValue("chatConnectionId", message.ConnectionId);
-                break;
+        console.log("onmessage", event);
+        if (event.data instanceof ArrayBuffer) {
+            var receive = [];
+            var length = 0;
+            receive = receive.concat(Array.from(new Uint8Array(event.data)));
+            if (receive.length < 9) {
+                return;
+            }
+            var dv = new DataView(event.data);
+            //使用小端字节序
+            var commandType = dv.getInt32(0,true);
+            var dataType = dv.getInt8(4, true);
+            length = dv.getInt32(5, true);
+            console.log("commandType", commandType);
+            console.log("dataType", dataType);
+            console.log("byteLength", receive.byteLength);
+            console.log("length", length);
+            if (receive.length < length + 9) {
+                return;
+            }
+            var bytes = receive.slice(9, length + 9);
+            if (dataType === chat.dataType.MessagePack) {
+                var decodedData = deserializeMsgPack(bytes);
+                console.log("decodedData", decodedData);
+            }
+          
+            receive = receive.slice(length + 9);
+            console.log("decodedData", receive);
+        } else {
+            var dto = JSON.parse(event.data);
+            switch (dto.CommandType) {
+                case chat.commandType.Connected:
+                    var message = JSON.parse(dto.Data);
+                    abp.utils.setCookieValue("chatConnectionId", message.ConnectionId);
+                    break;
 
-            default:
+                default:
+            }
         }
+
+
     };
     ws.onclose = function (event) {
         $("#btnClose").hide();

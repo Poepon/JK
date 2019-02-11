@@ -47,7 +47,7 @@ namespace JK.Chat
             await socket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), messageType, true, cancellationToken ?? CancellationToken.None);
         }
 
-        public abstract Task ReceiveJsonAsync(WebSocket socket, WebSocketReceiveResult result, TextMessage receivedMessage);
+        public abstract Task ReceiveTextAsync(WebSocket socket, WebSocketReceiveResult result, string receivedMessage);
 
         public abstract Task ReceiveBinaryAsync(WebSocket socket, WebSocketReceiveResult result, BinaryMessage receivedMessage);
 

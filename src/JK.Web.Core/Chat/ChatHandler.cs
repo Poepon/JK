@@ -4,8 +4,10 @@ using Abp.Json;
 using Abp.RealTime;
 using Abp.Runtime.Caching.Redis;
 using Abp.Runtime.Session;
+using Abp.Timing;
 using JK.Chat.Dto;
 using JK.Chat.Dto.Input;
+using JK.Chat.Dto.Output;
 using MessagePack;
 using StackExchange.Redis;
 using System;
@@ -104,71 +106,17 @@ namespace JK.Chat
             return Task.CompletedTask;
         }
 
-        public override async Task ReceiveJsonAsync(WebSocket socket, WebSocketReceiveResult result, TextMessage receivedMessage)
+        public override async Task ReceiveTextAsync(WebSocket socket, WebSocketReceiveResult result, string receivedMessage)
         {
-            switch (receivedMessage.CommandType)
-            {
-                case CommandType.Online:
-                    var onlineInput = ConvertData<OnlineInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.Offline:
-                    var offlineInput = ConvertData<OfflineInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.Typing:
-                    var typingInput = ConvertData<TypingInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.SendMessage:
-                    var messageInput = ConvertData<SendMessageInput>(receivedMessage.DataType, receivedMessage.Data);
-                    await SendAsync(socket, WebSocketMessageType.Text, messageInput.Message.ToBytes());
-                    break;
-                case CommandType.GetMessage:
-                    var getMessageInput = ConvertData<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.PinMessageToTop:
-                    var pinMessageToTopInput = ConvertData<PinMessageToTopInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.UnpinMessageFromTop:
-                    var unpinMessageFromTopInput = ConvertData<UnpinMessageFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.ReadMessage:
-                    var readMessageInput = ConvertData<ReadMessageInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.CreateGroup:
-                    var createGroupInput = ConvertData<CreateGroupInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.DeleteGroup:
-                    var deleteGroupInput = ConvertData<DeleteGroupInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.JoinGroup:
-                    var joinGroupInput = ConvertData<JoinGroupInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.LeaveGroup:
-                    var leaveGroupInput = ConvertData<LeaveGroupInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.GetGroups:
-                    var getGroupsInput = ConvertData<GetGroupsInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.PinToTop:
-                    var pinToTopInput = ConvertData<PinToTopInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.UnpinFromTop:
-                    var unpinFromTopInput = ConvertData<UnpinFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.BlockUser:
-                    var blockUserInput = ConvertData<BlockUserInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.UnblockUser:
-                    var unblockUserInput = ConvertData<UnblockUserInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.UploadFile:
-                    var uploadFileInput = ConvertData<UploadFileInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                case CommandType.DownloadFile:
-                    var downloadFileInput = ConvertData<DownloadFileInput>(receivedMessage.DataType, receivedMessage.Data);
-                    break;
-                default:
-                    break;
-            }
+            await SendMsgPackAsync(socket, CommandType.SendMessage,
+                new ChatMessageOutput
+                {
+                    CreationTime = Clock.Now,
+                    GroupId = 1,
+                    UserId = 1,
+                    UserName = "Admin",
+                    Message = "Hi"
+                });
         }
 
         private T ConvertData<T>(MessageDataType dataType, string data) where T : class
@@ -203,14 +151,21 @@ namespace JK.Chat
                     value = jsonString.FromJsonString<T>();
                     break;
                 case MessageDataType.MessagePack:
-                    value = MessagePackSerializer.Deserialize<T>(data);
+                    value = LZ4MessagePackSerializer.Deserialize<T>(data);
                     break;
                 case MessageDataType.Protobuf:
-                    throw new NotSupportedException("不支持Protobuf。");
+                    using (var ms = new MemoryStream())
+                    {
+                        ms.Write(data, 0, data.Length);
+                        ms.Seek(0, SeekOrigin.Begin);
+                        value = ProtoBuf.Serializer.Deserialize<T>(ms);
+                    }
+                    break;
                 case MessageDataType.Blob:
                     MemoryStream memoryStream = new MemoryStream(data);
                     BinaryReader binaryReader = new BinaryReader(memoryStream);
                     var fileType = (FileType)binaryReader.ReadInt32();
+                    //TODO 图片、音视频文件处理
                     break;
                 default:
                     throw new NotSupportedException("不支持的数据格式。" + dataType.ToString());
@@ -255,28 +210,45 @@ namespace JK.Chat
         }
 
         public async Task SendBinaryAsync(WebSocket webSocket,
-            CommandType messageType,
+            CommandType commandType,
             MessageDataType dataType,
             byte[] msgdata,
             CancellationToken? cancellationToken = null)
         {
-            var packagedata = new byte[msgdata.Length + 10];
-            Array.Copy(BitConverter.GetBytes(Convert.ToInt32(messageType)), 0, packagedata, 0, 4);
-            Array.Copy(BitConverter.GetBytes(Convert.ToByte(dataType)), 0, packagedata, 4, 2);
-            Array.Copy(BitConverter.GetBytes(Convert.ToInt64(msgdata.Length)), 0, packagedata, 6, 4);
-            Array.Copy(msgdata, 0, packagedata, 10, msgdata.Length);
+            var packagedata = new byte[msgdata.Length + 9];
+            Array.Copy(BitConverter.GetBytes(Convert.ToInt32(commandType)), 0, packagedata, 0, 4);
+            Array.Copy(BitConverter.GetBytes(Convert.ToByte(dataType)), 0, packagedata, 4, 1);
+            Array.Copy(BitConverter.GetBytes(Convert.ToInt64(msgdata.Length)), 0, packagedata, 5, 4);
+            Array.Copy(msgdata, 0, packagedata, 9, msgdata.Length);
             await SendAsync(webSocket, WebSocketMessageType.Binary, packagedata, cancellationToken);
         }
 
+        public async Task SendMsgPackAsync<T>(WebSocket webSocket, CommandType commandType, T dto, CancellationToken? cancellationToken = null)
+        {
+            var data = LZ4MessagePackSerializer.Serialize(dto);
+            await SendBinaryAsync(webSocket, commandType, MessageDataType.MessagePack, data, cancellationToken);
+        }
+
+        public async Task SendProtobufAsync<T>(WebSocket webSocket, CommandType commandType, T dto, CancellationToken? cancellationToken = null)
+        {
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                ProtoBuf.Serializer.Serialize(memoryStream, dto);
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                var data = memoryStream.ToArray();
+                await SendBinaryAsync(webSocket, commandType, MessageDataType.Protobuf, data, cancellationToken);
+            }
+        }
+
         public async Task SendTextAsync(WebSocket webSocket,
-            CommandType messageType,
+            CommandType commandType,
             MessageDataType dataType,
             string msgdata,
             CancellationToken? cancellationToken = null)
         {
             var message = new TextMessage
             {
-                CommandType = messageType,
+                CommandType = commandType,
                 DataType = dataType,
                 Data = msgdata
             };

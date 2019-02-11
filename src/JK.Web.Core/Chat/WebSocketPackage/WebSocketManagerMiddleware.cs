@@ -61,9 +61,8 @@ namespace JK.Chat
                         {
                             using (var reader = new StreamReader(ms, Encoding.UTF8))
                             {
-                                string serializedMessage = await reader.ReadToEndAsync();
-                                TextMessage message = JsonConvert.DeserializeObject<TextMessage>(serializedMessage);
-                                await _webSocketHandler.ReceiveJsonAsync(socket, result, message);
+                                string message = await reader.ReadToEndAsync();
+                                await _webSocketHandler.ReceiveTextAsync(socket, result, message);
                             }
                         }
                         else if (result.MessageType == WebSocketMessageType.Binary)
