@@ -77,7 +77,6 @@ namespace JK.Chat
                                 var dataLength = binaryReader.ReadInt32();
                                 message.Data = binaryReader.ReadBytes(dataLength);
                                 await _webSocketHandler.ReceiveBinaryAsync(socket, result, message);
-                                return;
                             }
                         }
                         else if (result.MessageType == WebSocketMessageType.Close)

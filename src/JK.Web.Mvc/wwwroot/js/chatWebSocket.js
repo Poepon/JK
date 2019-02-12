@@ -119,9 +119,10 @@ $(function () {
             }
             var dv = new DataView(event.data);
             //使用小端字节序
-            var commandType = dv.getInt32(0,true);
-            var dataType = dv.getInt8(4, true);
-            length = dv.getInt32(5, true);
+            var littleEndian = true;
+            var commandType = dv.getInt32(0, littleEndian);
+            var dataType = dv.getInt8(4, littleEndian);
+            length = dv.getInt32(5, littleEndian);
             console.log("commandType", commandType);
             console.log("dataType", dataType);
             console.log("byteLength", receive.byteLength);
@@ -138,6 +139,7 @@ $(function () {
             receive = receive.slice(length + 9);
             console.log("decodedData", receive);
         } else {
+            console.log(event.data);
             var dto = JSON.parse(event.data);
             switch (dto.CommandType) {
                 case chat.commandType.Connected:
@@ -173,6 +175,9 @@ $(function () {
         if (event.keyCode === 13) {
             SendMessage();
         }
+    });
+    abp.event.on("websocket.sendbinary", function (data) {
+        ws.send(data);
     });
     function Send(commandType, dataType, Data) {
         var data = {

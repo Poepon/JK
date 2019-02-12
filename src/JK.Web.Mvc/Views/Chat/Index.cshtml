@@ -1,4 +1,4 @@
-﻿
+﻿@using JK.Chat;
 @{
     CurrentPageName = "Chat";
 }
@@ -7,6 +7,8 @@
     <script src="~/lib/websocket/reconnecting-websocket.js" asp-append-version="true"></script>
     <script src="~/lib/msgpack/msgpack.min.js" asp-append-version="true"></script>
     <script src="~/js/chatWebSocket.js" asp-append-version="true"></script>
+    <script src="~/view-resources/Views/Chat/ChatHandlerBase.js" asp-append-version="true"></script>
+    <script src="~/view-resources/Views/Chat/MessagePackChatHandler.js" asp-append-version="true"></script>
 }
 <div class="row clearfix">
     <br />
@@ -25,7 +27,13 @@
                                 Friends
                             </a>
                         </li>
+                        <li role="presentation" class="right">
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#NewGroupModal">
+                                NewGroup
+                            </button>
+                        </li>
                     </ul>
+
                     <div class="tab-content">
                         <div class="tab-pane active" id="SessionsTab" role="tabpanel">
                             <div class="list-group">
@@ -97,13 +105,43 @@
                     <div class="input-group">
                         <input type="text" id="message" name="message" class="form-control" placeholder="Write a message..." />
                         <span class="input-group-btn">
-                            <input type="button" id="btnSend" class="btn btn-primary" value="Send"/>
+                            <input type="button" id="btnSend" class="btn btn-primary" value="Send" />
                         </span>
 
                     </div>
 
 
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="NewGroupModal" tabindex="-1" role="dialog" aria-labelledby="NewGroupModalLabel" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <span>NewGroup</span>
+                </h4>
+            </div>
+            <div class="modal-body">
+                <form role="form" novalidate class="form-validation">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group form-float">
+                                <div class="form-line">
+                                    <input type="text" name="GroupName" class="form-control" required maxlength="@ChatGroup.MaxNameLength">
+                                    <label class="form-label">Group name</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">@L("Cancel")</button>
+                        <button type="submit" class="btn btn-primary waves-effect">@L("Save")</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

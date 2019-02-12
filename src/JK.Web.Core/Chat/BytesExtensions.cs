@@ -8,7 +8,7 @@ namespace JK.Chat
         {
             return Encoding.UTF8.GetBytes(str);
         }
-        public static string ToString(this byte[] bytes)
+        public static string GetString(this byte[] bytes)
         {
             return Encoding.UTF8.GetString(bytes);
         }

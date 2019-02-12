@@ -134,5 +134,6 @@
     <text name="LoginLogs">Login Logs</text>
     <text name="HangFire">HangFire</text>
     <text name="AdminPassword">Admin Password</text>
+    <text name="Chat">Chat</text>
   </texts>
 </localizationDictionary>

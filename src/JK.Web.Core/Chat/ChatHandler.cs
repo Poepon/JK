@@ -38,72 +38,71 @@ namespace JK.Chat
             AbpSession = NullAbpSession.Instance;
         }
 
-        public override Task ReceiveBinaryAsync(WebSocket socket, WebSocketReceiveResult result, BinaryMessage receivedMessage)
+        public override async Task ReceiveBinaryAsync(WebSocket socket, WebSocketReceiveResult result, BinaryMessage receivedMessage)
         {
             switch (receivedMessage.CommandType)
             {
                 case CommandType.Online:
-                    var onlineInput = ConvertData<OnlineInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var onlineInput = DeserializeFromBytes<OnlineInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.Offline:
-                    var offlineInput = ConvertData<OfflineInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var offlineInput = DeserializeFromBytes<OfflineInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.Typing:
-                    var typingInput = ConvertData<TypingInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var typingInput = DeserializeFromBytes<TypingInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.SendMessage:
-                    var messageInput = ConvertData<SendMessageInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var messageInput = DeserializeFromBytes<Dto.Input.SendMessageInput>(receivedMessage.DataType, receivedMessage.Data);
+                    await SendMsgPackAsync(socket, CommandType.GetMessage, messageInput);
                     break;
                 case CommandType.GetMessage:
-                    var getMessageInput = ConvertData<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var getMessageInput = DeserializeFromBytes<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.PinMessageToTop:
-                    var pinMessageToTopInput = ConvertData<PinMessageToTopInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var pinMessageToTopInput = DeserializeFromBytes<PinMessageToTopInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.UnpinMessageFromTop:
-                    var unpinMessageFromTopInput = ConvertData<UnpinMessageFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var unpinMessageFromTopInput = DeserializeFromBytes<UnpinMessageFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.ReadMessage:
-                    var readMessageInput = ConvertData<ReadMessageInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var readMessageInput = DeserializeFromBytes<ReadMessageInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.CreateGroup:
-                    var createGroupInput = ConvertData<CreateGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var createGroupInput = DeserializeFromBytes<Dto.Input.CreateGroupInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.DeleteGroup:
-                    var deleteGroupInput = ConvertData<DeleteGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var deleteGroupInput = DeserializeFromBytes<DeleteGroupInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.JoinGroup:
-                    var joinGroupInput = ConvertData<JoinGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var joinGroupInput = DeserializeFromBytes<JoinGroupInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.LeaveGroup:
-                    var leaveGroupInput = ConvertData<LeaveGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var leaveGroupInput = DeserializeFromBytes<LeaveGroupInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.GetGroups:
-                    var getGroupsInput = ConvertData<GetGroupsInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var getGroupsInput = DeserializeFromBytes<GetGroupsInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.PinToTop:
-                    var pinToTopInput = ConvertData<PinToTopInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var pinToTopInput = DeserializeFromBytes<PinToTopInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.UnpinFromTop:
-                    var unpinFromTopInput = ConvertData<UnpinFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var unpinFromTopInput = DeserializeFromBytes<UnpinFromTopInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.BlockUser:
-                    var blockUserInput = ConvertData<BlockUserInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var blockUserInput = DeserializeFromBytes<BlockUserInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.UnblockUser:
-                    var unblockUserInput = ConvertData<UnblockUserInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var unblockUserInput = DeserializeFromBytes<UnblockUserInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.UploadFile:
-                    var uploadFileInput = ConvertData<UploadFileInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var uploadFileInput = DeserializeFromBytes<UploadFileInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.DownloadFile:
-                    var downloadFileInput = ConvertData<DownloadFileInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var downloadFileInput = DeserializeFromBytes<DownloadFileInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 default:
                     break;
             }
-
-            return Task.CompletedTask;
         }
 
         public override async Task ReceiveTextAsync(WebSocket socket, WebSocketReceiveResult result, string receivedMessage)
@@ -119,7 +118,7 @@ namespace JK.Chat
                 });
         }
 
-        private T ConvertData<T>(MessageDataType dataType, string data) where T : class
+        private T DeserializeFromText<T>(MessageDataType dataType, string data) where T : class
         {
             T value = default(T);
             switch (dataType)
@@ -138,7 +137,7 @@ namespace JK.Chat
             }
             return value;
         }
-        private T ConvertData<T>(MessageDataType dataType, byte[] data) where T : class
+        private T DeserializeFromBytes<T>(MessageDataType dataType, byte[] data) where T : class
         {
             T value = default(T);
             switch (dataType)
@@ -169,6 +168,69 @@ namespace JK.Chat
                     break;
                 default:
                     throw new NotSupportedException("不支持的数据格式。" + dataType.ToString());
+            }
+            return value;
+        }
+
+        private byte[] SerializeToBytes<T>(MessageDataType dataType, T obj)
+        {
+            byte[] bytes = null;
+            switch (dataType)
+            {
+                case MessageDataType.Text:
+                    bytes = obj.ToString().ToBytes();
+                    break;
+                case MessageDataType.Json:
+                    bytes = obj.ToJsonString().ToBytes();
+                    break;
+                case MessageDataType.MessagePack:
+                    bytes = LZ4MessagePackSerializer.Serialize(obj);
+                    break;
+                case MessageDataType.Protobuf:
+                    using (var ms = new MemoryStream())
+                    {
+                        ProtoBuf.Serializer.Serialize(ms, obj);
+                        ms.Seek(0, SeekOrigin.Begin);
+                        bytes = ms.ToArray();
+                    }
+                    break;
+                case MessageDataType.Blob:
+
+                    break;
+                default:
+                    break;
+            }
+            return bytes;
+        }
+        private string SerializeToText<T>(MessageDataType dataType, T obj)
+        {
+            //TODO
+            string value = "";
+            switch (dataType)
+            {
+                case MessageDataType.Text:
+                    value = obj.ToString();
+                    break;
+                case MessageDataType.Json:
+                    value = obj.ToJsonString();
+                    break;
+                case MessageDataType.MessagePack:
+                    var bytes = LZ4MessagePackSerializer.Serialize(obj);
+                    value = bytes.GetString();
+                    break;
+                case MessageDataType.Protobuf:
+                    using (var ms = new MemoryStream())
+                    {
+                        ProtoBuf.Serializer.Serialize(ms, obj);
+                        ms.Seek(0, SeekOrigin.Begin);
+                        bytes = ms.ToArray();
+                        value = bytes.GetString();
+                    }
+                    break;
+                case MessageDataType.Blob:
+                    break;
+                default:
+                    break;
             }
             return value;
         }
@@ -225,7 +287,7 @@ namespace JK.Chat
 
         public async Task SendMsgPackAsync<T>(WebSocket webSocket, CommandType commandType, T dto, CancellationToken? cancellationToken = null)
         {
-            var data = LZ4MessagePackSerializer.Serialize(dto);
+            var data = SerializeToBytes(MessageDataType.MessagePack, dto);
             await SendBinaryAsync(webSocket, commandType, MessageDataType.MessagePack, data, cancellationToken);
         }
 

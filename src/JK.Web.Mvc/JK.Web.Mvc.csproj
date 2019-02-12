@@ -18,6 +18,8 @@
   <ItemGroup>
     <Content Remove="appMenus.config" />
     <Content Remove="appPermissions.config" />
+    <Content Remove="wwwroot\view-resources\Views\Chat\ChatHandlerBase.ts" />
+    <Content Remove="wwwroot\view-resources\Views\Chat\MessagePackChatHandler.ts" />
     <Content Remove="wwwroot\view-resources\Views\_Bundles\common-scripts.js" />
   </ItemGroup>
   <ItemGroup>
@@ -66,5 +68,9 @@
     <PackageReference Include="Abp.RedisCache" Version="4.2.0" />
     <PackageReference Include="Abp.Castle.Log4Net" Version="4.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.2.0" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\view-resources\Views\Chat\MessagePackChatHandler.ts" />
+    <TypeScriptCompile Include="wwwroot\view-resources\Views\Chat\ChatHandlerBase.ts" />
   </ItemGroup>
 </Project>

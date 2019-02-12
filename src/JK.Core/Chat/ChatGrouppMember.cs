@@ -9,14 +9,17 @@ namespace JK.Chat
     /// 聊天群组成员
     /// </summary>
     [Table("ChatGrouppMembers")]
-    public class ChatGrouppMember : Entity<long>, IHasCreationTime
+    public class ChatGrouppMember : Entity<long>, IHasCreationTime, IPassivable
     {
         public long GroupId { get; set; }
 
+        [ForeignKey(nameof(GroupId))]
+        public virtual ChatGroup ChatGroup { get; set; }
+
         public long UserId { get; set; }
 
-        public int Status { get; set; }
-
         public DateTime CreationTime { get; set; }
+
+        public bool IsActive { get; set; } = true;
     }
 }

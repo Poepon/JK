@@ -138,6 +138,7 @@
     <text name="LoginLogs">登录日志</text>
     <text name="HangFire">HangFire</text>
     <text name="AdminPassword">管理员密码</text>
+    <text name="Chat">聊天</text>
     
   </texts>
 </localizationDictionary>

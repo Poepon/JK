@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace JK.Chat
 {
     [Table("ChatMessages")]
-    public class ChatMessage : Entity<long>, IMayHaveTenant, IHasCreationTime
+    public class ChatMessage : Entity<long>, IHasCreationTime
     {
         public const int MaxMessageLength = 4 * 1024; //4KB
 
@@ -17,8 +17,6 @@ namespace JK.Chat
 
         [StringLength(MaxMessageLength)]
         public string Message { get; set; }
-
-        public int? TenantId { get; set; }
 
         public DateTime CreationTime { get; set; }
 
