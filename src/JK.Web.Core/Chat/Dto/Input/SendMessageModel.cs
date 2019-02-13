@@ -1,12 +1,11 @@
-﻿using MessagePack;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Abp.AutoMapper;
+using MessagePack;
 
 namespace JK.Chat.Dto.Input
 {
     [MessagePackObject]
-    public class SendMessageInput
+    [AutoMap(typeof(SendMessageInput))]
+    public class SendMessageModel
     {
         [Key("gid")]
         public long GroupId { get; set; }

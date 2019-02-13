@@ -1,4 +1,5 @@
 ﻿using Abp.Auditing;
+using Abp.AutoMapper;
 using Abp.Dependency;
 using Abp.Json;
 using Abp.RealTime;
@@ -12,6 +13,7 @@ using MessagePack;
 using StackExchange.Redis;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -21,6 +23,7 @@ namespace JK.Chat
 {
     public class ChatHandler : WebSocketHandler, ISingletonDependency
     {
+        private readonly IChatAppService chatAppService;
         private readonly IAbpRedisCacheDatabaseProvider databaseProvider;
 
         protected IOnlineClientManager<ChatChannel> OnlineClientManager { get; }
@@ -30,10 +33,12 @@ namespace JK.Chat
         public ChatHandler(WebSocketConnectionManager webSocketConnectionManager,
             IOnlineClientManager<ChatChannel> onlineClientManager,
             IClientInfoProvider clientInfoProvider,
+            IChatAppService chatAppService,
             IAbpRedisCacheDatabaseProvider databaseProvider) : base(webSocketConnectionManager)
         {
             this.OnlineClientManager = onlineClientManager;
             ClientInfoProvider = clientInfoProvider;
+            this.chatAppService = chatAppService;
             this.databaseProvider = databaseProvider;
             AbpSession = NullAbpSession.Instance;
         }
@@ -52,8 +57,46 @@ namespace JK.Chat
                     var typingInput = DeserializeFromBytes<TypingInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.SendMessage:
-                    var messageInput = DeserializeFromBytes<Dto.Input.SendMessageInput>(receivedMessage.DataType, receivedMessage.Data);
-                    await SendMsgPackAsync(socket, CommandType.GetMessage, messageInput);
+                    var messageInput = DeserializeFromBytes<SendMessageModel>(receivedMessage.DataType, receivedMessage.Data);
+                    await chatAppService.SendMessage(messageInput.MapTo<SendMessageInput>());
+                    //trigger publish
+                    var lastId = await chatAppService.GetLastReceivedMessageId(new ChatGroupInputBase
+                    {
+                        GroupId = messageInput.GroupId,
+                        UserId = messageInput.UserId
+                    });
+                    var oldLastId = lastId;
+                    do
+                    {
+                        var list = await chatAppService.GetMessages(new GetMessagesInput
+                        {
+                            GroupId = messageInput.GroupId,
+                            UserId = messageInput.UserId,
+                            LastReceivedMessageId = lastId,
+                            MaxResultCount = 50,
+                            SkipCount = 0,
+                            Sorting = "Id"
+                        });
+                        if (list.TotalCount > 0)
+                        {
+                            var dtos = list.Items.Select(x => x.MapTo<ChatMessageOutput>()).ToArray();
+                            await SendMsgPackAsync(socket, CommandType.GetMessage, dtos);
+                            lastId = list.Items.Max(x => x.Id);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    } while (true);
+                    if (lastId > oldLastId)
+                    {
+                        await chatAppService.SetLastReceivedMessageId(new SetLastReceivedIdInput
+                        {
+                            GroupId = messageInput.GroupId,
+                            UserId = messageInput.UserId,
+                            LastReceivedMessageId = lastId
+                        });
+                    }
                     break;
                 case CommandType.GetMessage:
                     var getMessageInput = DeserializeFromBytes<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);

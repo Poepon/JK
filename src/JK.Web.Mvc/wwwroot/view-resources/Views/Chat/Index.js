@@ -14,8 +14,10 @@
         abp.event.on("websocket.onreceivebinary", function (data) {
             var cmddto = chat.receiveCommand(data);
             if (cmddto.dataType === chat.dataType.MessagePack) {
-                var decodedData = deserializeMsgPack(cmddto.data);
-                console.log("decodedData", decodedData);
+                var decodedObj = deserializeMsgPack(cmddto.data);
+                if (cmddto.commandType === chat.commandType.GetMessage) {
+                    console.log(decodedObj);
+                }
             }
         });
         abp.event.on("websocket.onreceiveblob", function (data) {

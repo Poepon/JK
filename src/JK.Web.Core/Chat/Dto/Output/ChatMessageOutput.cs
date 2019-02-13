@@ -1,9 +1,11 @@
-﻿using MessagePack;
+﻿using Abp.AutoMapper;
+using MessagePack;
 using System;
 
 namespace JK.Chat.Dto.Output
 {
     [MessagePackObject]
+    [AutoMapFrom(typeof(ChatMessageDto))]
     public class ChatMessageOutput
     {
         [Key("gid")]
@@ -16,5 +18,7 @@ namespace JK.Chat.Dto.Output
         public string Message { get; set; }
         [Key("time")]
         public DateTime CreationTime { get; set; }
+        [Key("s")]
+        public ChatMessageReadState ReadState { get; set; }
     }
 }

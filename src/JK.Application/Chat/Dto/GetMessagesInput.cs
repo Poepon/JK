@@ -9,6 +9,8 @@ namespace JK.Chat.Dto
 
         public long UserId { get; set; }
 
+        public long LastReceivedMessageId { get; set; }
+
         public void Normalize()
         {
             if (string.IsNullOrEmpty(Sorting))

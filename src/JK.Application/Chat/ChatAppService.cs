@@ -16,13 +16,13 @@ namespace JK.Chat
     {
         private readonly IRepository<ChatMessage, long> _chatMessageRepository;
         private readonly IRepository<ChatGroup, long> _chatGroupRepository;
-        private readonly IRepository<ChatGrouppMember, long> _chatGrouppMemberRepository;
+        private readonly IRepository<ChatGroupMember, long> _chatGrouppMemberRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRepository<UserChatMessageLog, long> _userChatMessageLogRepository;
         public ChatAppService(IRepository<ChatMessage, long> chatMessageRepository,
             IRepository<UserChatMessageLog, long> userChatMessageLogRepository,
             IRepository<ChatGroup, long> chatGroupRepository,
-            IRepository<ChatGrouppMember, long> chatGrouppMemberRepository,
+            IRepository<ChatGroupMember, long> chatGrouppMemberRepository,
             IHttpContextAccessor httpContextAccessor)
         {
             _chatMessageRepository = chatMessageRepository;
@@ -64,13 +64,13 @@ namespace JK.Chat
                     CreationTime = Clock.Now,
                     IsActive = true
                 });
-                await _chatGrouppMemberRepository.InsertAsync(new ChatGrouppMember
+                await _chatGrouppMemberRepository.InsertAsync(new ChatGroupMember
                 {
                     GroupId = groupId,
                     CreationTime = Clock.Now,
                     UserId = input.CreatorUserId
                 });
-                await _chatGrouppMemberRepository.InsertAsync(new ChatGrouppMember
+                await _chatGrouppMemberRepository.InsertAsync(new ChatGroupMember
                 {
                     GroupId = groupId,
                     CreationTime = Clock.Now,
@@ -82,10 +82,7 @@ namespace JK.Chat
 
         public async Task<PagedResultDto<ChatMessageDto>> GetMessages(GetMessagesInput input)
         {
-            var lastReceivedMessageId = await _userChatMessageLogRepository.GetAll()
-                  .Where(log => log.GroupId == input.GroupId && log.UserId == input.UserId)
-                  .Select(log => log.LastReceivedMessageId).SingleOrDefaultAsync();
-            var query = _chatMessageRepository.GetAll().Where(msg => msg.GroupId == input.GroupId && msg.Id > lastReceivedMessageId);
+            var query = _chatMessageRepository.GetAll().Where(msg => msg.GroupId == input.GroupId && msg.Id > input.LastReceivedMessageId);
             int totalCount = await query.CountAsync();
             var list = await query.OrderBy(input.Sorting).PageBy(input).ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
             return new PagedResultDto<ChatMessageDto>(totalCount, ObjectMapper.Map<List<ChatMessageDto>>(list));
@@ -98,7 +95,7 @@ namespace JK.Chat
             if (!exists)
             {
                 await _chatGrouppMemberRepository.InsertAsync(
-                      new ChatGrouppMember
+                      new ChatGroupMember
                       {
                           GroupId = input.GroupId,
                           UserId = input.UserId,
@@ -122,6 +119,74 @@ namespace JK.Chat
                 CreationTime = Clock.Now,
                 ReadState = ChatMessageReadState.Unread
             });
+        }
+
+        public async Task<int> GetUnreadCount(ChatGroupInputBase input)
+        {
+            long lastMessageId = await _userChatMessageLogRepository.GetAll()
+                .Where(log => log.GroupId == input.GroupId && log.UserId == input.UserId)
+                .Select(log => log.LastReadMessageId).FirstOrDefaultAsync();
+            return await _chatMessageRepository.CountAsync(message =>
+                message.GroupId == input.GroupId &&
+                message.Id > lastMessageId);
+        }
+
+        public async Task<long> GetLastReceivedMessageId(ChatGroupInputBase input)
+        {
+            var lastReceivedMessageId = await _userChatMessageLogRepository.GetAll()
+                    .Where(log => log.GroupId == input.GroupId && log.UserId == input.UserId)
+                    .Select(log => log.LastReceivedMessageId).SingleOrDefaultAsync();
+            return lastReceivedMessageId;
+        }
+
+        public async Task<long> GetLastReadMessageId(ChatGroupInputBase input)
+        {
+            var lastReadMessageId = await _userChatMessageLogRepository.GetAll()
+                    .Where(log => log.GroupId == input.GroupId && log.UserId == input.UserId)
+                    .Select(log => log.LastReadMessageId).SingleOrDefaultAsync();
+            return lastReadMessageId;
+        }
+
+        public async Task SetLastReceivedMessageId(SetLastReceivedIdInput input)
+        {
+            var entity = await _userChatMessageLogRepository.GetAll()
+                .SingleOrDefaultAsync(log => log.GroupId == input.GroupId && log.UserId == input.UserId);
+            if (entity == null)
+            {
+                entity = new UserChatMessageLog
+                {
+                    GroupId = input.GroupId,
+                    UserId = input.UserId,
+                    LastReceivedMessageId = input.LastReceivedMessageId
+                };
+                await _userChatMessageLogRepository.InsertAsync(entity);
+            }
+            else
+            {
+                entity.LastReceivedMessageId = input.LastReceivedMessageId;
+                await _userChatMessageLogRepository.UpdateAsync(entity);
+            }
+        }
+
+        public async Task SetLastReadMessageId(SetLastReadIdInput input)
+        {
+            var entity = await _userChatMessageLogRepository.GetAll()
+                 .SingleOrDefaultAsync(log => log.GroupId == input.GroupId && log.UserId == input.UserId);
+            if (entity == null)
+            {
+                entity = new UserChatMessageLog
+                {
+                    GroupId = input.GroupId,
+                    UserId = input.UserId,
+                    LastReadMessageId = input.LastReadMessageId
+                };
+                await _userChatMessageLogRepository.InsertAsync(entity);
+            }
+            else
+            {
+                entity.LastReadMessageId = input.LastReadMessageId;
+                await _userChatMessageLogRepository.UpdateAsync(entity);
+            }
         }
     }
 }

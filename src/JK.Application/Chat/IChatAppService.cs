@@ -1,9 +1,7 @@
-﻿using System;
-using System.Text;
-using System.Threading.Tasks;
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using JK.Chat.Dto;
+using System.Threading.Tasks;
 
 namespace JK.Chat
 {
@@ -21,6 +19,14 @@ namespace JK.Chat
 
         Task LeaveGroup(ChatGroupInputBase input);
 
-        
+        Task<int> GetUnreadCount(ChatGroupInputBase input);
+
+        Task<long> GetLastReceivedMessageId(ChatGroupInputBase input);
+
+        Task<long> GetLastReadMessageId(ChatGroupInputBase input);
+
+        Task SetLastReceivedMessageId(SetLastReceivedIdInput input);
+
+        Task SetLastReadMessageId(SetLastReadIdInput input);
     }
 }

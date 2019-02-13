@@ -92,6 +92,10 @@ namespace JK.Chat
                         }
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                   
+                }
                 catch (WebSocketException e)
                 {
                     if (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
