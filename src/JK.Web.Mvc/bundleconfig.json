@@ -184,5 +184,17 @@
     "inputFiles": [
       "wwwroot/lib/websocket/reconnecting-websocket.js"
     ]
+  },
+  {
+    "outputFileName": "wwwroot/view-resources/Views/Chat/chatWebSocket.min.js",
+    "inputFiles": [
+      "wwwroot/view-resources/Views/Chat/chatWebSocket.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/view-resources/Views/Chat/Index.min.js",
+    "inputFiles": [
+      "wwwroot/view-resources/Views/Chat/Index.js"
+    ]
   }
 ]

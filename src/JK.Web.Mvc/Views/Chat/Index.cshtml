@@ -4,11 +4,18 @@
 }
 @section scripts
     {
-    <script src="~/lib/websocket/reconnecting-websocket.js" asp-append-version="true"></script>
-    <script src="~/lib/msgpack/msgpack.min.js" asp-append-version="true"></script>
-    <script src="~/js/chatWebSocket.js" asp-append-version="true"></script>
-    <script src="~/view-resources/Views/Chat/ChatHandlerBase.js" asp-append-version="true"></script>
-    <script src="~/view-resources/Views/Chat/MessagePackChatHandler.js" asp-append-version="true"></script>
+    <environment names="Staging,Development">
+        <script src="~/lib/websocket/reconnecting-websocket.js" asp-append-version="true"></script>
+        <script src="~/lib/msgpack/msgpack.min.js" asp-append-version="true"></script>
+        <script src="~/view-resources/Views/Chat/chatWebSocket.js"></script>
+        <script src="~/view-resources/Views/Chat/Index.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Production">
+        <script src="~/lib/websocket/reconnecting-websocket.min.js" asp-append-version="true"></script>
+        <script src="~/lib/msgpack/msgpack.min.js" asp-append-version="true"></script>
+        <script src="~/view-resources/Views/Chat/chatWebSocket.min.js" asp-append-version="true"></script>
+        <script src="~/view-resources/Views/Chat/Index.min.js" asp-append-version="true"></script>
+    </environment>
 }
 <div class="row clearfix">
     <br />
