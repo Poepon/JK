@@ -79,10 +79,19 @@ namespace JK.Chat
             }
         }
 
-
-        public async Task<PagedResultDto<ChatMessageDto>> GetMessages(GetMessagesInput input)
+        public async Task<PagedResultDto<ChatMessageDto>> GetNewMessages(GetNewMessagesInput input)
         {
-            var query = _chatMessageRepository.GetAll().Where(msg => msg.GroupId == input.GroupId && msg.Id > input.LastReceivedMessageId);
+            var query = _chatMessageRepository.GetAll()
+                .Where(msg => msg.GroupId == input.GroupId && msg.Id > input.LastReceivedMessageId);
+            int totalCount = await query.CountAsync();
+            var list = await query.OrderBy(input.Sorting).PageBy(input).ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
+            return new PagedResultDto<ChatMessageDto>(totalCount, ObjectMapper.Map<List<ChatMessageDto>>(list));
+        }
+
+        public async Task<PagedResultDto<ChatMessageDto>> GetOldMessages(GetNewMessagesInput input)
+        {
+            var query = _chatMessageRepository.GetAll()
+               .Where(msg => msg.GroupId == input.GroupId && msg.Id < input.LastReceivedMessageId);
             int totalCount = await query.CountAsync();
             var list = await query.OrderBy(input.Sorting).PageBy(input).ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
             return new PagedResultDto<ChatMessageDto>(totalCount, ObjectMapper.Map<List<ChatMessageDto>>(list));

@@ -100,6 +100,8 @@ chat.dataType = {
         new DataView(buffer).setInt16(0, 256, true);
         return new Int16Array(buffer)[0] === 256;
     })();
+
+    chat.readyState = 3;
     chat.init = function () {
         var scheme = document.location.protocol === "https:" ? "wss" : "ws";
         var port = document.location.port ? (":" + document.location.port) : "";
@@ -107,10 +109,12 @@ chat.dataType = {
         var connectionUrl = scheme + "://" + document.location.hostname + port + "/chatws";
         var ws = new ReconnectingWebSocket(connectionUrl, null, { binaryType: "arraybuffer" });
         ws.onconnecting = function (event) {
+            chat.readyState = ws.readyState;
             console.log("onconnecting", ws.readyState);
             abp.event.trigger("websocket.onconnecting", event);
         };
         ws.onopen = function (event) {
+            chat.readyState = ws.readyState;
             abp.event.trigger("websocket.onopen", event);
             console.log("onopen", ws.readyState);
         };
@@ -128,6 +132,7 @@ chat.dataType = {
 
         };
         ws.onclose = function (event) {
+            chat.readyState = ws.readyState;
             abp.event.trigger("websocket.onclose", event);
             console.log("onclose", ws.readyState);
         };
@@ -155,6 +160,7 @@ chat.dataType = {
 
     chat.receiveCommand = function (data) {
         var receive = [];
+        var length = 0;
         receive = receive.concat(Array.from(new Uint8Array(data)));
         var dv = new DataView(data);
         var commandType = dv.getInt32(0, chat.littleEndian);
@@ -164,6 +170,8 @@ chat.dataType = {
             return;
         }
         var bytes = receive.slice(9, length + 9);
+        console.log(length);
+        console.log(receive.length);
         return { commandType: commandType, dataType: dataType, data: bytes };
     };
 

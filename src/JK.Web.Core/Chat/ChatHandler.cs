@@ -68,7 +68,7 @@ namespace JK.Chat
                     var oldLastId = lastId;
                     do
                     {
-                        var list = await chatAppService.GetMessages(new GetMessagesInput
+                        var list = await chatAppService.GetNewMessages(new GetNewMessagesInput
                         {
                             GroupId = messageInput.GroupId,
                             UserId = messageInput.UserId,
@@ -100,6 +100,8 @@ namespace JK.Chat
                     break;
                 case CommandType.GetMessage:
                     var getMessageInput = DeserializeFromBytes<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);
+
+                    await chatAppService.GetNewMessages(new GetNewMessagesInput { MaxResultCount=100,SkipCount=0,  });
                     break;
                 case CommandType.PinMessageToTop:
                     var pinMessageToTopInput = DeserializeFromBytes<PinMessageToTopInput>(receivedMessage.DataType, receivedMessage.Data);
@@ -193,7 +195,7 @@ namespace JK.Chat
                     value = jsonString.FromJsonString<T>();
                     break;
                 case MessageDataType.MessagePack:
-                    value = LZ4MessagePackSerializer.Deserialize<T>(data);
+                    value = MessagePackSerializer.Deserialize<T>(data);
                     break;
                 case MessageDataType.Protobuf:
                     using (var ms = new MemoryStream())
@@ -227,7 +229,7 @@ namespace JK.Chat
                     bytes = obj.ToJsonString().ToBytes();
                     break;
                 case MessageDataType.MessagePack:
-                    bytes = LZ4MessagePackSerializer.Serialize(obj);
+                    bytes = MessagePackSerializer.Serialize(obj);
                     break;
                 case MessageDataType.Protobuf:
                     using (var ms = new MemoryStream())
@@ -258,7 +260,7 @@ namespace JK.Chat
                     value = obj.ToJsonString();
                     break;
                 case MessageDataType.MessagePack:
-                    var bytes = LZ4MessagePackSerializer.Serialize(obj);
+                    var bytes = MessagePackSerializer.Serialize(obj);
                     value = bytes.GetString();
                     break;
                 case MessageDataType.Protobuf:

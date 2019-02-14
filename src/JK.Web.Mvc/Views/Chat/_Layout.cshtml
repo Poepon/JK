@@ -1,0 +1,108 @@
+﻿@using System.Globalization
+@using Abp.Configuration.Startup
+@using Abp.Web.Mvc.Alerts
+@using Abp.Web.Security.AntiForgery
+@using JK
+@using JK.Configuration
+@using JK.Web.Resources
+@using JK.Web.Views.Shared.Components.SideBarNav
+@using JK.Web.Views.Shared.Components.SideBarUserArea
+@using JK.Web.Views.Shared.Components.TopBarLanguageSwitch
+@using JK.Web.Views.Shared.Components.RightSideBar
+@inject JK.Timing.AppTimes AppTimes
+@inject IAbpAntiForgeryManager AbpAntiForgeryManager
+@inject IMultiTenancyConfig MultiTenancyConfig
+@inject IWebResourceManager WebResourceManager
+@inject IAlertManager AlertManager
+@{
+    Layout = null;
+    AbpAntiForgeryManager.SetCookie(Context);
+    var uiTheme = await SettingManager.GetSettingValueAsync(AppSettingNames.UiTheme);
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="~/favicon.ico">
+    <title>JK</title>
+    <link href="~/fonts/roboto/roboto.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/fonts/material-icons/materialicons.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/lib/famfamfam-flags/dist/sprite/famfamfam-flags.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/lib/font-awesome/css/font-awesome.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/lib/animate.css/animate.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/materialize.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/style.css" rel="stylesheet" asp-append-version="true">
+    <link href="~/css/themes/all-themes.css" rel="stylesheet" asp-append-version="true" />
+    <!-- View specific styles -->
+    @RenderSection("styles", required: false)
+    <script type="text/javascript">
+        // This is used to get the application's root path from javascript. It's useful if you're running application in a virtual directory under IIS.
+        var abp = abp || {};
+        abp.appPath = '@ApplicationPath';
+    </script>
+</head>
+<body class="@("theme-" + uiTheme)">
+    <!-- Overlay For Sidebars -->
+    <div class="overlay"></div>
+    <!-- #END# Overlay For Sidebars -->
+    <!-- Top Bar -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a href="javascript:void(0);" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false"></a>
+                <a href="javascript:void(0);" class="bars"></a>
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index"><i class="fa fa-cubes"></i> JK</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    @await Component.InvokeAsync(typeof(SideBarUserAreaViewComponent))
+                    @*@await Component.InvokeAsync(typeof(TopBarLanguageSwitchViewComponent))*@
+                    <li class="pull-right"><a href="javascript:void(0);" class="js-right-sidebar" data-close="true"><i class="material-icons">more_vert</i></a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- #Top Bar -->
+    <section>
+        @await Component.InvokeAsync(typeof(RightSideBarViewComponent))
+    </section>
+    <section class="content">
+        <div class="container-fluid">
+            @if (AlertManager.Alerts.Any())
+            {
+                <div id="AbpPageAlerts">
+                    @foreach (var alertMessage in AlertManager.Alerts)
+                    {
+                        <div class="alert alert-@alertMessage.Type.ToString().ToLower() @(alertMessage.Dismissible ? "alert-dismisable" : "")" role="alert">
+                            <h4 class="alert-heading">
+                                @alertMessage.Title
+                                @if (alertMessage.Dismissible)
+                                {
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                }
+                            </h4>
+                            <p>@alertMessage.Text</p>
+                        </div>
+                    }
+                </div>
+            }
+            @RenderBody()
+        </div>
+    </section>
+    <script asp-append-version="true" src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.js" asp-append-version="true"></script>
+    <script asp-append-version="true" src="~/lib/abp-web-resources/Abp/Framework/scripts/abp.js"></script>
+    <script asp-append-version="true" src="~/lib/abp-web-resources/Abp/Framework/scripts/libs/abp.jquery.js"></script>
+    <script asp-append-version="true" src="~/js/main.js"></script>
+    @WebResourceManager.RenderScripts()
+    @WebResourceManager.RenderScriptContents()
+    <!-- View specific scripts -->
+    @RenderSection("scripts", required: false)
+</body>
+</html>

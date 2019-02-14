@@ -4,20 +4,22 @@
 }
 @section scripts
     {
-    <environment names="Staging,Development">
-        <script src="~/lib/websocket/reconnecting-websocket.js" asp-append-version="true"></script>
-        <script src="~/lib/msgpack/msgpack.min.js" asp-append-version="true"></script>
-        <script src="~/view-resources/Views/Chat/chatWebSocket.js"></script>
-        <script src="~/view-resources/Views/Chat/Index.js" asp-append-version="true"></script>
-    </environment>
-    <environment names="Production">
-        <script src="~/lib/websocket/reconnecting-websocket.min.js" asp-append-version="true"></script>
-        <script src="~/lib/msgpack/msgpack.min.js" asp-append-version="true"></script>
-        <script src="~/view-resources/Views/Chat/chatWebSocket.min.js" asp-append-version="true"></script>
-        <script src="~/view-resources/Views/Chat/Index.min.js" asp-append-version="true"></script>
-    </environment>
+<environment names="Staging,Development">
+    <script src="https://vuejs.org/js/vue.js"></script>
+    <script src="~/lib/websocket/reconnecting-websocket.js" asp-append-version="true"></script>
+    <script src="~/lib/msgpack/msgpack.min.js" asp-append-version="true"></script>
+    <script src="~/view-resources/Views/Chat/chatWebSocket.js"></script>
+    <script src="~/view-resources/Views/Chat/Index.js" asp-append-version="true"></script>
+</environment>
+<environment names="Production">
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="~/lib/websocket/reconnecting-websocket.min.js" asp-append-version="true"></script>
+    <script src="~/lib/msgpack/msgpack.min.js" asp-append-version="true"></script>
+    <script src="~/view-resources/Views/Chat/chatWebSocket.min.js" asp-append-version="true"></script>
+    <script src="~/view-resources/Views/Chat/Index.min.js" asp-append-version="true"></script>
+</environment>
 }
-<div class="row clearfix">
+<div class="row clearfix" id="chatApp">
     <br />
     <div class="col-xs-12 col-sm-3">
         <div class="card" style="height:85vh">
@@ -43,35 +45,10 @@
 
                     <div class="tab-content">
                         <div class="tab-pane active" id="SessionsTab" role="tabpanel">
-                            <div class="list-group">
-                                <a href="#" class="list-group-item">
-                                    <div class="media">
-                                        <div class="media-left">
-                                            <img src="~/images/user.png" class="img-circle">
-                                        </div>
-                                        <div class="media-body">
-                                            <h4 class="media-heading">张一疯</h4>
-                                            <span>Hi,Can i help you ?</span>
-                                        </div>
-                                        <div class="media-right">
-                                            <span class="right">Fri</span>
-                                            <span class="badge bg-pink">14</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
+                            <vue-groups-container v-bind:groups="groups" v-bind:currentgroup="currentgroup"></vue-groups-container>
                         </div>
                         <div class="tab-pane" id="FriendsTab" role="tabpanel">
-                            <div class="list-group">
-                                <a href="#" class="list-group-item">
-                                    <img src="~/images/user.png" class="img-circle">
-                                    <span>张一疯</span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <img src="~/images/user.png" class="img-circle">
-                                    <span>张三疯</span>
-                                </a>
-                            </div>
+                            <vue-friends-container v-bind:friends="friends"></vue-friends-container>
                         </div>
                     </div>
                 </div>
@@ -79,48 +56,7 @@
         </div>
     </div>
     <div class="col-xs-12 col-sm-9">
-        <div class="card" style="height:85vh">
-            <div class="header">
-                FriendName or GroupName
-                <button type="button" id="btnOpen" class="btn btn-primary">上线</button>
-                <button type="button" id="btnClose" class="btn btn-primary">下线</button>
-            </div>
-            <div class="body">
-                <div class="panel" style="height:65vh">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <div class="media">
-                                <div class="media-left">
-                                    <a href="#">
-                                        <img src="~/images/user.png" class="img-circle">
-                                    </a>
-                                </div>
-                                <div class="media-body">
-                                    <h4 class="media-heading">&nbsp;</h4>
-                                    <span>Hi,Can i help you ?</span>
-                                </div>
-                                <div class="media-right">
-                                    <time datetime="@DateTime.Now"></time>
-                                    @*<i class="material-icons col-green">done</i>*@
-                                    <i class="material-icons col-green">done_all</i>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-                <div class="panel">
-                    <div class="input-group">
-                        <input type="text" id="message" name="message" class="form-control" placeholder="Write a message..." />
-                        <span class="input-group-btn">
-                            <input type="button" id="btnSend" class="btn btn-primary" value="Send" />
-                        </span>
-
-                    </div>
-
-
-                </div>
-            </div>
-        </div>
+        <vue-messages-container v-bind:currentgroup="currentgroup" v-bind:messages="messages" v-bind:readystate="readystate"></vue-messages-container>
     </div>
 </div>
 
@@ -153,3 +89,77 @@
         </div>
     </div>
 </div>
+
+<script type="x-template" id="groupsContainerTemplate">
+    <div class="list-group" id="sessionsContainer">
+        <a v-for="group in groups" href="#" class="list-group-item" v-bind:class="{active:group.isCurrent}" v-on:click="changeGroup(currentgroup,group);">
+            <div class="media">
+                <div class="media-left">
+                    <img :src="group.ico" class="img-circle">
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading">{{group.gname}}</h4>
+                    <span>{{group.lstmsg}}</span>
+                </div>
+                <div class="media-right">
+                    <span class="right">{{group.lsttime}}</span>
+                    <span class="badge bg-pink">{{group.unread}}</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</script>
+
+<script type="x-template" id="friendsContainerTemplate">
+    <div class="list-group" id="friendsContainer">
+        <a v-for="friend in friends" href="#" class="list-group-item" v-on:click="goChat">
+            <img :src="friend.ico" class="img-circle">
+            <span>{{friend.uname}}</span>
+        </a>
+    </div>
+</script>
+
+<script type="x-template" id="messagesContainerTemplate">
+    <div class="card" style="height:85vh" id="messagesContainer">
+        <div class="header">
+
+            <ul class="header-dropdown m-r-10">
+                <li class="dropdown">
+                    <button type="button" id="btnOpen" v-on:click="chat.online();" v-if="readystate==3" class="btn btn-primary">上线</button>
+                    <button type="button" id="btnClose" v-on:click="chat.offline();" v-else class="btn btn-primary">下线</button>
+                </li>
+            </ul>
+        </div>
+        <div class="body">
+            <div class="panel" style="height:65vh;overflow-y:auto;">
+                <ul class="list-group">
+                    <li v-for="item in messages" class="list-group-item">
+                        <div class="media">
+                            <div class="media-left">
+                                <a href="#">
+                                    <img src="/images/user.png" class="img-circle">
+                                </a>
+                            </div>
+                            <div class="media-body">
+                                <h4 class="media-heading"><span>{{item.uname}}</span></h4>
+                                <span>{{item.msg}}</span>
+                            </div>
+                            <div class="media-right">
+                                <time :datetime="item.time">{{item.time}}</time>
+                                <i class="material-icons col-green">{{item.s==2?"done_all":"done"}}</i>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="panel">
+                <div class="input-group">
+                    <input type="text" id="message" v-on:keyup.enter="sendMessage" name="message" class="form-control" placeholder="Write a message..." />
+                    <span class="input-group-btn">
+                        <input type="button" id="btnSend" v-on:click="sendMessage" class="btn btn-primary" value="Send" />
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>

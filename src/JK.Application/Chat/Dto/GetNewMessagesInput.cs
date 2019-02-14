@@ -3,7 +3,7 @@ using Abp.Runtime.Validation;
 
 namespace JK.Chat.Dto
 {
-    public class GetMessagesInput : PagedAndSortedResultRequestDto, IShouldNormalize
+    public class GetNewMessagesInput : PagedAndSortedResultRequestDto, IShouldNormalize
     {
         public long GroupId { get; set; }
 
