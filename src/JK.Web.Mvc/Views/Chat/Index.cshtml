@@ -5,7 +5,7 @@
 @section scripts
     {
 <environment names="Staging,Development">
-    <script src="https://vuejs.org/js/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.6/dist/vue.js"></script>
     <script src="~/lib/websocket/reconnecting-websocket.js" asp-append-version="true"></script>
     <script src="~/lib/msgpack/msgpack.min.js" asp-append-version="true"></script>
     <script src="~/view-resources/Views/Chat/chatWebSocket.js"></script>
@@ -56,7 +56,7 @@
         </div>
     </div>
     <div class="col-xs-12 col-sm-9">
-        <vue-messages-container v-bind:currentgroup="currentgroup" v-bind:messages="messages" v-bind:readystate="readystate"></vue-messages-container>
+        <vue-messages-container v-bind:loginuid="@AbpSession.UserId.GetValueOrDefault()" v-bind:currentgroup="currentgroup" v-bind:messages="messages" v-bind:readystate="readystate"></vue-messages-container>
     </div>
 </div>
 
@@ -92,7 +92,7 @@
 
 <script type="x-template" id="groupsContainerTemplate">
     <div class="list-group" id="sessionsContainer">
-        <a v-for="group in groups" href="#" class="list-group-item" v-bind:class="{active:group.isCurrent}" v-on:click="changeGroup(currentgroup,group);">
+        <a v-for="group in groups" href="#" class="list-group-item" v-bind:class="{active:group.isCurrent}" v-on:click="changeGroup(group);">
             <div class="media">
                 <div class="media-left">
                     <img :src="group.ico" class="img-circle">
@@ -122,18 +122,19 @@
 <script type="x-template" id="messagesContainerTemplate">
     <div class="card" style="height:85vh" id="messagesContainer">
         <div class="header">
-
+            &nbsp; {{currentgroup.gname}}
             <ul class="header-dropdown m-r-10">
                 <li class="dropdown">
-                    <button type="button" id="btnOpen" v-on:click="chat.online();" v-if="readystate==3" class="btn btn-primary">上线</button>
-                    <button type="button" id="btnClose" v-on:click="chat.offline();" v-else class="btn btn-primary">下线</button>
+                    <button type="button" id="btnOpen" v-on:click="online" v-if="readystate==3" class="btn btn-primary">上线</button>
+                    <button type="button" v-else-if="readystate==0" class="btn btn-primary">连接中</button>
+                    <button type="button" id="btnClose" v-on:click="offline" v-else class="btn btn-primary">下线</button>
                 </li>
             </ul>
         </div>
         <div class="body">
-            <div class="panel" style="height:65vh;overflow-y:auto;">
+            <div class="panel" style="height:65vh;overflow-y:auto;" ref="messagespanel">
                 <ul class="list-group">
-                    <li v-for="item in messages" class="list-group-item">
+                    <li v-for="item in messages" class="list-group-item" >
                         <div class="media">
                             <div class="media-left">
                                 <a href="#">
@@ -142,7 +143,7 @@
                             </div>
                             <div class="media-body">
                                 <h4 class="media-heading"><span>{{item.uname}}</span></h4>
-                                <span>{{item.msg}}</span>
+                                <span :class="{right:item.uid==loginuid}">{{item.msg}}</span>
                             </div>
                             <div class="media-right">
                                 <time :datetime="item.time">{{item.time}}</time>
@@ -153,10 +154,10 @@
                 </ul>
             </div>
             <div class="panel">
-                <div class="input-group">
-                    <input type="text" id="message" v-on:keyup.enter="sendMessage" name="message" class="form-control" placeholder="Write a message..." />
+                <div class="input-group" v-if="currentgroup.gid">
+                    <input type="text" v-model="message" id="message" v-on:keyup.enter="sendMessage();" name="message" class="form-control" placeholder="Write a message..." />
                     <span class="input-group-btn">
-                        <input type="button" id="btnSend" v-on:click="sendMessage" class="btn btn-primary" value="Send" />
+                        <input type="button" id="btnSend" v-on:click="sendMessage();" class="btn btn-primary" value="Send" />
                     </span>
                 </div>
             </div>

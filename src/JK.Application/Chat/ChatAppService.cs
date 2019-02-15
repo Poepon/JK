@@ -81,20 +81,42 @@ namespace JK.Chat
 
         public async Task<PagedResultDto<ChatMessageDto>> GetNewMessages(GetNewMessagesInput input)
         {
-            var query = _chatMessageRepository.GetAll()
+            var query = _chatMessageRepository.GetAllIncluding(msg => msg.User)
                 .Where(msg => msg.GroupId == input.GroupId && msg.Id > input.LastReceivedMessageId);
             int totalCount = await query.CountAsync();
-            var list = await query.OrderBy(input.Sorting).PageBy(input).ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
-            return new PagedResultDto<ChatMessageDto>(totalCount, ObjectMapper.Map<List<ChatMessageDto>>(list));
+            var list = await query.OrderBy(input.Sorting).PageBy(input)
+                .Select(x => new ChatMessageDto
+                {
+                    Id = x.Id,
+                    GroupId = x.GroupId,
+                    UserId = x.UserId,
+                    UserNmae = x.User.UserName,
+                    Message = x.Message,
+                    CreationTime = x.CreationTime,
+                    ReadState = x.ReadState
+                })
+                .ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
+            return new PagedResultDto<ChatMessageDto>(totalCount, list);
         }
 
-        public async Task<PagedResultDto<ChatMessageDto>> GetOldMessages(GetNewMessagesInput input)
+        public async Task<PagedResultDto<ChatMessageDto>> GetOldMessages(GetOldMessagesInput input)
         {
-            var query = _chatMessageRepository.GetAll()
+            var query = _chatMessageRepository.GetAllIncluding(msg => msg.User)
                .Where(msg => msg.GroupId == input.GroupId && msg.Id < input.LastReceivedMessageId);
             int totalCount = await query.CountAsync();
-            var list = await query.OrderBy(input.Sorting).PageBy(input).ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
-            return new PagedResultDto<ChatMessageDto>(totalCount, ObjectMapper.Map<List<ChatMessageDto>>(list));
+            var list = await query.OrderBy(input.Sorting).PageBy(input)
+                  .Select(x => new ChatMessageDto
+                  {
+                      Id = x.Id,
+                      GroupId = x.GroupId,
+                      UserId = x.UserId,
+                      UserNmae = x.User.UserName,
+                      Message = x.Message,
+                      CreationTime = x.CreationTime,
+                      ReadState = x.ReadState
+                  })
+                .ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
+            return new PagedResultDto<ChatMessageDto>(totalCount, list);
         }
 
         public async Task JoinGroup(ChatGroupInputBase input)

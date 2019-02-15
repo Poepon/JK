@@ -4,14 +4,14 @@
             props: ['groups', "currentgroup"],
             template: "#groupsContainerTemplate",
             methods: {
-                changeGroup: function (oldgroup, newgroup) {
-                    if (oldgroup !== newgroup) {
-                        if (oldgroup) {
-                            oldgroup.isCurrent = false;
+                changeGroup: function (newgroup) {
+                    if (this.currentgroup.gid !== newgroup.gid) {
+                        for (var i = 0; i < this.groups.length; i++) {
+                            if (this.groups[i].isCurrent)
+                                this.groups[i].isCurrent = false;
                         }
                         newgroup.isCurrent = true;
-                        currentgroup = newgroup;
-                        console.log("changeGroup todo", currentgroup);
+                        this.$root.currentgroup = newgroup;
                     }
                 }
             }
@@ -26,22 +26,31 @@
             }
         });
         Vue.component('vue-messages-container', {
-            props: ['currentgroup', 'readystate', 'messages'],
+            props: ['currentgroup', 'readystate', 'messages',"loginuid"],
             template: "#messagesContainerTemplate",
+            data: function () {
+                return { message: "" };
+            },
             methods: {
                 sendMessage: function () {
-                    var messagetext = $("#message").val();
-                    if (messagetext.trim() === "") {
+                    if (this.message.trim() === "") {
                         return;
                     }
                     var messagedto = {
-                        gid: 1,
+                        gid: this.currentgroup.gid,
                         uid: 1,
-                        msg: messagetext
+                        msg: this.message
                     };
                     var bytes = serializeMsgPack(messagedto);
                     chat.sendCommand(chat.commandType.SendMessage, chat.dataType.MessagePack, bytes);
-                    $("#message").val("");
+                    this.message = "";
+                    this.$refs.messagespanel.scrollBy(0, this.$refs.messagespanel.scrollHeight);
+                },
+                online: function () {
+                    chat.online();
+                },
+                offline: function () {
+                    chat.offline();
                 }
             }
         });
@@ -66,7 +75,7 @@
                         lstmsg: "hello,nice to meet you.",
                         lsttime: "2019-02-14 14:23",
                         unread: 99,
-                        isCurrent: true
+                        isCurrent: false
                     },
                     {
                         gid: 2,
@@ -81,11 +90,26 @@
             },
             methods: {
 
+            },
+            watch: {
+                currentgroup: function (val, oldval) {
+                    this.messages = [];
+                    var commanddto = {
+                        gid: val.gid,
+                        mid:0
+                    };
+                  
+                    var bytes = serializeMsgPack(commanddto);
+                    chat.sendCommand(chat.commandType.GetMessage, chat.dataType.MessagePack, bytes);
+                }
             }
         });
 
         abp.event.on("websocket.onopen", function (data) {
             chatApp.readystate = 1;
+        });
+        abp.event.on("websocket.onconnecting", function (data) {
+            chatApp.readystate = 0;
         });
         abp.event.on("websocket.onclose", function (data) {
             chatApp.readystate = 3;

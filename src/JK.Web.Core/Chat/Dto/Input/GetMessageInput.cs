@@ -1,15 +1,20 @@
-﻿namespace JK.Chat.Dto.Input
+﻿using MessagePack;
+
+namespace JK.Chat.Dto.Input
 {
+    [MessagePackObject]
     public class GetMessageInput
     {
-        public long UserId { get; set; }
-
+        [Key("gid")]
         public long GroupId { get; set; }
 
+        [Key("mid")]
         public long MessageId { get; set; }
 
+        [Key("d")]
         public QueryDirection Direction { get; set; }
 
+        [Key("c")]
         public int TakeCount { get; set; }
     }
 }

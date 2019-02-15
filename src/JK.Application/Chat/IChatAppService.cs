@@ -11,6 +11,8 @@ namespace JK.Chat
 
         Task<PagedResultDto<ChatMessageDto>> GetNewMessages(GetNewMessagesInput input);
 
+        Task<PagedResultDto<ChatMessageDto>> GetOldMessages(GetOldMessagesInput input);
+
         Task CreatePrivate(CreatePrivateInput input);
 
         Task CreateGroup(CreateGroupInput input);

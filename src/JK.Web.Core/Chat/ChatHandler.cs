@@ -57,51 +57,93 @@ namespace JK.Chat
                     var typingInput = DeserializeFromBytes<TypingInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.SendMessage:
-                    var messageInput = DeserializeFromBytes<SendMessageModel>(receivedMessage.DataType, receivedMessage.Data);
-                    await chatAppService.SendMessage(messageInput.MapTo<SendMessageInput>());
-                    //trigger publish
-                    var lastId = await chatAppService.GetLastReceivedMessageId(new ChatGroupInputBase
                     {
-                        GroupId = messageInput.GroupId,
-                        UserId = messageInput.UserId
-                    });
-                    var oldLastId = lastId;
-                    do
-                    {
-                        var list = await chatAppService.GetNewMessages(new GetNewMessagesInput
+                        var messageInput = DeserializeFromBytes<SendMessageModel>(receivedMessage.DataType, receivedMessage.Data);
+                        await chatAppService.SendMessage(new SendMessageInput
                         {
                             GroupId = messageInput.GroupId,
-                            UserId = messageInput.UserId,
-                            LastReceivedMessageId = lastId,
-                            MaxResultCount = 50,
-                            SkipCount = 0,
-                            Sorting = "Id"
+                            Message = messageInput.Message,
+                            UserId = AbpSession.GetUserId()
                         });
-                        if (list.TotalCount > 0)
-                        {
-                            var dtos = list.Items.Select(x => x.MapTo<ChatMessageOutput>()).ToArray();
-                            await SendMsgPackAsync(socket, CommandType.GetMessage, dtos);
-                            lastId = list.Items.Max(x => x.Id);
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    } while (true);
-                    if (lastId > oldLastId)
-                    {
-                        await chatAppService.SetLastReceivedMessageId(new SetLastReceivedIdInput
+                        //trigger publish
+                        var lastId = await chatAppService.GetLastReceivedMessageId(new ChatGroupInputBase
                         {
                             GroupId = messageInput.GroupId,
-                            UserId = messageInput.UserId,
-                            LastReceivedMessageId = lastId
+                            UserId = AbpSession.GetUserId()
                         });
+                        var oldLastId = lastId;
+                        do
+                        {
+                            var list = await chatAppService.GetNewMessages(new GetNewMessagesInput
+                            {
+                                GroupId = messageInput.GroupId,
+                                UserId = AbpSession.GetUserId(),
+                                LastReceivedMessageId = lastId,
+                                MaxResultCount = 50,
+                                SkipCount = 0,
+                                Sorting = "Id"
+                            });
+                            if (list.TotalCount > 0)
+                            {
+                                var dtos = list.Items.Select(x => x.MapTo<ChatMessageOutput>()).ToArray();
+                                await SendMsgPackAsync(socket, CommandType.GetMessage, dtos);
+                                lastId = list.Items.Max(x => x.Id);
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        } while (true);
+                        if (lastId > oldLastId)
+                        {
+                            await chatAppService.SetLastReceivedMessageId(new SetLastReceivedIdInput
+                            {
+                                GroupId = messageInput.GroupId,
+                                UserId = AbpSession.GetUserId(),
+                                LastReceivedMessageId = lastId
+                            });
+                        }
                     }
                     break;
                 case CommandType.GetMessage:
-                    var getMessageInput = DeserializeFromBytes<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);
+                    {
+                        ChatMessageOutput[] list = null;
+                        var getMessageInput = DeserializeFromBytes<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);
+                        if (getMessageInput.MessageId == 0)
+                        {
+                            var lastId = await chatAppService.GetLastReceivedMessageId(new ChatGroupInputBase
+                            {
+                                GroupId = getMessageInput.GroupId,
+                                UserId = AbpSession.GetUserId()
+                            });
+                            var oldMessages = await chatAppService.GetOldMessages(new GetOldMessagesInput
+                            {
+                                MaxResultCount = 100,
+                                SkipCount = 0,
+                                LastReceivedMessageId = lastId,
+                                GroupId = getMessageInput.GroupId,
+                                UserId = AbpSession.GetUserId()
+                            });
 
-                    await chatAppService.GetNewMessages(new GetNewMessagesInput { MaxResultCount=100,SkipCount=0,  });
+                            var newMessages = await chatAppService.GetNewMessages(new GetNewMessagesInput
+                            {
+                                MaxResultCount = 100,
+                                SkipCount = 0,
+                                LastReceivedMessageId = lastId,
+                                GroupId = getMessageInput.GroupId,
+                                UserId = AbpSession.GetUserId()
+                            });
+                            list = oldMessages.Items.OrderBy(item => item.Id).Concat(newMessages.Items)
+                                .Select(msg => msg.MapTo<ChatMessageOutput>())
+                                .ToArray();
+                            await SendMsgPackAsync(socket, CommandType.GetMessage, list);
+                        }
+                        else
+                        {
+
+                        }
+
+                    }
                     break;
                 case CommandType.PinMessageToTop:
                     var pinMessageToTopInput = DeserializeFromBytes<PinMessageToTopInput>(receivedMessage.DataType, receivedMessage.Data);

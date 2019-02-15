@@ -10,6 +10,8 @@ namespace JK.Chat.Dto
     {
         public long UserId { get; set; }
 
+        public string UserNmae { get; set; }
+
         public long GroupId { get; set; }
 
         [StringLength(ChatMessage.MaxMessageLength)]
