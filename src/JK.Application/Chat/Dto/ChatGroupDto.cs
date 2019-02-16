@@ -13,7 +13,7 @@ namespace JK.Chat.Dto
 
         public ChatGroupType GroupType { get; set; }
 
-        public long? CreatorUserId { get; set; }
+        public long CreatorUserId { get; set; }
 
         public long CreationTime { get; set; }
 

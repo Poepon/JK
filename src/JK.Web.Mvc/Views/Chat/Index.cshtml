@@ -92,17 +92,17 @@
 
 <script type="x-template" id="groupsContainerTemplate">
     <div class="list-group" id="sessionsContainer">
-        <a v-for="group in groups" href="#" class="list-group-item" v-bind:class="{active:group.isCurrent}" v-on:click="changeGroup(group);">
+        <a v-for="group in groups" href="#" class="list-group-item" v-bind:class="{active:group.cur}" v-on:click="changeGroup(group);">
             <div class="media">
                 <div class="media-left">
                     <img :src="group.ico" class="img-circle">
                 </div>
                 <div class="media-body">
-                    <h4 class="media-heading">{{group.gname}}</h4>
+                    <h4 class="media-heading">{{group.gn}}</h4>
                     <span>{{group.lstmsg}}</span>
                 </div>
                 <div class="media-right">
-                    <span class="right">{{group.lsttime}}</span>
+                    <span class="right">{{group.lsttime | grouptime}}</span>
                     <span class="badge bg-pink">{{group.unread}}</span>
                 </div>
             </div>
@@ -141,7 +141,7 @@
                                     <img src="/images/user.png" class="img-circle">
                                 </a>
                             </div>
-                            <div class="media-body">
+                            <div class="media-body" style="width:80%">
                                 <h4 class="media-heading" v-if="item.uid!=loginuid"><span>{{item.uname}}</span></h4>
                                 <span :class="{right:item.uid==loginuid}">{{item.msg}}</span>
                             </div>

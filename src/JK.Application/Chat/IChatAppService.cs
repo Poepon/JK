@@ -30,5 +30,7 @@ namespace JK.Chat
         Task SetLastReceivedMessageId(SetLastReceivedIdInput input);
 
         Task SetLastReadMessageId(SetLastReadIdInput input);
+
+        Task<ListResultDto<ChatGroupDto>> GetUserGroups(GetUserGroupsInput input);
     }
 }

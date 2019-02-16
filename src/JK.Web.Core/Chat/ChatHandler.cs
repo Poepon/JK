@@ -154,6 +154,14 @@ namespace JK.Chat
                 case CommandType.ReadMessage:
                     var readMessageInput = DeserializeFromBytes<ReadMessageInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
+                case CommandType.CreatePrivate:
+                    var createPrivateInput = DeserializeFromBytes<Dto.Input.CreatePrivateInput>(receivedMessage.DataType, receivedMessage.Data);
+                    await chatAppService.CreatePrivate(new Dto.CreatePrivateInput
+                    {
+                        CreatorUserId = AbpSession.GetUserId(),
+                        TargetUserId = createPrivateInput.TargetUserId
+                    });
+                    break;
                 case CommandType.CreateGroup:
                     var createGroupInput = DeserializeFromBytes<Dto.Input.CreateGroupInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
@@ -167,7 +175,28 @@ namespace JK.Chat
                     var leaveGroupInput = DeserializeFromBytes<LeaveGroupInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.GetGroups:
-                    var getGroupsInput = DeserializeFromBytes<GetGroupsInput>(receivedMessage.DataType, receivedMessage.Data);
+                    {
+                        var groups = await chatAppService.GetUserGroups(
+                          new GetUserGroupsInput
+                          {
+                              UserId = AbpSession.GetUserId()
+                          });
+                        var dtos = groups.Items.Select(x => new ChatGroupOutput
+                        {
+                            CreationTime = x.CreationTime,
+                            CreatorUserId = x.CreatorUserId,
+                            GroupType = x.GroupType,
+                            Id = x.Id,
+                            Name = x.Name,
+                            Status = x.Status,
+                            Unread = 88,
+                            IsCurrent = false,
+                            Icon = "/images/user.png",
+                            LastMessage = "Hi,thie is a test.",
+                            LastTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+                        }).ToArray();
+                        await SendMsgPackAsync(socket, CommandType.GetGroups, dtos);
+                    }
                     break;
                 case CommandType.PinToTop:
                     var pinToTopInput = DeserializeFromBytes<PinToTopInput>(receivedMessage.DataType, receivedMessage.Data);

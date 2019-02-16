@@ -1,5 +1,9 @@
 ﻿(function () {
     $(function () {
+        Vue.filter('grouptime', function (value) {
+            if (!value) return '';
+            return moment(value).format("ddd,HH:mm");
+        });
         Vue.filter('timeago', function (value) {
             if (!value) return '';
             return moment(value).fromNow();
@@ -11,10 +15,10 @@
                 changeGroup: function (newgroup) {
                     if (this.currentgroup.gid !== newgroup.gid) {
                         for (var i = 0; i < this.groups.length; i++) {
-                            if (this.groups[i].isCurrent)
-                                this.groups[i].isCurrent = false;
+                            if (this.groups[i].cur)
+                                this.groups[i].cur = false;
                         }
-                        newgroup.isCurrent = true;
+                        newgroup.cur = true;
                         this.$root.currentgroup = newgroup;
                     }
                 }
@@ -25,7 +29,9 @@
             template: "#friendsContainerTemplate",
             methods: {
                 goChat: function (uid) {
-                    console.log("goChat todo");
+                    var commanddto = { tgid: uid };
+                    var bytes = serializeMsgPack(commanddto);
+                    chat.sendCommand(chat.commandType.CreateGroup, chat.dataType.MessagePack, bytes);
                 }
             }
         });
@@ -37,6 +43,9 @@
             },
             methods: {
                 sendMessage: function () {
+                    if (this.readystate !== 1) {
+                        alert("未能连接到服务器，请检查网络后刷新重试。");
+                    }
                     if (this.message.trim() === "") {
                         return;
                     }
@@ -61,7 +70,7 @@
         var chatApp = new Vue({
             el: '#chatApp',
             data: {
-                currentgroup: { gname: "", gid: "" },
+                currentgroup: { gn: "", gid: "" },
                 readystate: 3,
                 friends: [
                     { uid: 1, uname: "张一疯", ico: "/images/user.png" },
@@ -72,29 +81,17 @@
 
                 ],
                 groups: [
-                    {
-                        gid: 1,
-                        gname: "学前班1班",
-                        ico: "/images/user.png",
-                        lstmsg: "hello,nice to meet you.",
-                        lsttime: "2019-02-14 14:23",
-                        unread: 99,
-                        isCurrent: false
-                    },
-                    {
-                        gid: 2,
-                        gname: "学前班2班",
-                        ico: "/images/user.png",
-                        lstmsg: "hello,nice to meet you.",
-                        lsttime: "2019-02-14 14:23",
-                        unread: 99,
-                        isCurrent: false
-                    }
+                    
                 ]
             },
             methods: {
-
+                getGroups: function () {
+                    var commanddto = {};
+                    var bytes = serializeMsgPack(commanddto);
+                    chat.sendCommand(chat.commandType.GetGroups, chat.dataType.MessagePack, bytes);
+                }
             },
+           
             watch: {
                 currentgroup: function (val, oldval) {
                     this.messages = [];
@@ -111,6 +108,7 @@
 
         abp.event.on("websocket.onopen", function (data) {
             chatApp.readystate = 1;
+            chatApp.getGroups();
         });
         abp.event.on("websocket.onconnecting", function (data) {
             chatApp.readystate = 0;
@@ -125,9 +123,15 @@
             var cmddto = chat.receiveCommand(data);
             if (cmddto.dataType === chat.dataType.MessagePack) {
                 var decodedObj = deserializeMsgPack(cmddto.data);
-                if (cmddto.commandType === chat.commandType.GetMessage) {
-                    chatApp.messages = chatApp.messages.concat(decodedObj);
-                }
+                switch (cmddto.commandType) {
+                    case chat.commandType.GetMessage:
+                        chatApp.messages = chatApp.messages.concat(decodedObj);
+                        break;
+                    case chat.commandType.GetGroups:
+                        chatApp.groups = decodedObj;
+                        break;
+                    default:
+                }               
             }
         });
         abp.event.on("websocket.onreceiveblob", function (data) {
@@ -145,7 +149,7 @@
                 default:
             }
         });
-        chat.init();
+        chat.init();     
         $("#message").focus();
     });
 })();

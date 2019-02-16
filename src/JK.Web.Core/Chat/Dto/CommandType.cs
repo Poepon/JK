@@ -66,6 +66,10 @@
 
         #region 群组
         /// <summary>
+        /// 创建私聊
+        /// </summary>
+        CreatePrivate = 300,
+        /// <summary>
         /// 创建群组
         /// </summary>
         CreateGroup = 301,

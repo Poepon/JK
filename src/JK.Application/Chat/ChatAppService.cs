@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Abp.Application.Services.Dto;
+using Abp.Domain.Repositories;
+using Abp.Linq.Extensions;
+using JK.Chat.Dto;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
-using Abp.Application.Services.Dto;
-using Abp.Domain.Repositories;
-using Abp.Linq.Extensions;
-using Abp.Timing;
-using JK.Chat.Dto;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace JK.Chat
 {
@@ -219,6 +218,15 @@ namespace JK.Chat
                 entity.LastReadMessageId = input.LastReadMessageId;
                 await _userChatMessageLogRepository.UpdateAsync(entity);
             }
+        }
+
+        public async Task<ListResultDto<ChatGroupDto>> GetUserGroups(GetUserGroupsInput input)
+        {
+            var list = await _chatGrouppMemberRepository.GetAllIncluding(member => member.ChatGroup)
+                      .Where(member => member.UserId == input.UserId)
+                      .Select(member => member.ChatGroup)
+                      .ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
+            return new ListResultDto<ChatGroupDto>(ObjectMapper.Map<List<ChatGroupDto>>(list));
         }
     }
 }

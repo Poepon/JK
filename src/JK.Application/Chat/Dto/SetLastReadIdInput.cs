@@ -4,4 +4,5 @@
     {
         public long LastReadMessageId { get; set; }
     }
+
 }
