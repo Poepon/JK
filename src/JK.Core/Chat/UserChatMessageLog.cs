@@ -8,6 +8,9 @@ namespace JK.Chat
     {
         public long GroupId { get; set; }
 
+        [ForeignKey("GroupId")]
+        public virtual ChatGroup ChatGroup { get; set; }
+
         public long UserId { get; set; }
 
         public long LastReceivedMessageId { get; set; }

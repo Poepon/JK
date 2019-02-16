@@ -17,7 +17,7 @@ namespace JK.Chat.Dto
         [StringLength(ChatMessage.MaxMessageLength)]
         public string Message { get; set; }
 
-        public DateTime CreationTime { get; set; }
+        public long CreationTime { get; set; }
 
         public ChatMessageReadState ReadState { get; set; }
     }

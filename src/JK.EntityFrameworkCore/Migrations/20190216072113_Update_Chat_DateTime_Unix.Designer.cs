@@ -4,14 +4,16 @@ using JK.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace JK.Migrations
 {
     [DbContext(typeof(JKDbContext))]
-    partial class JKDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190216072113_Update_Chat_DateTime_Unix")]
+    partial class Update_Chat_DateTime_Unix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

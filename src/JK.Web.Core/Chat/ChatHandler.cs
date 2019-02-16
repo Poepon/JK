@@ -85,12 +85,7 @@ namespace JK.Chat
                             });
                             if (list.TotalCount > 0)
                             {
-                                var dtos = list.Items.Select(msg =>
-                                {
-                                    var r = msg.MapTo<ChatMessageOutput>();
-                                    r.Timestamp = msg.CreationTime.ToUnix();
-                                    return r;
-                                }).ToArray();
+                                var dtos = list.Items.Select(msg => msg.MapTo<ChatMessageOutput>()).ToArray();
                                 await SendMsgPackAsync(socket, CommandType.GetMessage, dtos);
                                 lastId = list.Items.Max(x => x.Id);
                             }
@@ -139,12 +134,7 @@ namespace JK.Chat
                                 UserId = AbpSession.GetUserId()
                             });
                             list = oldMessages.Items.OrderBy(item => item.Id).Concat(newMessages.Items)
-                                .Select(msg =>
-                                {
-                                    var r = msg.MapTo<ChatMessageOutput>();
-                                    r.Timestamp = msg.CreationTime.ToUnix();
-                                    return r;
-                                })
+                                .Select(msg => msg.MapTo<ChatMessageOutput>())
                                 .ToArray();
                             await SendMsgPackAsync(socket, CommandType.GetMessage, list);
                         }

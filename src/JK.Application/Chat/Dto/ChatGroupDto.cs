@@ -15,7 +15,7 @@ namespace JK.Chat.Dto
 
         public long? CreatorUserId { get; set; }
 
-        public DateTime CreationTime { get; set; }
+        public long CreationTime { get; set; }
 
         public int Status { get; set; }
     }

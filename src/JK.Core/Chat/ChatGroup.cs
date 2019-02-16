@@ -10,7 +10,7 @@ namespace JK.Chat
     /// 群组
     /// </summary>
     [Table("ChatGroups")]
-    public class ChatGroup : Entity<long>, IHasCreationTime, IPassivable, IMayHaveTenant
+    public class ChatGroup : Entity<long>, IPassivable, IMayHaveTenant
     {
         public const int MaxNameLength = 100;
         [StringLength(MaxNameLength)]
@@ -23,7 +23,7 @@ namespace JK.Chat
 
         public long CreatorUserId { get; set; }
 
-        public DateTime CreationTime { get; set; }
+        public long CreationTime { get; set; }
 
         public bool IsActive { get; set; } = true;
 

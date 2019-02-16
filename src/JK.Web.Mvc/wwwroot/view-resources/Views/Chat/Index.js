@@ -2,7 +2,7 @@
     $(function () {
         Vue.filter('timeago', function (value) {
             if (!value) return '';
-            return moment.unix(value).fromNow();
+            return moment(value).fromNow();
         });
         Vue.component('vue-groups-container', {
             props: ['groups', "currentgroup"],

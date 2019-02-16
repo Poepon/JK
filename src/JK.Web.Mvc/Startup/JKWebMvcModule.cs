@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Abp.Modules;
 using Abp.Reflection.Extensions;
 using JK.Configuration;
+using Abp.Timing;
 
 namespace JK.Web.Startup
 {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
@@ -38,7 +39,7 @@ namespace JK.Chat
             return _chatGroupRepository.InsertAsync(new ChatGroup
             {
                 TenantId = AbpSession.TenantId,
-                CreationTime = Clock.Now,
+                CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 Name = input.GroupName,
                 GroupType = ChatGroupType.Public,
                 CreatorUserId = input.CreatorUserId,
@@ -61,19 +62,19 @@ namespace JK.Chat
                     Name = $"{input.CreatorUserId}_{input.TargetUserId}",
                     CreatorUserId = input.CreatorUserId,
                     GroupType = ChatGroupType.Private,
-                    CreationTime = Clock.Now,
+                    CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                     IsActive = true
                 });
                 await _chatGrouppMemberRepository.InsertAsync(new ChatGroupMember
                 {
                     GroupId = groupId,
-                    CreationTime = Clock.Now,
+                    CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                     UserId = input.CreatorUserId
                 });
                 await _chatGrouppMemberRepository.InsertAsync(new ChatGroupMember
                 {
                     GroupId = groupId,
-                    CreationTime = Clock.Now,
+                    CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                     UserId = input.TargetUserId
                 });
             }
@@ -130,7 +131,7 @@ namespace JK.Chat
                       {
                           GroupId = input.GroupId,
                           UserId = input.UserId,
-                          CreationTime = Clock.Now
+                          CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
                       });
             }
         }
@@ -147,7 +148,7 @@ namespace JK.Chat
                 GroupId = input.GroupId,
                 UserId = input.UserId,
                 Message = input.Message,
-                CreationTime = Clock.Now,
+                CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 ReadState = ChatMessageReadState.Unread
             });
         }
