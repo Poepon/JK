@@ -17,7 +17,7 @@
     <script src="~/lib/msgpack/msgpack.min.js" asp-append-version="true"></script>
     <script src="~/view-resources/Views/Chat/chatWebSocket.min.js" asp-append-version="true"></script>
     <script src="~/view-resources/Views/Chat/Index.min.js" asp-append-version="true"></script>
-</environment>
+</environment>       
 }
 <div class="row clearfix" id="chatApp">
     <br />
@@ -142,11 +142,11 @@
                                 </a>
                             </div>
                             <div class="media-body">
-                                <h4 class="media-heading"><span>{{item.uname}}</span></h4>
+                                <h4 class="media-heading" v-if="item.uid!=loginuid"><span>{{item.uname}}</span></h4>
                                 <span :class="{right:item.uid==loginuid}">{{item.msg}}</span>
                             </div>
                             <div class="media-right">
-                                <time :datetime="item.time">{{item.time}}</time>
+                                <time>{{item.time | timeago}}</time>
                                 <i class="material-icons col-green">{{item.s==2?"done_all":"done"}}</i>
                             </div>
                         </div>

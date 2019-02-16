@@ -21,7 +21,7 @@ namespace JK.Chat.Dto.Output
         public string Message { get; set; }
 
         [Key("time")]
-        public DateTime CreationTime { get; set; }
+        public long Timestamp { get; set; }
 
         [Key("s")]
         public ChatMessageReadState ReadState { get; set; }

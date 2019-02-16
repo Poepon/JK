@@ -85,7 +85,12 @@ namespace JK.Chat
                             });
                             if (list.TotalCount > 0)
                             {
-                                var dtos = list.Items.Select(x => x.MapTo<ChatMessageOutput>()).ToArray();
+                                var dtos = list.Items.Select(msg =>
+                                {
+                                    var r = msg.MapTo<ChatMessageOutput>();
+                                    r.Timestamp = msg.CreationTime.ToUnix();
+                                    return r;
+                                }).ToArray();
                                 await SendMsgPackAsync(socket, CommandType.GetMessage, dtos);
                                 lastId = list.Items.Max(x => x.Id);
                             }
@@ -134,7 +139,12 @@ namespace JK.Chat
                                 UserId = AbpSession.GetUserId()
                             });
                             list = oldMessages.Items.OrderBy(item => item.Id).Concat(newMessages.Items)
-                                .Select(msg => msg.MapTo<ChatMessageOutput>())
+                                .Select(msg =>
+                                {
+                                    var r = msg.MapTo<ChatMessageOutput>();
+                                    r.Timestamp = msg.CreationTime.ToUnix();
+                                    return r;
+                                })
                                 .ToArray();
                             await SendMsgPackAsync(socket, CommandType.GetMessage, list);
                         }
@@ -194,15 +204,7 @@ namespace JK.Chat
 
         public override async Task ReceiveTextAsync(WebSocket socket, WebSocketReceiveResult result, string receivedMessage)
         {
-            await SendMsgPackAsync(socket, CommandType.SendMessage,
-                new ChatMessageOutput
-                {
-                    CreationTime = Clock.Now,
-                    GroupId = 1,
-                    UserId = 1,
-                    UserName = "Admin",
-                    Message = "Hi"
-                });
+
         }
 
         private T DeserializeFromText<T>(MessageDataType dataType, string data) where T : class
