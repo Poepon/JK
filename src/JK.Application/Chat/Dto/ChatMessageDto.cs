@@ -10,7 +10,7 @@ namespace JK.Chat.Dto
     {
         public long UserId { get; set; }
 
-        public string UserNmae { get; set; }
+        public string UserName { get; set; }
 
         public long GroupId { get; set; }
 

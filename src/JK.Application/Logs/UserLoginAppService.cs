@@ -43,7 +43,7 @@ namespace JK.Logs
             {
                 var query = _userLoginAttemptRepository.GetAll()
                .WhereIf(input.UserId.HasValue, la => la.UserId == input.UserId)
-               .WhereIf(!string.IsNullOrEmpty(input.UserNmae), la => la.UserNameOrEmailAddress == input.UserNmae)
+               .WhereIf(!string.IsNullOrEmpty(input.UserName), la => la.UserNameOrEmailAddress == input.UserName)
                .WhereIf(input.StartTime.HasValue, la => la.CreationTime >= input.StartTime)
                .WhereIf(input.EndTime.HasValue, la => la.CreationTime <= input.EndTime);
 

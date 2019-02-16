@@ -90,7 +90,7 @@ namespace JK.Chat
                     Id = x.Id,
                     GroupId = x.GroupId,
                     UserId = x.UserId,
-                    UserNmae = x.User.UserName,
+                    UserName = x.User.UserName,
                     Message = x.Message,
                     CreationTime = x.CreationTime,
                     ReadState = x.ReadState
@@ -110,7 +110,7 @@ namespace JK.Chat
                       Id = x.Id,
                       GroupId = x.GroupId,
                       UserId = x.UserId,
-                      UserNmae = x.User.UserName,
+                      UserName = x.User.UserName,
                       Message = x.Message,
                       CreationTime = x.CreationTime,
                       ReadState = x.ReadState

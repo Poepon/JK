@@ -10,14 +10,19 @@ namespace JK.Chat.Dto.Output
     {
         [Key("gid")]
         public long GroupId { get; set; }
+
         [Key("uid")]
         public long UserId { get; set; }
+
         [Key("uname")]
         public string UserName { get; set; }
+
         [Key("msg")]
         public string Message { get; set; }
+
         [Key("time")]
         public DateTime CreationTime { get; set; }
+
         [Key("s")]
         public ChatMessageReadState ReadState { get; set; }
     }
