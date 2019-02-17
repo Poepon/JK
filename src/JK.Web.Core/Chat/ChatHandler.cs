@@ -10,6 +10,7 @@ using JK.Chat.Dto;
 using JK.Chat.Dto.Input;
 using JK.Chat.Dto.Output;
 using MessagePack;
+using Microsoft.AspNetCore.Http;
 using StackExchange.Redis;
 using System;
 using System.IO;
@@ -23,6 +24,7 @@ namespace JK.Chat
 {
     public class ChatHandler : WebSocketHandler, ISingletonDependency
     {
+        private readonly IHttpContextAccessor httpContextAccess;
         private readonly IChatAppService chatAppService;
         private readonly IAbpRedisCacheDatabaseProvider databaseProvider;
 
@@ -31,11 +33,13 @@ namespace JK.Chat
         public IAbpSession AbpSession { get; set; }
 
         public ChatHandler(WebSocketConnectionManager webSocketConnectionManager,
+            IHttpContextAccessor httpContextAccess,
             IOnlineClientManager<ChatChannel> onlineClientManager,
             IClientInfoProvider clientInfoProvider,
             IChatAppService chatAppService,
             IAbpRedisCacheDatabaseProvider databaseProvider) : base(webSocketConnectionManager)
         {
+            this.httpContextAccess = httpContextAccess;
             this.OnlineClientManager = onlineClientManager;
             ClientInfoProvider = clientInfoProvider;
             this.chatAppService = chatAppService;
@@ -161,6 +165,7 @@ namespace JK.Chat
                         CreatorUserId = AbpSession.GetUserId(),
                         TargetUserId = createPrivateInput.TargetUserId
                     });
+                  
                     break;
                 case CommandType.CreateGroup:
                     var createGroupInput = DeserializeFromBytes<Dto.Input.CreateGroupInput>(receivedMessage.DataType, receivedMessage.Data);

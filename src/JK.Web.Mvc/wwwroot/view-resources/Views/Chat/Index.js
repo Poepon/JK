@@ -29,9 +29,9 @@
             template: "#friendsContainerTemplate",
             methods: {
                 goChat: function (uid) {
-                    var commanddto = { tgid: uid };
+                    var commanddto = { tguid: uid };
                     var bytes = serializeMsgPack(commanddto);
-                    chat.sendCommand(chat.commandType.CreateGroup, chat.dataType.MessagePack, bytes);
+                    chat.sendCommand(chat.commandType.CreatePrivate, chat.dataType.MessagePack, bytes);
                 }
             }
         });

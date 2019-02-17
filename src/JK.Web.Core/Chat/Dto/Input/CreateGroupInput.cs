@@ -5,7 +5,7 @@ namespace JK.Chat.Dto.Input
     [MessagePackObject]
     public class CreatePrivateInput
     {
-        [Key("tgid")]
+        [Key("tguid")]
         public long TargetUserId { get; set; }
     }
     [MessagePackObject]
