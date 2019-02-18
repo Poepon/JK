@@ -5,7 +5,6 @@ using Abp.Json;
 using Abp.RealTime;
 using Abp.Runtime.Caching.Redis;
 using Abp.Runtime.Session;
-using Abp.Timing;
 using JK.Chat.Dto;
 using JK.Chat.Dto.Input;
 using JK.Chat.Dto.Output;
@@ -47,6 +46,26 @@ namespace JK.Chat
             AbpSession = NullAbpSession.Instance;
         }
 
+        private async Task<ChatGroupOutput[]> GetGroups(long userId)
+        {
+            var groups = await chatAppService.GetUserGroups(new GetUserGroupsInput { UserId = userId });
+            var dtos = groups.Items.Select(x => new ChatGroupOutput
+            {
+                CreationTime = x.CreationTime,
+                CreatorUserId = x.CreatorUserId,
+                GroupType = x.GroupType,
+                Id = x.Id,
+                Name = x.Name,
+                Status = x.Status,
+                Unread = 88,
+                IsCurrent = false,
+                Icon = "/images/user.png",
+                LastMessage = "Hi,thie is a test.",
+                LastTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            }).ToArray();
+            return dtos;
+        }
+
         public override async Task ReceiveBinaryAsync(WebSocket socket, WebSocketReceiveResult result, BinaryMessage receivedMessage)
         {
             switch (receivedMessage.CommandType)
@@ -78,14 +97,15 @@ namespace JK.Chat
                         var oldLastId = lastId;
                         do
                         {
-                            var list = await chatAppService.GetNewMessages(new GetNewMessagesInput
+                            var list = await chatAppService.GetMessages(new GetMessagesInput
                             {
                                 GroupId = messageInput.GroupId,
                                 UserId = AbpSession.GetUserId(),
                                 LastReceivedMessageId = lastId,
                                 MaxResultCount = 50,
                                 SkipCount = 0,
-                                Sorting = "Id"
+                                Direction = QueryDirection.New,
+                                Sorting = "Id asc"
                             });
                             if (list.TotalCount > 0)
                             {
@@ -113,40 +133,57 @@ namespace JK.Chat
                     {
                         ChatMessageOutput[] list = null;
                         var getMessageInput = DeserializeFromBytes<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);
-                        if (getMessageInput.MessageId == 0)
+                        var lastId = await chatAppService.GetLastReceivedMessageId(new ChatGroupInputBase
                         {
-                            var lastId = await chatAppService.GetLastReceivedMessageId(new ChatGroupInputBase
+                            GroupId = getMessageInput.GroupId,
+                            UserId = AbpSession.GetUserId()
+                        });
+                        var oldLastId = lastId;
+                        do
+                        {
+                            var messages = await chatAppService.GetMessages(new GetMessagesInput
                             {
-                                GroupId = getMessageInput.GroupId,
-                                UserId = AbpSession.GetUserId()
-                            });
-                            var oldMessages = await chatAppService.GetOldMessages(new GetOldMessagesInput
-                            {
-                                MaxResultCount = 100,
+                                MaxResultCount = getMessageInput.MaxCount,
                                 SkipCount = 0,
                                 LastReceivedMessageId = lastId,
                                 GroupId = getMessageInput.GroupId,
-                                UserId = AbpSession.GetUserId()
+                                UserId = AbpSession.GetUserId(),
+                                Direction = getMessageInput.Direction,
+                                Sorting = "Id " + (getMessageInput.Direction == QueryDirection.New ? "asc" : "desc")
                             });
-
-                            var newMessages = await chatAppService.GetNewMessages(new GetNewMessagesInput
+                            if (getMessageInput.Direction == QueryDirection.History)
                             {
-                                MaxResultCount = 100,
-                                SkipCount = 0,
-                                LastReceivedMessageId = lastId,
-                                GroupId = getMessageInput.GroupId,
-                                UserId = AbpSession.GetUserId()
-                            });
-                            list = oldMessages.Items.OrderBy(item => item.Id).Concat(newMessages.Items)
-                                .Select(msg => msg.MapTo<ChatMessageOutput>())
-                                .ToArray();
-                            await SendMsgPackAsync(socket, CommandType.GetMessage, list);
-                        }
-                        else
+                                list = messages.Items.OrderBy(msg => msg.Id)
+                              .Select(msg => msg.MapTo<ChatMessageOutput>())
+                              .ToArray();
+                            }
+                            else
+                            {
+                                list = messages.Items
+                                 .Select(msg => msg.MapTo<ChatMessageOutput>())
+                                 .ToArray();
+                            }
+                            if (list.Length > 0)
+                            {
+                                await SendMsgPackAsync(socket, CommandType.GetMessage, list);
+                                lastId = getMessageInput.Direction == QueryDirection.New
+                                    ? list.Max(x => x.Id)
+                                    : list.Min(x => x.Id);
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        } while (getMessageInput.Loop);
+                        if (lastId > oldLastId)
                         {
-
+                            await chatAppService.SetLastReceivedMessageId(new SetLastReceivedIdInput
+                            {
+                                GroupId = getMessageInput.GroupId,
+                                UserId = AbpSession.GetUserId(),
+                                LastReceivedMessageId = lastId
+                            });
                         }
-
                     }
                     break;
                 case CommandType.PinMessageToTop:
@@ -159,16 +196,41 @@ namespace JK.Chat
                     var readMessageInput = DeserializeFromBytes<ReadMessageInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.CreatePrivate:
-                    var createPrivateInput = DeserializeFromBytes<Dto.Input.CreatePrivateInput>(receivedMessage.DataType, receivedMessage.Data);
-                    await chatAppService.CreatePrivate(new Dto.CreatePrivateInput
                     {
-                        CreatorUserId = AbpSession.GetUserId(),
-                        TargetUserId = createPrivateInput.TargetUserId
-                    });
-                  
+                        var createPrivateInput = DeserializeFromBytes<Dto.Input.CreatePrivateInput>(receivedMessage.DataType, receivedMessage.Data);
+                        if (createPrivateInput.TargetUserId != AbpSession.GetUserId())
+                        {
+                            await chatAppService.CreatePrivate(new Dto.CreatePrivateInput
+                            {
+                                CreatorUserId = AbpSession.GetUserId(),
+                                TargetUserId = createPrivateInput.TargetUserId
+                            });
+                            var dtos = await GetGroups(AbpSession.GetUserId());
+                            await SendMsgPackAsync(socket, CommandType.GetGroups, dtos);
+                        }
+                        else
+                        {
+                            var error = new AlertMessageOutput
+                            {
+                                Title = "错误",
+                                Type = AlertType.Warning,
+                                Text = "不能跟自己发起对话。"
+                            };
+                            await SendMsgPackAsync(socket, CommandType.AlertMessage, error, httpContextAccess.HttpContext.RequestAborted);
+                        }
+                    }
                     break;
                 case CommandType.CreateGroup:
-                    var createGroupInput = DeserializeFromBytes<Dto.Input.CreateGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                    {
+                        var createGroupInput = DeserializeFromBytes<Dto.Input.CreateGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                        await chatAppService.CreateGroup(new Dto.CreateGroupInput
+                        {
+                            GroupName = createGroupInput.GroupName,
+                            CreatorUserId = AbpSession.GetUserId()
+                        });
+                        var dtos = await GetGroups(AbpSession.GetUserId());
+                        await SendMsgPackAsync(socket, CommandType.GetGroups, dtos);
+                    }
                     break;
                 case CommandType.DeleteGroup:
                     var deleteGroupInput = DeserializeFromBytes<DeleteGroupInput>(receivedMessage.DataType, receivedMessage.Data);
@@ -181,25 +243,7 @@ namespace JK.Chat
                     break;
                 case CommandType.GetGroups:
                     {
-                        var groups = await chatAppService.GetUserGroups(
-                          new GetUserGroupsInput
-                          {
-                              UserId = AbpSession.GetUserId()
-                          });
-                        var dtos = groups.Items.Select(x => new ChatGroupOutput
-                        {
-                            CreationTime = x.CreationTime,
-                            CreatorUserId = x.CreatorUserId,
-                            GroupType = x.GroupType,
-                            Id = x.Id,
-                            Name = x.Name,
-                            Status = x.Status,
-                            Unread = 88,
-                            IsCurrent = false,
-                            Icon = "/images/user.png",
-                            LastMessage = "Hi,thie is a test.",
-                            LastTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
-                        }).ToArray();
+                        var dtos = await GetGroups(AbpSession.GetUserId());
                         await SendMsgPackAsync(socket, CommandType.GetGroups, dtos);
                     }
                     break;

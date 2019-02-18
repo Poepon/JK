@@ -1,6 +1,7 @@
 ﻿using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
+using JK.Authorization.Users;
 using JK.Chat.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -8,12 +9,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace JK.Chat
 {
     public class ChatAppService : JKAppServiceBase, IChatAppService
     {
+        private readonly IRepository<User, long> _userRepository;
         private readonly IRepository<ChatMessage, long> _chatMessageRepository;
         private readonly IRepository<ChatGroup, long> _chatGroupRepository;
         private readonly IRepository<ChatGroupMember, long> _chatGrouppMemberRepository;
@@ -23,19 +26,21 @@ namespace JK.Chat
             IRepository<UserChatMessageLog, long> userChatMessageLogRepository,
             IRepository<ChatGroup, long> chatGroupRepository,
             IRepository<ChatGroupMember, long> chatGrouppMemberRepository,
+            IRepository<User, long> userRepository,
             IHttpContextAccessor httpContextAccessor)
         {
             _chatMessageRepository = chatMessageRepository;
             _userChatMessageLogRepository = userChatMessageLogRepository;
             _chatGroupRepository = chatGroupRepository;
             _chatGrouppMemberRepository = chatGrouppMemberRepository;
+            _userRepository = userRepository;
             _httpContextAccessor = httpContextAccessor;
         }
 
 
-        public Task CreateGroup(CreateGroupInput input)
+        public async Task CreateGroup(CreateGroupInput input)
         {
-            return _chatGroupRepository.InsertAsync(new ChatGroup
+            var groupId = await _chatGroupRepository.InsertAndGetIdAsync(new ChatGroup
             {
                 TenantId = AbpSession.TenantId,
                 CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
@@ -43,6 +48,14 @@ namespace JK.Chat
                 GroupType = ChatGroupType.Public,
                 CreatorUserId = input.CreatorUserId,
                 IsActive = true
+            });
+
+            await _chatGrouppMemberRepository.InsertAsync(new ChatGroupMember
+            {
+                GroupId = groupId,
+                CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                IsActive = true,
+                UserId = input.CreatorUserId
             });
         }
 
@@ -79,10 +92,12 @@ namespace JK.Chat
             }
         }
 
-        public async Task<PagedResultDto<ChatMessageDto>> GetNewMessages(GetNewMessagesInput input)
+        public async Task<PagedResultDto<ChatMessageDto>> GetMessages(GetMessagesInput input)
         {
             var query = _chatMessageRepository.GetAllIncluding(msg => msg.User)
-                .Where(msg => msg.GroupId == input.GroupId && msg.Id > input.LastReceivedMessageId);
+                .Where(msg => msg.GroupId == input.GroupId)
+                .WhereIf(input.Direction == QueryDirection.New, msg => msg.Id > input.LastReceivedMessageId)
+                .WhereIf(input.Direction == QueryDirection.History, msg => msg.Id <= input.LastReceivedMessageId);
             int totalCount = await query.CountAsync();
             var list = await query.OrderBy(input.Sorting).PageBy(input)
                 .Select(x => new ChatMessageDto
@@ -95,26 +110,6 @@ namespace JK.Chat
                     CreationTime = x.CreationTime,
                     ReadState = x.ReadState
                 })
-                .ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
-            return new PagedResultDto<ChatMessageDto>(totalCount, list);
-        }
-
-        public async Task<PagedResultDto<ChatMessageDto>> GetOldMessages(GetOldMessagesInput input)
-        {
-            var query = _chatMessageRepository.GetAllIncluding(msg => msg.User)
-               .Where(msg => msg.GroupId == input.GroupId && msg.Id < input.LastReceivedMessageId);
-            int totalCount = await query.CountAsync();
-            var list = await query.OrderBy(input.Sorting).PageBy(input)
-                  .Select(x => new ChatMessageDto
-                  {
-                      Id = x.Id,
-                      GroupId = x.GroupId,
-                      UserId = x.UserId,
-                      UserName = x.User.UserName,
-                      Message = x.Message,
-                      CreationTime = x.CreationTime,
-                      ReadState = x.ReadState
-                  })
                 .ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
             return new PagedResultDto<ChatMessageDto>(totalCount, list);
         }
@@ -226,7 +221,27 @@ namespace JK.Chat
                       .Where(member => member.UserId == input.UserId)
                       .Select(member => member.ChatGroup)
                       .ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
-            return new ListResultDto<ChatGroupDto>(ObjectMapper.Map<List<ChatGroupDto>>(list));
+            var dtos = list.Select(item =>
+            {
+                ChatGroupDto chatGroupDto = ObjectMapper.Map<ChatGroupDto>(item);
+                if (chatGroupDto.GroupType == ChatGroupType.Private)
+                {
+                    const string reg = @"^(?<uid1>[1-9]\d*)_(?<uid2>[1-9]\d*)$";
+                    var match = Regex.Match(item.Name, reg);
+                    if (match.Success)
+                    {
+                        var uid1 = long.Parse(match.Groups["uid1"].Value);
+                        var uid2 = long.Parse(match.Groups["uid2"].Value);
+                        if (uid1 != input.UserId)
+                            chatGroupDto.Name = _userRepository.GetAll().Where(u => u.Id == uid1).Select(u => u.Name).SingleOrDefault();
+                        if (uid2 != input.UserId)
+                            chatGroupDto.Name = _userRepository.GetAll().Where(u => u.Id == uid2).Select(u => u.Name).SingleOrDefault();
+                    }
+                }
+                return chatGroupDto;
+            }).ToList();
+
+            return new ListResultDto<ChatGroupDto>(dtos);
         }
     }
 }

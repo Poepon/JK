@@ -9,9 +9,7 @@ namespace JK.Chat
     {
         Task SendMessage(SendMessageInput input);
 
-        Task<PagedResultDto<ChatMessageDto>> GetNewMessages(GetNewMessagesInput input);
-
-        Task<PagedResultDto<ChatMessageDto>> GetOldMessages(GetOldMessagesInput input);
+        Task<PagedResultDto<ChatMessageDto>> GetMessages(GetMessagesInput input);
 
         Task CreatePrivate(CreatePrivateInput input);
 

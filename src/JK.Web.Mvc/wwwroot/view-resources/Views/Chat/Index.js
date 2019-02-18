@@ -24,6 +24,22 @@
                 }
             }
         });
+        Vue.component('vue-newgroup-form', {
+            template: "#newGroupFormTemplate",
+            data: function () {
+                return {
+                    gn:""
+                };
+            },
+            methods: {
+                createGroup: function () {
+                    var commanddto = { gn: this.gn };
+                    var bytes = serializeMsgPack(commanddto);
+                    chat.sendCommand(chat.commandType.CreateGroup, chat.dataType.MessagePack, bytes);
+                    this.gn = "";
+                }
+            }
+        });
         Vue.component('vue-friends-container', {
             props: ['friends'],
             template: "#friendsContainerTemplate",
@@ -95,13 +111,25 @@
             watch: {
                 currentgroup: function (val, oldval) {
                     this.messages = [];
-                    var commanddto = {
+                    var oldcommanddto = {
                         gid: val.gid,
-                        mid:0
+                        mid: 0,
+                        d: 2,
+                        mc: 100,
+                        loop: false
+                    };
+                    var newcommanddto = {
+                        gid: val.gid,
+                        mid: 0,
+                        d: 1,
+                        mc: 100,
+                        loop:true
                     };
                   
-                    var bytes = serializeMsgPack(commanddto);
-                    chat.sendCommand(chat.commandType.GetMessage, chat.dataType.MessagePack, bytes);
+                    var oldbytes = serializeMsgPack(oldcommanddto);
+                    chat.sendCommand(chat.commandType.GetMessage, chat.dataType.MessagePack, oldbytes);
+                    var newbytes = serializeMsgPack(newcommanddto);
+                    chat.sendCommand(chat.commandType.GetMessage, chat.dataType.MessagePack, newbytes);
                 }
             }
         });
@@ -125,10 +153,13 @@
                 var decodedObj = deserializeMsgPack(cmddto.data);
                 switch (cmddto.commandType) {
                     case chat.commandType.GetMessage:
-                        chatApp.messages = chatApp.messages.concat(decodedObj);
+                        chatApp.messages = chatApp.messages.concat(decodedObj).sort(function (a, b) { return a.mid - b.mid; });
                         break;
                     case chat.commandType.GetGroups:
                         chatApp.groups = decodedObj;
+                        break;
+                    case chat.commandType.AlertMessage:
+                        alert(decodedObj.text);
                         break;
                     default:
                 }               

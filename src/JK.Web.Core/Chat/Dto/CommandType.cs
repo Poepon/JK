@@ -10,6 +10,10 @@
         /// 断开连接
         /// </summary>
         Disconnected = 3,
+        /// <summary>
+        /// 提示消息
+        /// </summary>
+        AlertMessage = 4,
         #region 用户
         /// <summary>
         /// 上线

@@ -14,7 +14,10 @@ namespace JK.Chat.Dto.Input
         [Key("d")]
         public QueryDirection Direction { get; set; }
 
-        [Key("c")]
-        public int TakeCount { get; set; }
+        [Key("mc")]
+        public int MaxCount { get; set; }
+
+        [Key("loop")]
+        public bool Loop { get; set; }
     }
 }

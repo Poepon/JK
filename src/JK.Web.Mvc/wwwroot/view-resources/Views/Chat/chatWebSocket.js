@@ -9,6 +9,10 @@ chat.commandType = {
     /// </summary>
     Disconnected: 3,
     /// <summary>
+    /// 错误
+    /// </summary>
+    AlertMessage: 4,
+    /// <summary>
     /// 上线
     /// </summary>
     Online: 101,
@@ -61,7 +65,7 @@ chat.commandType = {
     /// <summary>
     /// 创建私聊
     /// </summary>
-    CreatePrivate:300,
+    CreatePrivate: 300,
     /// <summary>
     /// 创建群组
     /// </summary>
@@ -131,7 +135,7 @@ chat.dataType = {
                 abp.event.trigger("websocket.onreceiveblob", event.data);
             }
             else {
-                abp.event.trigger("websocket.onreceivetext", event.data);               
+                abp.event.trigger("websocket.onreceivetext", event.data);
             }
 
         };

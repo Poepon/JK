@@ -8,6 +8,9 @@ namespace JK.Chat.Dto.Output
     [AutoMapFrom(typeof(ChatMessageDto))]
     public class ChatMessageOutput
     {
+        [Key("mid")]
+        public long Id { get; set; }
+
         [Key("gid")]
         public long GroupId { get; set; }
 
