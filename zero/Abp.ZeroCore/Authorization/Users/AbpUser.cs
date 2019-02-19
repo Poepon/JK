@@ -28,7 +28,6 @@ namespace Abp.Authorization.Users
         /// Email address of the user.
         /// Email address must be unique for it's tenant.
         /// </summary>
-        [Required]
         [StringLength(MaxEmailAddressLength)]
         public virtual string NormalizedEmailAddress { get; set; }
 
@@ -53,7 +52,7 @@ namespace Abp.Authorization.Users
         public void SetNormalizedNames()
         {
             NormalizedUserName = UserName.ToUpperInvariant();
-            NormalizedEmailAddress = EmailAddress.ToUpperInvariant();
+            NormalizedEmailAddress = EmailAddress?.ToUpperInvariant();
         }
     }
 }

@@ -63,29 +63,13 @@ namespace JK.Migrations
                     Description = table.Column<string>(maxLength: 2048, nullable: true),
                     GroupType = table.Column<int>(nullable: false),
                     CreatorUserId = table.Column<long>(nullable: false),
-                    CreationTime = table.Column<DateTime>(nullable: false),
+                    CreationTime = table.Column<long>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false),
                     TenantId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ChatGroups", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserChatMessageLogs",
-                columns: table => new
-                {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    GroupId = table.Column<long>(nullable: false),
-                    UserId = table.Column<long>(nullable: false),
-                    LastReceivedMessageId = table.Column<long>(nullable: false),
-                    LastReadMessageId = table.Column<long>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserChatMessageLogs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -96,7 +80,7 @@ namespace JK.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     GroupId = table.Column<long>(nullable: false),
                     UserId = table.Column<long>(nullable: false),
-                    CreationTime = table.Column<DateTime>(nullable: false),
+                    CreationTime = table.Column<long>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
@@ -119,7 +103,7 @@ namespace JK.Migrations
                     UserId = table.Column<long>(nullable: false),
                     GroupId = table.Column<long>(nullable: false),
                     Message = table.Column<string>(maxLength: 4096, nullable: true),
-                    CreationTime = table.Column<DateTime>(nullable: false),
+                    CreationTime = table.Column<long>(nullable: false),
                     ReadState = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -135,6 +119,28 @@ namespace JK.Migrations
                         name: "FK_ChatMessages_AbpUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AbpUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserChatMessageLogs",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    GroupId = table.Column<long>(nullable: false),
+                    UserId = table.Column<long>(nullable: false),
+                    LastReceivedMessageId = table.Column<long>(nullable: false),
+                    LastReadMessageId = table.Column<long>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserChatMessageLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserChatMessageLogs_ChatGroups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "ChatGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });

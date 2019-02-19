@@ -9,26 +9,17 @@
             return moment(value).fromNow();
         });
         Vue.component('vue-groups-container', {
-            props: ['groups', "currentgroup"],
+            props: ['groups'],
             template: "#groupsContainerTemplate",
             methods: {
-                changeGroup: function (newgroup) {
-                    if (this.currentgroup.gid !== newgroup.gid) {
-                        for (var i = 0; i < this.groups.length; i++) {
-                            if (this.groups[i].cur)
-                                this.groups[i].cur = false;
-                        }
-                        newgroup.cur = true;
-                        this.$root.currentgroup = newgroup;
-                    }
-                }
+
             }
         });
         Vue.component('vue-newgroup-form', {
             template: "#newGroupFormTemplate",
             data: function () {
                 return {
-                    gname:""
+                    gname: ""
                 };
             },
             methods: {
@@ -52,12 +43,48 @@
             }
         });
         Vue.component('vue-messages-container', {
-            props: ['currentgroup', 'readystate', 'messages',"loginuid"],
+            props: ['currentgroup', 'gmessages', 'readystate', "loginuid"],
             template: "#messagesContainerTemplate",
             data: function () {
-                return { message: "" };
+                return {
+                    message: ""
+                };
+            },
+            computed: {
+                messages: function () {
+                    console.log(this.gmessages);
+                    if (this.gmessages.hasOwnProperty(this.currentgroup.gid)) {
+                        return this.gmessages[this.currentgroup.gid];
+                    } else {
+                        return [];
+                    }
+                }
+            },
+            mounted: function () {
+                this.getMessages();
             },
             methods: {
+                getMessages: function () {
+                    var oldcommanddto = {
+                        gid: this.currentgroup.gid,
+                        mid: 0,
+                        d: 2,
+                        mc: 100,
+                        loop: false
+                    };
+                    var newcommanddto = {
+                        gid: this.currentgroup.gid,
+                        mid: 0,
+                        d: 1,
+                        mc: 100,
+                        loop: true
+                    };
+
+                    var oldbytes = serializeMsgPack(oldcommanddto);
+                    chat.sendCommand(chat.commandType.GetMessage, chat.dataType.MessagePack, oldbytes);
+                    var newbytes = serializeMsgPack(newcommanddto);
+                    chat.sendCommand(chat.commandType.GetMessage, chat.dataType.MessagePack, newbytes);
+                },
                 sendMessage: function () {
                     if (this.readystate !== 1) {
                         alert("未能连接到服务器，请检查网络后刷新重试。");
@@ -86,17 +113,14 @@
         var chatApp = new Vue({
             el: '#chatApp',
             data: {
-                currentgroup: { gname: "", gid: "" },
                 readystate: 3,
                 friends: [
-                   
-                ],
-                messages: [
 
                 ],
                 groups: [
-                    
-                ]
+
+                ],
+                gmessages: {}
             },
             methods: {
                 getGroups: function () {
@@ -108,31 +132,6 @@
                     var commanddto = {};
                     var bytes = serializeMsgPack(commanddto);
                     chat.sendCommand(chat.commandType.GetOnlineUsers, chat.dataType.MessagePack, bytes);
-                }
-            },
-           
-            watch: {
-                currentgroup: function (val, oldval) {
-                    this.messages = [];
-                    var oldcommanddto = {
-                        gid: val.gid,
-                        mid: 0,
-                        d: 2,
-                        mc: 100,
-                        loop: false
-                    };
-                    var newcommanddto = {
-                        gid: val.gid,
-                        mid: 0,
-                        d: 1,
-                        mc: 100,
-                        loop:true
-                    };
-                  
-                    var oldbytes = serializeMsgPack(oldcommanddto);
-                    chat.sendCommand(chat.commandType.GetMessage, chat.dataType.MessagePack, oldbytes);
-                    var newbytes = serializeMsgPack(newcommanddto);
-                    chat.sendCommand(chat.commandType.GetMessage, chat.dataType.MessagePack, newbytes);
                 }
             }
         });
@@ -157,7 +156,14 @@
                 var decodedObj = deserializeMsgPack(cmddto.data);
                 switch (cmddto.commandType) {
                     case chat.commandType.GetMessage:
-                        chatApp.messages = chatApp.messages.concat(decodedObj).sort(function (a, b) { return a.mid - b.mid; });
+                        for (var i = 0; i < decodedObj.length; i++) {
+                            var item = decodedObj[i];
+                            if (chatApp.gmessages[item.gid] === undefined) {
+                                chatApp.gmessages[item.gid] = [];
+                            }
+                            chatApp.gmessages[item.gid].push(item);
+                        }
+                        //chatApp.messages = chatApp.messages.concat(decodedObj).sort(function (a, b) { return a.mid - b.mid; });
                         break;
                     case chat.commandType.GetGroups:
                         chatApp.groups = decodedObj;
@@ -169,7 +175,7 @@
                         chatApp.friends = decodedObj;
                         break;
                     default:
-                }               
+                }
             }
         });
         abp.event.on("websocket.onreceiveblob", function (data) {
@@ -187,7 +193,6 @@
                 default:
             }
         });
-        chat.init();     
-        $("#message").focus();
+        chat.init();
     });
 })();

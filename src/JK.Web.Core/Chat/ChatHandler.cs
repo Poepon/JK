@@ -551,12 +551,26 @@ namespace JK.Chat
                 UserId = c.UserId.GetValueOrDefault(),
                 UserName = await chatAppService.GetUserName(new EntityDto<long>(c.UserId.GetValueOrDefault())),
                 Icon = "/images/user.png"
-            }).ToArray();
+            }).Distinct(new OnlineUserOutputComparer()).ToArray();
             foreach (var client in clients)
             {
                 var socket = this.WebSocketConnectionManager.GetSocket(client.ConnectionId);
                 await SendMsgPackAsync(socket, CommandType.GetOnlineUsers, onlineUsers);
             }
+        }
+    }
+
+    public class OnlineUserOutputComparer : System.Collections.Generic.IEqualityComparer<Task<OnlineUserOutput>>
+    {
+
+        public bool Equals(Task<OnlineUserOutput> x, Task<OnlineUserOutput> y)
+        {
+            return x.Result.UserId == y.Result.UserId;
+        }
+
+        public int GetHashCode(Task<OnlineUserOutput> obj)
+        {
+            return obj.Result.UserId.GetHashCode();
         }
     }
 }

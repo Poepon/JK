@@ -39,5 +39,6 @@ namespace JK.Chat.Dto.Output
 
         [Key("cur")]
         public bool IsCurrent { get; set; }
+
     }
 }

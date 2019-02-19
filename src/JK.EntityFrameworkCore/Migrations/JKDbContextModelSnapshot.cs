@@ -1332,6 +1332,14 @@ namespace JK.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("JK.Chat.UserChatMessageLog", b =>
+                {
+                    b.HasOne("JK.Chat.ChatGroup", "ChatGroup")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("JK.MultiTenancy.Tenant", b =>
                 {
                     b.HasOne("JK.Authorization.Users.User", "CreatorUser")

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JK.Migrations
 {
     [DbContext(typeof(JKDbContext))]
-    [Migration("20190213080148_InitialChat")]
+    [Migration("20190219102117_InitialChat")]
     partial class InitialChat
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1009,7 +1009,7 @@ namespace JK.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("CreationTime");
+                    b.Property<long>("CreationTime");
 
                     b.Property<long>("CreatorUserId");
 
@@ -1036,7 +1036,7 @@ namespace JK.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("CreationTime");
+                    b.Property<long>("CreationTime");
 
                     b.Property<long>("GroupId");
 
@@ -1057,7 +1057,7 @@ namespace JK.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("CreationTime");
+                    b.Property<long>("CreationTime");
 
                     b.Property<long>("GroupId");
 
@@ -1331,6 +1331,14 @@ namespace JK.Migrations
                     b.HasOne("JK.Authorization.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("JK.Chat.UserChatMessageLog", b =>
+                {
+                    b.HasOne("JK.Chat.ChatGroup", "ChatGroup")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
