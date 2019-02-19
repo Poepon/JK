@@ -10,10 +10,10 @@ namespace JK.Chat.Dto.Output
         [Key("gid")]
         public long Id { get; set; }
 
-        [Key("gn")]
+        [Key("gname")]
         public string Name { get; set; }
 
-        [Key("ico")]
+        [Key("icon")]
         public string Icon { get; set; }
 
         [Key("gt")]

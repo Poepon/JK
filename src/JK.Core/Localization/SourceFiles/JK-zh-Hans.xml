@@ -139,7 +139,7 @@
     <text name="HangFire">HangFire</text>
     <text name="AdminPassword">管理员密码</text>
     <text name="Chat">聊天</text>
-    
+    <text name="Save">保存</text>
   </texts>
 </localizationDictionary>
 

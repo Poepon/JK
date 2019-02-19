@@ -28,15 +28,15 @@
             template: "#newGroupFormTemplate",
             data: function () {
                 return {
-                    gn:""
+                    gname:""
                 };
             },
             methods: {
                 createGroup: function () {
-                    var commanddto = { gn: this.gn };
+                    var commanddto = { gname: this.gname };
                     var bytes = serializeMsgPack(commanddto);
                     chat.sendCommand(chat.commandType.CreateGroup, chat.dataType.MessagePack, bytes);
-                    this.gn = "";
+                    this.gname = "";
                 }
             }
         });
@@ -86,12 +86,10 @@
         var chatApp = new Vue({
             el: '#chatApp',
             data: {
-                currentgroup: { gn: "", gid: "" },
+                currentgroup: { gname: "", gid: "" },
                 readystate: 3,
                 friends: [
-                    { uid: 1, uname: "张一疯", ico: "/images/user.png" },
-                    { uid: 2, uname: "张二疯", ico: "/images/user.png" },
-                    { uid: 3, uname: "张三疯", ico: "/images/user.png" }
+                   
                 ],
                 messages: [
 
@@ -105,6 +103,11 @@
                     var commanddto = {};
                     var bytes = serializeMsgPack(commanddto);
                     chat.sendCommand(chat.commandType.GetGroups, chat.dataType.MessagePack, bytes);
+                },
+                getOnlineUsers: function () {
+                    var commanddto = {};
+                    var bytes = serializeMsgPack(commanddto);
+                    chat.sendCommand(chat.commandType.GetOnlineUsers, chat.dataType.MessagePack, bytes);
                 }
             },
            
@@ -137,6 +140,7 @@
         abp.event.on("websocket.onopen", function (data) {
             chatApp.readystate = 1;
             chatApp.getGroups();
+            //chatApp.getOnlineUsers();
         });
         abp.event.on("websocket.onconnecting", function (data) {
             chatApp.readystate = 0;
@@ -160,6 +164,9 @@
                         break;
                     case chat.commandType.AlertMessage:
                         alert(decodedObj.text);
+                        break;
+                    case chat.commandType.GetOnlineUsers:
+                        chatApp.friends = decodedObj;
                         break;
                     default:
                 }               

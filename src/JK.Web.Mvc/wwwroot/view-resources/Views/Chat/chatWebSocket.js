@@ -94,6 +94,10 @@ chat.commandType = {
     /// 解除置顶
     /// </summary>
     UnpinFromTop: 307,
+    /// <summary>
+    /// 获取在线用户
+    /// </summary>
+    GetOnlineUsers: 308
 };
 chat.dataType = {
     Text: 0,

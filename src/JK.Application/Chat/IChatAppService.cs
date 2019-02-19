@@ -1,6 +1,7 @@
 ﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using JK.Chat.Dto;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace JK.Chat
@@ -29,6 +30,10 @@ namespace JK.Chat
 
         Task SetLastReadMessageId(SetLastReadIdInput input);
 
+        Task<IList<long>> GetUserGroupsId(GetUserGroupsInput input);
+
         Task<ListResultDto<ChatGroupDto>> GetUserGroups(GetUserGroupsInput input);
+
+        Task<string> GetUserName(EntityDto<long> idDto);
     }
 }

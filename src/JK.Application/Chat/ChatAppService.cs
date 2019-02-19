@@ -215,6 +215,15 @@ namespace JK.Chat
             }
         }
 
+        public async Task<IList<long>> GetUserGroupsId(GetUserGroupsInput input)
+        {
+            var list = await _chatGrouppMemberRepository.GetAll()
+                     .Where(member => member.UserId == input.UserId)
+                     .Select(member => member.GroupId)
+                     .ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
+            return list;
+        }
+
         public async Task<ListResultDto<ChatGroupDto>> GetUserGroups(GetUserGroupsInput input)
         {
             var list = await _chatGrouppMemberRepository.GetAllIncluding(member => member.ChatGroup)
@@ -242,6 +251,11 @@ namespace JK.Chat
             }).ToList();
 
             return new ListResultDto<ChatGroupDto>(dtos);
+        }
+
+        public Task<string> GetUserName(EntityDto<long> idDto)
+        {
+            return _userRepository.GetAll().Where(u => u.Id == idDto.Id).Select(u => u.Name).SingleOrDefaultAsync();
         }
     }
 }

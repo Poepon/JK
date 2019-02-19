@@ -1,4 +1,5 @@
-﻿using Abp.Auditing;
+﻿using Abp.Application.Services.Dto;
+using Abp.Auditing;
 using Abp.AutoMapper;
 using Abp.Dependency;
 using Abp.Json;
@@ -21,6 +22,7 @@ using System.Threading.Tasks;
 
 namespace JK.Chat
 {
+
     public class ChatHandler : WebSocketHandler, ISingletonDependency
     {
         private readonly IHttpContextAccessor httpContextAccess;
@@ -88,44 +90,12 @@ namespace JK.Chat
                             Message = messageInput.Message,
                             UserId = AbpSession.GetUserId()
                         });
-                        //trigger publish
-                        var lastId = await chatAppService.GetLastReceivedMessageId(new ChatGroupInputBase
+                        var connections = WebSocketConnectionManager.GetAllFromGroup(messageInput.GroupId.ToString());
+                        foreach (var connectionId in connections)
                         {
-                            GroupId = messageInput.GroupId,
-                            UserId = AbpSession.GetUserId()
-                        });
-                        var oldLastId = lastId;
-                        do
-                        {
-                            var list = await chatAppService.GetMessages(new GetMessagesInput
-                            {
-                                GroupId = messageInput.GroupId,
-                                UserId = AbpSession.GetUserId(),
-                                LastReceivedMessageId = lastId,
-                                MaxResultCount = 50,
-                                SkipCount = 0,
-                                Direction = QueryDirection.New,
-                                Sorting = "Id asc"
-                            });
-                            if (list.TotalCount > 0)
-                            {
-                                var dtos = list.Items.Select(msg => msg.MapTo<ChatMessageOutput>()).ToArray();
-                                await SendMsgPackAsync(socket, CommandType.GetMessage, dtos);
-                                lastId = list.Items.Max(x => x.Id);
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        } while (true);
-                        if (lastId > oldLastId)
-                        {
-                            await chatAppService.SetLastReceivedMessageId(new SetLastReceivedIdInput
-                            {
-                                GroupId = messageInput.GroupId,
-                                UserId = AbpSession.GetUserId(),
-                                LastReceivedMessageId = lastId
-                            });
+                            var onlineClient = OnlineClientManager.GetByConnectionIdOrNull(connectionId);
+                            WebSocket webSocket = WebSocketConnectionManager.GetSocket(connectionId);
+                            await SendNewMessage(messageInput.GroupId, onlineClient.UserId.GetValueOrDefault(), webSocket);
                         }
                     }
                     break;
@@ -265,6 +235,18 @@ namespace JK.Chat
                 case CommandType.DownloadFile:
                     var downloadFileInput = DeserializeFromBytes<DownloadFileInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
+                case CommandType.GetOnlineUsers:
+                    {
+                        var clients = OnlineClientManager.GetAllClients();
+                        var onlineUsers = clients.Select(async c => new OnlineUserOutput
+                        {
+                            UserId = c.UserId.GetValueOrDefault(),
+                            UserName = await chatAppService.GetUserName(new EntityDto<long>(c.UserId.GetValueOrDefault())),
+                            Icon = "/images/user.png"
+                        }).ToArray();
+                        await SendMsgPackAsync(socket, CommandType.GetOnlineUsers, onlineUsers, httpContextAccess.HttpContext.RequestAborted);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -392,15 +374,6 @@ namespace JK.Chat
             return value;
         }
 
-        public override async Task OnConnected(string connectionId, WebSocket socket)
-        {
-            var client = CreateClientForCurrentConnection(connectionId);
-            OnlineClientManager.Add(client);
-
-            await base.OnConnected(client.ConnectionId, socket);
-            await SendTextAsync(socket, CommandType.Connected, MessageDataType.Json, new { client.ConnectionId }.ToJsonString());
-        }
-
         protected virtual IOnlineClient CreateClientForCurrentConnection(string connectionId)
         {
             return new OnlineClient(
@@ -423,9 +396,45 @@ namespace JK.Chat
             }
         }
 
+        public override async Task OnConnected(string connectionId, WebSocket socket)
+        {
+            var client = CreateClientForCurrentConnection(connectionId);
+
+            await base.OnConnected(client.ConnectionId, socket);
+            await AddToGroup(client);
+
+            OnlineClientManager.Add(client);
+            await SendOnlineUsers();
+        }
+
         public override async Task OnDisconnected(WebSocket socket)
         {
             await base.OnDisconnected(socket);
+            var conntionId = this.WebSocketConnectionManager.GetConnectionId(socket);
+            if (string.IsNullOrEmpty(conntionId))
+                return;
+            var onlineClient = OnlineClientManager.GetByConnectionIdOrNull(conntionId);
+            await RemoveFromGroup(onlineClient);
+            OnlineClientManager.Remove(onlineClient);
+            await SendOnlineUsers();
+        }
+
+        private async Task AddToGroup(IOnlineClient onlineClient)
+        {
+            var groups = await chatAppService.GetUserGroupsId(new GetUserGroupsInput { UserId = onlineClient.UserId.GetValueOrDefault() });
+            foreach (var groupId in groups)
+            {
+                WebSocketConnectionManager.AddToGroup(onlineClient.ConnectionId, groupId.ToString());
+            }
+        }
+
+        private async Task RemoveFromGroup(IOnlineClient onlineClient)
+        {
+            var groups = await chatAppService.GetUserGroupsId(new GetUserGroupsInput { UserId = onlineClient.UserId.GetValueOrDefault() });
+            foreach (var groupId in groups)
+            {
+                WebSocketConnectionManager.RemoveFromGroup(onlineClient.ConnectionId, groupId.ToString());
+            }
         }
 
         public async Task SendBinaryAsync(WebSocket webSocket,
@@ -490,6 +499,64 @@ namespace JK.Chat
         {
             var _connection = databaseProvider.GetDatabase().Multiplexer;
             await _connection.GetSubscriber().UnsubscribeAllAsync();
+        }
+
+        private async Task SendNewMessage(long groupId, long userId, WebSocket socket)
+        {
+            var lastId = await chatAppService.GetLastReceivedMessageId(new ChatGroupInputBase
+            {
+                GroupId = groupId,
+                UserId = userId
+            });
+            var oldLastId = lastId;
+            do
+            {
+                var list = await chatAppService.GetMessages(new GetMessagesInput
+                {
+                    GroupId = groupId,
+                    UserId = userId,
+                    LastReceivedMessageId = lastId,
+                    MaxResultCount = 100,
+                    SkipCount = 0,
+                    Direction = QueryDirection.New,
+                    Sorting = "Id asc"
+                });
+                if (list.TotalCount > 0)
+                {
+                    var dtos = list.Items.Select(msg => msg.MapTo<ChatMessageOutput>()).ToArray();
+                    await SendMsgPackAsync(socket, CommandType.GetMessage, dtos);
+                    lastId = list.Items.Max(x => x.Id);
+                }
+                else
+                {
+                    break;
+                }
+            } while (true);
+            if (lastId > oldLastId)
+            {
+                await chatAppService.SetLastReceivedMessageId(new SetLastReceivedIdInput
+                {
+                    GroupId = groupId,
+                    UserId = userId,
+                    LastReceivedMessageId = lastId
+                });
+            }
+        }
+
+        private async Task SendOnlineUsers()
+        {
+            var clients = OnlineClientManager.GetAllClients();
+            var onlineUsers = clients.Select(async c => new OnlineUserOutput
+            {
+                UserId = c.UserId.GetValueOrDefault(),
+                UserName = await chatAppService.GetUserName(new EntityDto<long>(c.UserId.GetValueOrDefault())),
+                Icon = "/images/user.png"
+            }).ToArray();
+            foreach (var client in clients)
+            {
+                var socket = this.WebSocketConnectionManager.GetSocket(client.ConnectionId);
+                await SendMsgPackAsync(socket, CommandType.GetOnlineUsers, onlineUsers);
+            }
         }
     }
 }

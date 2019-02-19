@@ -104,7 +104,6 @@ namespace JK.Chat
                     }
                 }
             }
-
             await _webSocketHandler.OnDisconnected(socket);
         }
     }

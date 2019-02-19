@@ -79,10 +79,10 @@
         <a v-for="group in groups" href="#" :key="group.gid" class="list-group-item" v-bind:class="{active:group.cur}" v-on:click="changeGroup(group);">
             <div class="media">
                 <div class="media-left">
-                    <img :src="group.ico" class="img-circle">
+                    <img :src="group.icon" class="img-circle">
                 </div>
                 <div class="media-body">
-                    <h4 class="media-heading">{{group.gn}}</h4>
+                    <h4 class="media-heading">{{group.gname}}</h4>
                     <span>{{group.lstmsg}}</span>
                 </div>
                 <div class="media-right">
@@ -97,7 +97,7 @@
 <script type="x-template" id="friendsContainerTemplate">
     <div class="list-group" id="friendsContainer">
         <a v-for="friend in friends" :key="friend.uid" href="#" class="list-group-item" v-on:click="goChat(friend.uid);">
-            <img :src="friend.ico" class="img-circle">
+            <img :src="friend.icon" class="img-circle">
             <span>{{friend.uname}}</span>
         </a>
     </div>
@@ -106,7 +106,7 @@
 <script type="x-template" id="messagesContainerTemplate">
     <div class="card" style="height:85vh" id="messagesContainer">
         <div class="header">
-            &nbsp; {{currentgroup.gn}}
+            &nbsp; {{currentgroup.gname}}
             <ul class="header-dropdown m-r-10">
                 <li class="dropdown">
                     <button type="button" id="btnOpen" v-on:click="online" v-if="readystate==3" class="btn btn-primary">上线</button>
@@ -125,7 +125,7 @@
                                     <img src="/images/user.png" class="img-circle">
                                 </a>
                             </div>
-                            <div class="media-body" style="width:80%">
+                            <div class="media-body">
                                 <h4 class="media-heading" v-if="item.uid!=loginuid"><span>{{item.uname}}</span></h4>
                                 <span :class="{right:item.uid==loginuid}">{{item.msg}}</span>
                             </div>
@@ -156,14 +156,14 @@
                 <div class="form-group form-float">
                     <label class="form-label">Group name</label>
                     <div class="form-line">
-                        <input type="text" class="form-control" v-model="gn" required maxlength="@ChatGroup.MaxNameLength">
+                        <input type="text" class="form-control" v-model="gname" required maxlength="@ChatGroup.MaxNameLength">
                     </div>
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-default waves-effect" data-dismiss="modal" v-on:click="gn='';">@L("Cancel")</button>
-            <button type="button" class="btn btn-primary waves-effect" v-on:click="createGroup">@L("Save")</button>
+            <button type="button" class="btn btn-default waves-effect" data-dismiss="modal" v-on:click="gname='';">@L("Cancel")</button>
+            <button type="button" class="btn btn-primary waves-effect" data-dismiss="modal" v-on:click="createGroup">@L("Save")</button>
         </div>
     </div>
 </script>

@@ -101,6 +101,10 @@
         /// 解除置顶
         /// </summary>
         UnpinFromTop = 307,
+        /// <summary>
+        /// 获取在线用户
+        /// </summary>
+        GetOnlineUsers = 308
         #endregion
 
     }
