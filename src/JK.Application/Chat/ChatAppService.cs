@@ -257,5 +257,11 @@ namespace JK.Chat
         {
             return _userRepository.GetAll().Where(u => u.Id == idDto.Id).Select(u => u.Name).SingleOrDefaultAsync();
         }
+
+        public async Task<ChatMessageDto> GetLastMessage(GetLastMessageInput input)
+        {
+            var entity = await _chatMessageRepository.GetAll().Where(msg => msg.GroupId == input.GroupId).OrderBy(msg => msg.Id).LastOrDefaultAsync();
+            return ObjectMapper.Map<ChatMessageDto>(entity);
+        }
     }
 }

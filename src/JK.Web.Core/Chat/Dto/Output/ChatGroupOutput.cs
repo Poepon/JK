@@ -32,7 +32,7 @@ namespace JK.Chat.Dto.Output
         public string LastMessage { get; set; }
 
         [Key("lsttime")]
-        public long LastTime { get; set; }
+        public long? LastTime { get; set; }
 
         [Key("unread")]
         public int Unread { get; set; }
