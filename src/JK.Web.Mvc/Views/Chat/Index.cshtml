@@ -60,7 +60,7 @@
             <vue-messages-container v-for="group in groups" :key="group.gid"
                                     :loginuid="@AbpSession.UserId.GetValueOrDefault()" 
                                     :currentgroup="group"
-                                    :gmessages="gmessages"
+                                    :allgroupsmessages="allgroupsmessages"
                                     :readystate="readystate"></vue-messages-container>
 
         </div>

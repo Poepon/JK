@@ -110,7 +110,7 @@ namespace JK.Chat
                     CreationTime = x.CreationTime,
                     ReadState = x.ReadState
                 })
-                .ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
+                .ToListAsync();
             return new PagedResultDto<ChatMessageDto>(totalCount, list);
         }
 
@@ -220,7 +220,7 @@ namespace JK.Chat
             var list = await _chatGrouppMemberRepository.GetAll()
                      .Where(member => member.UserId == input.UserId)
                      .Select(member => member.GroupId)
-                     .ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
+                     .ToListAsync();
             return list;
         }
 

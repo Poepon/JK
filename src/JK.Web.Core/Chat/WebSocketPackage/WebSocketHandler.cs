@@ -25,9 +25,9 @@ namespace JK.Chat
         /// </summary>
         /// <param name="socket">The web-socket of the client.</param>
         /// <returns>Awaitable Task.</returns>
-        public virtual Task OnConnected(string connectionId, WebSocket socket)
+        public virtual Task OnConnected(string connectionId, WebSocketClient client)
         {
-            WebSocketConnectionManager.AddSocket(connectionId, socket);
+            WebSocketConnectionManager.AddWebSocketClient(connectionId, client);
             return Task.CompletedTask;
         }
 
@@ -36,16 +36,23 @@ namespace JK.Chat
         /// </summary>
         /// <param name="socket">The web-socket of the client.</param>
         /// <returns>Awaitable Task.</returns>
-        public virtual async Task OnDisconnected(WebSocket socket)
+        public virtual async Task OnDisconnected(WebSocketClient socket)
         {
-            var socketId = WebSocketConnectionManager.GetConnectionId(socket);
-            await WebSocketConnectionManager.RemoveSocket(socketId);
+            var connectionId = WebSocketConnectionManager.GetConnectionId(socket);
+            await WebSocketConnectionManager.RemoveClient(connectionId);
         }
 
         public async Task SendAsync(WebSocket socket, WebSocketMessageType messageType, byte[] data, CancellationToken? cancellationToken = null)
         {
             if (socket != null && socket.State == WebSocketState.Open)
+            {
                 await socket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), messageType, true, cancellationToken ?? CancellationToken.None);
+                Console.WriteLine("send one msg.");
+            }
+            else
+            {
+                Console.WriteLine("socket is close.");
+            }
         }
 
         public abstract Task ReceiveTextAsync(WebSocket socket, WebSocketReceiveResult result, string receivedMessage);

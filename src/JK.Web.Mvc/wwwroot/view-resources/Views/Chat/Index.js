@@ -43,7 +43,7 @@
             }
         });
         Vue.component('vue-messages-container', {
-            props: ['currentgroup', 'gmessages', 'readystate', "loginuid"],
+            props: ['currentgroup', 'allgroupsmessages', 'readystate', "loginuid"],
             template: "#messagesContainerTemplate",
             data: function () {
                 return {
@@ -52,12 +52,13 @@
             },
             computed: {
                 messages: function () {
-                    console.log(this.gmessages);
-                    if (this.gmessages.hasOwnProperty(this.currentgroup.gid)) {
-                        return this.gmessages[this.currentgroup.gid];
-                    } else {
-                        return [];
+                    var rs = [];
+                    for (var i = 0; i < this.allgroupsmessages.length; i++) {
+                        if (this.allgroupsmessages[i].gid === this.currentgroup.gid) {
+                            rs.push(this.allgroupsmessages[i]);
+                        }
                     }
+                    return rs.sort(function (a, b) { return a.mid - b.mid; });
                 }
             },
             mounted: function () {
@@ -100,7 +101,7 @@
                     var bytes = serializeMsgPack(messagedto);
                     chat.sendCommand(chat.commandType.SendMessage, chat.dataType.MessagePack, bytes);
                     this.message = "";
-                    this.$refs.messagespanel.scrollBy(0, this.$refs.messagespanel.scrollHeight);
+                    //this.$refs.messagespanel.scrollBy(0, this.$refs.messagespanel.scrollHeight);
                 },
                 online: function () {
                     chat.online();
@@ -120,8 +121,8 @@
                 groups: [
 
                 ],
-                gmessages: {}
-            },
+                allgroupsmessages: []
+            },           
             methods: {
                 getGroups: function () {
                     var commanddto = {};
@@ -156,14 +157,7 @@
                 var decodedObj = deserializeMsgPack(cmddto.data);
                 switch (cmddto.commandType) {
                     case chat.commandType.GetMessage:
-                        for (var i = 0; i < decodedObj.length; i++) {
-                            var item = decodedObj[i];
-                            if (chatApp.gmessages[item.gid] === undefined) {
-                                chatApp.gmessages[item.gid] = [];
-                            }
-                            chatApp.gmessages[item.gid].push(item);
-                        }
-                        //chatApp.messages = chatApp.messages.concat(decodedObj).sort(function (a, b) { return a.mid - b.mid; });
+                        chatApp.allgroupsmessages = chatApp.allgroupsmessages.concat(decodedObj);
                         break;
                     case chat.commandType.GetGroups:
                         chatApp.groups = decodedObj;

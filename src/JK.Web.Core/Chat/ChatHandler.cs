@@ -1,9 +1,7 @@
 ﻿using Abp.Application.Services.Dto;
-using Abp.Auditing;
 using Abp.AutoMapper;
 using Abp.Dependency;
 using Abp.Json;
-using Abp.RealTime;
 using Abp.Runtime.Caching.Redis;
 using Abp.Runtime.Session;
 using JK.Chat.Dto;
@@ -29,20 +27,17 @@ namespace JK.Chat
         private readonly IChatAppService chatAppService;
         private readonly IAbpRedisCacheDatabaseProvider databaseProvider;
 
-        protected IOnlineClientManager<ChatChannel> OnlineClientManager { get; }
-        protected IClientInfoProvider ClientInfoProvider { get; }
+
         public IAbpSession AbpSession { get; set; }
 
         public ChatHandler(WebSocketConnectionManager webSocketConnectionManager,
             IHttpContextAccessor httpContextAccess,
-            IOnlineClientManager<ChatChannel> onlineClientManager,
-            IClientInfoProvider clientInfoProvider,
+
             IChatAppService chatAppService,
             IAbpRedisCacheDatabaseProvider databaseProvider) : base(webSocketConnectionManager)
         {
             this.httpContextAccess = httpContextAccess;
-            this.OnlineClientManager = onlineClientManager;
-            ClientInfoProvider = clientInfoProvider;
+
             this.chatAppService = chatAppService;
             this.databaseProvider = databaseProvider;
             AbpSession = NullAbpSession.Instance;
@@ -93,9 +88,11 @@ namespace JK.Chat
                         var connections = WebSocketConnectionManager.GetAllFromGroup(messageInput.GroupId.ToString());
                         foreach (var connectionId in connections)
                         {
-                            var onlineClient = OnlineClientManager.GetByConnectionIdOrNull(connectionId);
-                            WebSocket webSocket = WebSocketConnectionManager.GetSocket(connectionId);
-                            await SendNewMessage(messageInput.GroupId, onlineClient.UserId.GetValueOrDefault(), webSocket);
+                            var client = WebSocketConnectionManager.GetWebSocketClient(connectionId);
+                            if (client != null)
+                            {
+                                await SendNewMessage(messageInput.GroupId, client.UserId.GetValueOrDefault(), client.WebSocket);
+                            }
                         }
                     }
                     break;
@@ -237,7 +234,7 @@ namespace JK.Chat
                     break;
                 case CommandType.GetOnlineUsers:
                     {
-                        var clients = OnlineClientManager.GetAllClients();
+                        var clients = WebSocketConnectionManager.GetAllClients();
                         var onlineUsers = clients.Select(async c => new OnlineUserOutput
                         {
                             UserId = c.UserId.GetValueOrDefault(),
@@ -374,52 +371,30 @@ namespace JK.Chat
             return value;
         }
 
-        protected virtual IOnlineClient CreateClientForCurrentConnection(string connectionId)
-        {
-            return new OnlineClient(
-                connectionId,
-                GetIpAddressOfClient(),
-                AbpSession.TenantId,
-                AbpSession.UserId
-            );
-        }
 
-        protected virtual string GetIpAddressOfClient()
+        public override async Task OnConnected(string connectionId, WebSocketClient client)
         {
-            try
-            {
-                return ClientInfoProvider.ClientIpAddress;
-            }
-            catch (Exception ex)
-            {
-                return "";
-            }
-        }
+            client.UserId = AbpSession.UserId;
 
-        public override async Task OnConnected(string connectionId, WebSocket socket)
-        {
-            var client = CreateClientForCurrentConnection(connectionId);
-
-            await base.OnConnected(client.ConnectionId, socket);
             await AddToGroup(client);
 
-            OnlineClientManager.Add(client);
+            await base.OnConnected(client.ConnectionId, client);
+           
             await SendOnlineUsers();
         }
 
-        public override async Task OnDisconnected(WebSocket socket)
+        public override async Task OnDisconnected(WebSocketClient client)
         {
-            await base.OnDisconnected(socket);
-            var conntionId = this.WebSocketConnectionManager.GetConnectionId(socket);
-            if (string.IsNullOrEmpty(conntionId))
-                return;
-            var onlineClient = OnlineClientManager.GetByConnectionIdOrNull(conntionId);
-            await RemoveFromGroup(onlineClient);
-            OnlineClientManager.Remove(onlineClient);
+            client.UserId = AbpSession.UserId;
+
+            await RemoveFromGroup(client);
+
+            await base.OnDisconnected(client);
+
             await SendOnlineUsers();
         }
 
-        private async Task AddToGroup(IOnlineClient onlineClient)
+        private async Task AddToGroup(WebSocketClient onlineClient)
         {
             var groups = await chatAppService.GetUserGroupsId(new GetUserGroupsInput { UserId = onlineClient.UserId.GetValueOrDefault() });
             foreach (var groupId in groups)
@@ -428,7 +403,7 @@ namespace JK.Chat
             }
         }
 
-        private async Task RemoveFromGroup(IOnlineClient onlineClient)
+        private async Task RemoveFromGroup(WebSocketClient onlineClient)
         {
             var groups = await chatAppService.GetUserGroupsId(new GetUserGroupsInput { UserId = onlineClient.UserId.GetValueOrDefault() });
             foreach (var groupId in groups)
@@ -545,7 +520,7 @@ namespace JK.Chat
 
         private async Task SendOnlineUsers()
         {
-            var clients = OnlineClientManager.GetAllClients();
+            var clients = WebSocketConnectionManager.GetAllClients();
             var onlineUsers = clients.Select(async c => new OnlineUserOutput
             {
                 UserId = c.UserId.GetValueOrDefault(),
@@ -554,8 +529,7 @@ namespace JK.Chat
             }).Distinct(new OnlineUserOutputComparer()).ToArray();
             foreach (var client in clients)
             {
-                var socket = this.WebSocketConnectionManager.GetSocket(client.ConnectionId);
-                await SendMsgPackAsync(socket, CommandType.GetOnlineUsers, onlineUsers);
+                await SendMsgPackAsync(client.WebSocket, CommandType.GetOnlineUsers, onlineUsers);
             }
         }
     }

@@ -5,7 +5,7 @@ namespace JK.Chat.Dto.Input
     [MessagePackObject]
     public class CreateGroupInput
     {
-        [Key("gn")]
+        [Key("gname")]
         public string GroupName { get; set; }        
     }
 }

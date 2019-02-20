@@ -1,8 +1,7 @@
-﻿using JK.Chat.Dto;
+﻿using Abp.Auditing;
+using JK.Chat.Dto;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text;
@@ -15,11 +14,15 @@ namespace JK.Chat
     {
         private readonly RequestDelegate _next;
         private WebSocketHandler _webSocketHandler { get; set; }
+        protected IClientInfoProvider ClientInfoProvider { get; }
 
-        public WebSocketManagerMiddleware(RequestDelegate next, WebSocketHandler webSocketHandler)
+        public WebSocketManagerMiddleware(RequestDelegate next,
+            IClientInfoProvider clientInfoProvider,
+            WebSocketHandler webSocketHandler)
         {
             _next = next;
             _webSocketHandler = webSocketHandler;
+            ClientInfoProvider = clientInfoProvider;
         }
 
         public async Task Invoke(HttpContext context)
@@ -32,7 +35,7 @@ namespace JK.Chat
             CancellationToken ct = context.RequestAborted;
             var socket = await context.WebSockets.AcceptWebSocketAsync();
             string connectionId = Guid.NewGuid().ToString("N");
-            await _webSocketHandler.OnConnected(connectionId, socket);
+            await _webSocketHandler.OnConnected(connectionId, CreateClientForCurrentConnection(connectionId, socket));
 
             await Receive(socket, ct);
         }
@@ -83,7 +86,10 @@ namespace JK.Chat
                         {
                             try
                             {
-                                await _webSocketHandler.OnDisconnected(socket);
+                                await _webSocketHandler.OnDisconnected(new WebSocketClient()
+                                {
+                                    WebSocket = socket
+                                });
                             }
                             catch (WebSocketException)
                             {
@@ -92,9 +98,21 @@ namespace JK.Chat
                         }
                     }
                 }
+                catch (AggregateException)
+                {
+                    break;
+                }
+                catch (ThreadAbortException)
+                {
+                    break;
+                }
+                catch (TaskCanceledException)
+                {
+                    break;
+                }
                 catch (OperationCanceledException)
                 {
-                   
+                    break;
                 }
                 catch (WebSocketException e)
                 {
@@ -104,7 +122,32 @@ namespace JK.Chat
                     }
                 }
             }
-            await _webSocketHandler.OnDisconnected(socket);
+            await _webSocketHandler.OnDisconnected(new WebSocketClient()
+            {
+                WebSocket = socket
+            });
+        }
+
+
+        protected virtual WebSocketClient CreateClientForCurrentConnection(string connectionId, WebSocket webSocket)
+        {
+            return new WebSocketClient(
+                connectionId,
+                GetIpAddressOfClient(),
+                webSocket
+            );
+        }
+
+        protected virtual string GetIpAddressOfClient()
+        {
+            try
+            {
+                return ClientInfoProvider.ClientIpAddress;
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
         }
     }
 }
