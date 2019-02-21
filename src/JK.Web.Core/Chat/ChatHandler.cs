@@ -1,9 +1,11 @@
-﻿using Abp.Application.Services.Dto;
+﻿using Abp;
+using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using Abp.Dependency;
 using Abp.Json;
 using Abp.Runtime.Caching.Redis;
 using Abp.Runtime.Session;
+using Abp.Threading;
 using JK.Chat.Dto;
 using JK.Chat.Dto.Input;
 using JK.Chat.Dto.Output;
@@ -11,6 +13,7 @@ using MessagePack;
 using Microsoft.AspNetCore.Http;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.WebSockets;
@@ -46,25 +49,34 @@ namespace JK.Chat
         private async Task<ChatGroupOutput[]> GetGroups(long userId)
         {
             var groups = await chatAppService.GetUserGroups(new GetUserGroupsInput { UserId = userId });
-            var dtos = groups.Items.Select(x => new ChatGroupOutput
+            var dtos = groups.Items.Select(x =>
             {
-                CreationTime = x.CreationTime,
-                CreatorUserId = x.CreatorUserId,
-                GroupType = x.GroupType,
-                Id = x.Id,
-                Name = x.Name,
-                Status = x.Status,
-                Unread = 88,
-                IsCurrent = false,
-                Icon = "/images/user.png",
-                LastMessage = "Hi,thie is a test.",
-                LastTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+                var o = new ChatGroupOutput
+                {
+                    CreationTime = x.CreationTime,
+                    CreatorUserId = x.CreatorUserId,
+                    GroupType = x.GroupType,
+                    Id = x.Id,
+                    Name = x.Name,
+                    Status = x.Status,
+                    Unread = AsyncHelper.RunSync(() => chatAppService.GetUnreadCount(new ChatGroupInputBase { GroupId = x.Id, UserId = userId })),
+                    IsCurrent = false,
+                    Icon = "/images/user.png",
+                };
+                var lstmsg = AsyncHelper.RunSync(() => chatAppService.GetLastMessage(new GetLastMessageInput { GroupId = x.Id }));
+                o.LastMessage = lstmsg?.Message;
+                o.LastTime = lstmsg?.CreationTime;
+                return o;
             }).ToArray();
             return dtos;
         }
 
         public override async Task ReceiveBinaryAsync(WebSocket socket, WebSocketReceiveResult result, BinaryMessage receivedMessage)
         {
+            if (!AbpSession.UserId.HasValue)
+            {
+                throw new AbpException("未登录，请先登录。");
+            }
             switch (receivedMessage.CommandType)
             {
                 case CommandType.Online:
@@ -234,13 +246,7 @@ namespace JK.Chat
                     break;
                 case CommandType.GetOnlineUsers:
                     {
-                        var clients = WebSocketConnectionManager.GetAllClients();
-                        var onlineUsers = clients.Select(async c => new OnlineUserOutput
-                        {
-                            UserId = c.UserId.GetValueOrDefault(),
-                            UserName = await chatAppService.GetUserName(new EntityDto<long>(c.UserId.GetValueOrDefault())),
-                            Icon = "/images/user.png"
-                        }).ToArray();
+                        var onlineUsers = GetOnlineUsers();
                         await SendMsgPackAsync(socket, CommandType.GetOnlineUsers, onlineUsers, httpContextAccess.HttpContext.RequestAborted);
                     }
                     break;
@@ -379,7 +385,7 @@ namespace JK.Chat
             await AddToGroup(client);
 
             await base.OnConnected(client.ConnectionId, client);
-           
+
             await SendOnlineUsers();
         }
 
@@ -517,16 +523,21 @@ namespace JK.Chat
                 });
             }
         }
-
+        private OnlineUserOutput[] GetOnlineUsers()
+        {
+            var clients = WebSocketConnectionManager.GetAllClients();
+            var onlineUsers = clients.Select(c => new OnlineUserOutput
+            {
+                UserId = c.UserId.GetValueOrDefault(),
+                UserName = AsyncHelper.RunSync(() => chatAppService.GetUserName(new EntityDto<long>(c.UserId.GetValueOrDefault()))),
+                Icon = "/images/user.png"
+            }).Distinct(new OnlineUserOutputComparer()).ToArray();
+            return onlineUsers;
+        }
         private async Task SendOnlineUsers()
         {
             var clients = WebSocketConnectionManager.GetAllClients();
-            var onlineUsers = clients.Select(async c => new OnlineUserOutput
-            {
-                UserId = c.UserId.GetValueOrDefault(),
-                UserName = await chatAppService.GetUserName(new EntityDto<long>(c.UserId.GetValueOrDefault())),
-                Icon = "/images/user.png"
-            }).Distinct(new OnlineUserOutputComparer()).ToArray();
+            var onlineUsers = GetOnlineUsers();
             foreach (var client in clients)
             {
                 await SendMsgPackAsync(client.WebSocket, CommandType.GetOnlineUsers, onlineUsers);
@@ -534,7 +545,7 @@ namespace JK.Chat
         }
     }
 
-    public class OnlineUserOutputComparer : System.Collections.Generic.IEqualityComparer<Task<OnlineUserOutput>>
+    public class OnlineUserOutputComparer : IEqualityComparer<OnlineUserOutput>
     {
 
         public bool Equals(Task<OnlineUserOutput> x, Task<OnlineUserOutput> y)
@@ -542,9 +553,19 @@ namespace JK.Chat
             return x.Result.UserId == y.Result.UserId;
         }
 
+        public bool Equals(OnlineUserOutput x, OnlineUserOutput y)
+        {
+            return x.UserId == y.UserId;
+        }
+
         public int GetHashCode(Task<OnlineUserOutput> obj)
         {
             return obj.Result.UserId.GetHashCode();
+        }
+
+        public int GetHashCode(OnlineUserOutput obj)
+        {
+            return obj.UserId.GetHashCode();
         }
     }
 }

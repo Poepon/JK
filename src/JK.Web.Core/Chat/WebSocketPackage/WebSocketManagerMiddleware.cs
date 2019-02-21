@@ -1,4 +1,5 @@
-﻿using Abp.Auditing;
+﻿using Abp;
+using Abp.Auditing;
 using JK.Chat.Dto;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -120,6 +121,10 @@ namespace JK.Chat
                     {
                         socket.Abort();
                     }
+                }
+                catch (AbpException e)
+                {
+                    break;
                 }
             }
             await _webSocketHandler.OnDisconnected(new WebSocketClient()

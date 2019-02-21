@@ -160,12 +160,14 @@
                         chatApp.allgroupsmessages = chatApp.allgroupsmessages.concat(decodedObj);
                         break;
                     case chat.commandType.GetGroups:
+                        console.log(decodedObj);
                         chatApp.groups = decodedObj;
                         break;
                     case chat.commandType.AlertMessage:
                         alert(decodedObj.text);
                         break;
                     case chat.commandType.GetOnlineUsers:
+                        console.log(decodedObj);
                         chatApp.friends = decodedObj;
                         break;
                     default:
