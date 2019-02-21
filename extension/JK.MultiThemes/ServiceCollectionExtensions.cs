@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace CXGS.MultiThemes
+namespace JK.MultiThemes
 {
     public static class ServiceCollectionExtensions
     {
