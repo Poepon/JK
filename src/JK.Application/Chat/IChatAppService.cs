@@ -18,6 +18,8 @@ namespace JK.Chat
 
         Task CreateGroup(CreateGroupInput input);
 
+        Task DeleteGroup(DeleteGroupInput input);
+
         Task JoinGroup(ChatGroupInputBase input);
 
         Task LeaveGroup(ChatGroupInputBase input);

@@ -1,6 +1,7 @@
 ﻿using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
+using Abp.UI;
 using JK.Authorization.Users;
 using JK.Chat.Dto;
 using Microsoft.AspNetCore.Http;
@@ -262,6 +263,27 @@ namespace JK.Chat
         {
             var entity = await _chatMessageRepository.GetAll().Where(msg => msg.GroupId == input.GroupId).OrderBy(msg => msg.Id).LastOrDefaultAsync();
             return ObjectMapper.Map<ChatMessageDto>(entity);
+        }
+
+        public async Task DeleteGroup(DeleteGroupInput input)
+        {
+            var group = await _chatGroupRepository.GetAsync(input.GroupId);
+            if (group != null)
+            {
+                if (group.CreatorUserId == input.UserId)
+                {
+                    await _chatGroupRepository.DeleteAsync(input.GroupId);
+                }
+                else
+                {
+                    throw new UserFriendlyException("您没有权限删除该聊天群组。");
+                }
+            }
+            else
+            {
+                throw new UserFriendlyException("聊天群组不存在或已被删除。");
+            }
+            throw new NotImplementedException();
         }
     }
 }
