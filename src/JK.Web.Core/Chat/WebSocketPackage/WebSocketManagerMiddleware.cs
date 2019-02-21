@@ -1,6 +1,8 @@
 ﻿using Abp;
 using Abp.Auditing;
+using Abp.UI;
 using JK.Chat.Dto;
+using JK.Chat.Dto.Output;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
@@ -98,6 +100,16 @@ namespace JK.Chat
                             }
                         }
                     }
+                }
+                catch (UserFriendlyException e)
+                {
+                    var warn = new AlertMessageOutput
+                    {
+                        Title = "警告",
+                        Type = AlertType.Warning,
+                        Text = e.Message
+                    };
+                    await _webSocketHandler.SendMsgPackAsync(socket, CommandType.AlertMessage, warn, cancellationToken);
                 }
                 catch (AggregateException)
                 {
