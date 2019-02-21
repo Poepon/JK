@@ -1,19 +1,19 @@
 ﻿using System;
+using Abp.AspNetCore;
+using Abp.Castle.Logging.Log4Net;
+using Castle.Facilities.Logging;
+using Exceptionless;
+using JK.Authentication.JwtBearer;
+using JK.Chat;
+using JK.Configuration;
+using JK.Identity;
+using JK.Web.Resources;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Castle.Facilities.Logging;
-using Abp.AspNetCore;
-using Abp.Castle.Logging.Log4Net;
-using JK.Authentication.JwtBearer;
-using JK.Configuration;
-using JK.Identity;
-using JK.Web.Resources;
-using JK.Chat;
-using Abp.Exceptionless;
 
 namespace JK.Web.Startup
 {

@@ -42,7 +42,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\extension\Abp.Exceptionless\Abp.Exceptionless.csproj" />
     <ProjectReference Include="..\JK.Web.Core\JK.Web.Core.csproj" />
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@ using Abp.Events.Bus.Handlers;
 using Exceptionless;
 using System.Threading.Tasks;
 
-namespace Abp.Exceptionless
+namespace JK.Exceptionless
 {
     public class ExceptionlessHandler : IAsyncEventHandler<AbpHandledExceptionData>, ITransientDependency
     {
