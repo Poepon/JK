@@ -7,8 +7,8 @@ using Abp.Dependency;
 namespace JK.Web.Controllers
 {
     [DisableAuditing]
-    [AbpMvcAuthorize()]
-    public class ChatController : JKControllerBase,ITransientDependency
+    [AbpMvcAuthorize]
+    public class ChatController : JKControllerBase, ITransientDependency
     {
         public ChatController()
         {

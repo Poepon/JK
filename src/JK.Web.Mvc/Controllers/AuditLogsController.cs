@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace JK.Web.Controllers
 {
     [DisableAuditing]
-    [AbpMvcAuthorize()]
+    [AbpMvcAuthorize]
     public class AuditLogsController : JKControllerBase
     {
         private readonly IAuditLogAppService _auditLogAppService;

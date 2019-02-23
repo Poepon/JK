@@ -38,6 +38,8 @@ namespace JK
                 case StorageMode.DistributedCache:
                     services.AddTransient<ICaptchaStorageProvider, DistributedCacheCaptchaStorageProvider>();
                     break;
+                default:
+                    break;
             }
 
             services.AddTransient<ICaptchaImageProvider, CaptchaImageProvider>();

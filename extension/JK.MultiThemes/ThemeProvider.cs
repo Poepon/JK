@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace JK.MultiThemes
 {
 
-    public partial class ThemeProvider : IThemeProvider
+    public class ThemeProvider : IThemeProvider
     {
         #region Fields
 

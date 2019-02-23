@@ -101,7 +101,7 @@ namespace JK.Captcha
         {
 
             IUrlHelper urlHelper = new UrlHelper(ViewContext);
-            var actionUrl = urlHelper.Action(action: nameof(CaptchaImageController.Show),
+            var actionUrl = urlHelper.Action(nameof(CaptchaImageController.Show),
                 controller: nameof(CaptchaImageController).Replace("Controller", string.Empty),
                 values:
                 new

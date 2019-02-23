@@ -24,7 +24,7 @@ namespace JK.MultiThemes
                 viewLocations = new[]
                     {
                         $"{themeDirPath}/Views/{{1}}/{{0}}.cshtml",
-                        $"{themeDirPath}/Views/Shared/{{0}}.cshtml",
+                        $"{themeDirPath}/Views/Shared/{{0}}.cshtml"
                     }
                     .Concat(viewLocations);
             }

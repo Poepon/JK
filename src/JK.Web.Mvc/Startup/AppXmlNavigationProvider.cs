@@ -115,9 +115,9 @@ namespace JK.Web.Startup
         private static void PopulateNode(MenuItemDefinition menuItemDefinition, XmlNode xmlNode)
         {
             var isEnabledStr = xmlNode.GetAttributeValueOrNull("isEnabled");
-            menuItemDefinition.IsEnabled = string.IsNullOrEmpty(isEnabledStr) ? true : bool.Parse(isEnabledStr);
+            menuItemDefinition.IsEnabled = string.IsNullOrEmpty(isEnabledStr) || bool.Parse(isEnabledStr);
             var isVisibleStr = xmlNode.GetAttributeValueOrNull("isVisible");
-            menuItemDefinition.IsVisible = string.IsNullOrEmpty(isVisibleStr) ? true : bool.Parse(isVisibleStr);
+            menuItemDefinition.IsVisible = string.IsNullOrEmpty(isVisibleStr) || bool.Parse(isVisibleStr);
             menuItemDefinition.RequiredPermissionName = xmlNode.GetAttributeValueOrNull("requiredPermissionName");
 
             var requiresAuthenticationStr = xmlNode.GetAttributeValueOrNull("requiresAuthentication");

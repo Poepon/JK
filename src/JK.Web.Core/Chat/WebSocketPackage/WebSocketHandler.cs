@@ -19,8 +19,7 @@ namespace JK.Chat
         /// Initializes a new instance of the <see cref="WebSocketHandler"/> class.
         /// </summary>
         /// <param name="webSocketConnectionManager">The web socket connection manager.</param>
-        /// <param name="methodInvocationStrategy">The method invocation strategy used for incoming requests.</param>
-        public WebSocketHandler(WebSocketConnectionManager webSocketConnectionManager)
+        protected WebSocketHandler(WebSocketConnectionManager webSocketConnectionManager)
         {
             WebSocketConnectionManager = webSocketConnectionManager;
         }
@@ -28,7 +27,7 @@ namespace JK.Chat
         /// <summary>
         /// Called when a client has connected to the server.
         /// </summary>
-        /// <param name="socket">The web-socket of the client.</param>
+        /// <param name="client">The web-socket of the client.</param>
         /// <returns>Awaitable Task.</returns>
         public virtual Task OnConnected(string connectionId, WebSocketClient client)
         {
@@ -41,9 +40,9 @@ namespace JK.Chat
         /// </summary>
         /// <param name="socket">The web-socket of the client.</param>
         /// <returns>Awaitable Task.</returns>
-        public virtual async Task OnDisconnected(WebSocketClient socket)
+        public virtual async Task OnDisconnected(WebSocketClient client)
         {
-            var connectionId = WebSocketConnectionManager.GetConnectionId(socket);
+            var connectionId = WebSocketConnectionManager.GetConnectionId(client);
             await WebSocketConnectionManager.RemoveClient(connectionId);
         }
 

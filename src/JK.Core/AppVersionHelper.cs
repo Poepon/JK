@@ -7,7 +7,7 @@ namespace JK
     /// <summary>
     /// Central point for application version.
     /// </summary>
-    public class AppVersionHelper
+    public static class AppVersionHelper
     {
         /// <summary>
         /// Gets current version of the application.
