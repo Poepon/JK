@@ -140,6 +140,20 @@
     <text name="AdminPassword">管理员密码</text>
     <text name="Chat">聊天</text>
     <text name="Save">保存</text>
+
+    <text name="GoogleAuthenticatorReferrerLink">如果不知道如何使用谷歌身份验证器,请查看</text>
+    <text name="ScanQrCodeWithYourMobileApp">使用手机App【谷歌身份验证器】扫描二维码</text>
+    <text name="Enable">启用</text>
+    <text name="SendSecurityCode">发送安全代码。</text>
+    <text name="SendSecurityCode_Information">您必须通过验证才能登录。请选择一个验证类型。根据选定的验证类型发送代码。</text>
+    <text name="SendSecurityCodeErrorMessage">无法发送安全代码！</text>
+    <text name="VerifySecurityCodeNotLoggedInErrorMessage">您应该在登录后再验证！可能您的登录已超时。请转到登录页，然后重新尝试。</text>
+    <text name="VerificationCode">验证码</text>
+    <text name="VerifySecurityCode">安全代码</text>
+    <text name="VerifySecurityCode_Information">请输入发送给您的验证码。</text>
+    <text name="RememberThisBrowser">记住这个浏览器</text>
+    <text name="Submit">提交</text>
+    <text name="InvalidSecurityCode">无效的安全代码！</text>
   </texts>
 </localizationDictionary>
 

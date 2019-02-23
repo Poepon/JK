@@ -1,0 +1,45 @@
+﻿@using JK.Web.Models.Common.Modals
+@model JK.Profile.Dto.TwoFactorLoginDto
+@{
+    Layout = null;
+}
+@await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml", new ModalHeaderViewModel("帐号安全"))
+<div class="modal-body">
+    <ul class="nav nav-tabs  m-tabs-line" role="tablist">
+        <li class="nav-item m-tabs__item">
+            <a href="#MainTab" class="nav-link m-tabs__link active" data-toggle="tab" role="tab">
+                设置
+            </a>
+        </li>
+        <li class="nav-item m-tabs__item">
+            <a href="#GoogleTab" data-toggle="tab" role="tab" class="nav-link m-tabs__link">
+                谷歌身份验证器
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="MainTab" role="tabpanel">
+            <div class="input-group">
+                <input type="checkbox" id="ckbEnable" @(Model.IsTwoFactorEnabled?"checked":"") />
+                <label for="ckbEnable">启用两步验证</label>
+            </div>
+        </div>
+        <div class="tab-pane" id="GoogleTab" role="tabpanel">
+            <div class="google-authenticator-enable" style="@(!Model.IsGoogleAuthenticatorEnabled ? "display:none" : "")">
+                <div>
+                    @L("ScanQrCodeWithYourMobileApp")
+                </div>
+                <div class="text-center">
+                    <img src="@Model.QrCodeSetupImageUrl" />
+                </div>
+                <small>
+                    @L("GoogleAuthenticatorReferrerLink"): <a href="https://support.google.com/accounts/answer/1066447" target="_blank" rel="noopener noreferrer">谷歌身份验证器</a>
+                </small>
+            </div>
+            <div class="google-authenticator-enable" style="@(Model.IsGoogleAuthenticatorEnabled ? "display:none" : "")">
+                <button type="button" class="btn blue" id="btnEnableGoogleAuthenticator">@L("Enable")</button>
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("~/Views/Shared/Modals/_ModalFooterWithClose.cshtml")

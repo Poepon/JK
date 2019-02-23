@@ -1,0 +1,20 @@
+﻿@model JK.Web.Models.Account.SendSecurityCodeViewModel
+<div class="card">
+    <div class="body">
+        <form class="m-login__form m-form" asp-action="SendSecurityCode" method="post">
+            <p>@L("SendSecurityCode_Information")</p>
+            @Html.Hidden("returnUrl", Model.ReturnUrl)
+            @Html.Hidden("rememberMe", @Model.RememberMe)
+            <div class="form-group m-form__group">
+                @Html.DropDownListFor(model => model.SelectedProvider, Model.Providers, new
+               {
+                   @class = "form-control",
+                   size = 1
+               })
+            </div>
+            <div class="m-login__form-action">
+                <input type="submit" class="btn btn-primary" value="@L("Submit")" />
+            </div>
+        </form>
+    </div>
+</div>

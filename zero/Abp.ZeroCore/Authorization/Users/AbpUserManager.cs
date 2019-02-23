@@ -405,11 +405,13 @@ namespace Abp.Authorization.Users
             {
                 throw new UserFriendlyException(string.Format(L("Identity.DuplicateUserName"), userName));
             }
-
-            user = (await FindByEmailAsync(emailAddress));
-            if (user != null && user.Id != expectedUserId)
+            if (!string.IsNullOrEmpty(emailAddress))
             {
-                throw new UserFriendlyException(string.Format(L("Identity.DuplicateEmail"), emailAddress));
+                user = (await FindByEmailAsync(emailAddress));
+                if (user != null && user.Id != expectedUserId)
+                {
+                    throw new UserFriendlyException(string.Format(L("Identity.DuplicateEmail"), emailAddress));
+                }
             }
 
             return IdentityResult.Success;

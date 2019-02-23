@@ -1,9 +1,6 @@
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using Abp.Auditing;
 using Abp.Authorization.Users;
-using Abp.Extensions;
-using JK.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace JK.Web.Models.Account
 {

@@ -1,11 +1,10 @@
-﻿using AutoMapper;
-using Abp.Authorization;
+﻿using Abp.Authorization;
 using Abp.Authorization.Roles;
 using JK.Authorization.Roles;
 
 namespace JK.Roles.Dto
 {
-    public class RoleMapProfile : Profile
+    public class RoleMapProfile : AutoMapper.Profile
     {
         public RoleMapProfile()
         {

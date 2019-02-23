@@ -28,6 +28,8 @@ using JK.MultiTenancy;
 using JK.Sessions;
 using JK.Web.Models.Account;
 using JK.Web.Views.Shared.Components.TenantChange;
+using JK.Profile;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace JK.Web.Controllers
 {
@@ -39,6 +41,7 @@ namespace JK.Web.Controllers
         private readonly IUnitOfWorkManager _unitOfWorkManager;
         private readonly AbpLoginResultTypeHelper _abpLoginResultTypeHelper;
         private readonly LogInManager _logInManager;
+        private readonly IProfileAppService _profileAppService;
         private readonly SignInManager _signInManager;
         private readonly UserRegistrationManager _userRegistrationManager;
         private readonly ISessionAppService _sessionAppService;
@@ -52,6 +55,7 @@ namespace JK.Web.Controllers
             IUnitOfWorkManager unitOfWorkManager,
             AbpLoginResultTypeHelper abpLoginResultTypeHelper,
             LogInManager logInManager,
+            IProfileAppService profileAppService,
             SignInManager signInManager,
             UserRegistrationManager userRegistrationManager,
             ISessionAppService sessionAppService,
@@ -64,6 +68,7 @@ namespace JK.Web.Controllers
             _unitOfWorkManager = unitOfWorkManager;
             _abpLoginResultTypeHelper = abpLoginResultTypeHelper;
             _logInManager = logInManager;
+            _profileAppService = profileAppService;
             _signInManager = signInManager;
             _userRegistrationManager = userRegistrationManager;
             _sessionAppService = sessionAppService;
@@ -101,7 +106,20 @@ namespace JK.Web.Controllers
 
             var loginResult = await GetLoginResultAsync(loginModel.UsernameOrEmailAddress, loginModel.Password, GetTenancyNameOrNull());
 
-            await _signInManager.SignInAsync(loginResult.Identity, loginModel.RememberMe);
+            var signInResult = await _signInManager.SignInOrTwoFactorAsync(loginResult, loginModel.RememberMe);
+            if (signInResult.RequiresTwoFactor)
+            {
+                return Json(new AjaxResponse
+                {
+                    TargetUrl = Url.Action(
+                        "SendSecurityCode",
+                        new
+                        {
+                            returnUrl = returnUrl,
+                            rememberMe = loginModel.RememberMe
+                        })
+                });
+            }
             await UnitOfWorkManager.Current.SaveChangesAsync();
 
             return Json(new AjaxResponse { TargetUrl = returnUrl });
@@ -125,6 +143,125 @@ namespace JK.Web.Controllers
                 default:
                     throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(loginResult.Result, usernameOrEmailAddress, tenancyName);
             }
+        }
+
+        #endregion
+
+        #region Two Factor Auth
+
+        public async Task<ActionResult> SendSecurityCode(string returnUrl, bool rememberMe = false)
+        {
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            CheckCurrentTenant(await _signInManager.GetVerifiedTenantIdAsync());
+
+            var userProviders = await _userManager.GetValidTwoFactorProvidersAsync(user);
+            if (userProviders.Count == 1)
+            {
+                return await SendSecurityCode(new SendSecurityCodeViewModel
+                {
+                    ReturnUrl = returnUrl,
+                    RememberMe = rememberMe,
+                    SelectedProvider = userProviders.First()
+                });
+            }
+            var factorOptions = userProviders.Select(
+                userProvider =>
+                    new SelectListItem
+                    {
+                        Text = userProvider,
+                        Value = userProvider
+                    }).ToList();
+
+            return View(
+                new SendSecurityCodeViewModel
+                {
+                    Providers = factorOptions,
+                    ReturnUrl = returnUrl,
+                    RememberMe = rememberMe
+                }
+            );
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> SendSecurityCode(SendSecurityCodeViewModel model)
+        {
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            CheckCurrentTenant(await _signInManager.GetVerifiedTenantIdAsync());
+
+            return RedirectToAction(
+                "VerifySecurityCode",
+                new
+                {
+                    provider = model.SelectedProvider,
+                    returnUrl = model.ReturnUrl,
+                    rememberMe = model.RememberMe
+                }
+            );
+        }
+
+        public async Task<ActionResult> VerifySecurityCode(string provider, string returnUrl, bool rememberMe)
+        {
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+            {
+                throw new UserFriendlyException(L("VerifySecurityCodeNotLoggedInErrorMessage"));
+            }
+
+            CheckCurrentTenant(await _signInManager.GetVerifiedTenantIdAsync());
+
+            var isRememberBrowserEnabled = await IsRememberBrowserEnabledAsync();
+
+            return View(
+                new VerifySecurityCodeViewModel
+                {
+                    Provider = provider,
+                    ReturnUrl = returnUrl,
+                    RememberMe = rememberMe,
+                    IsRememberBrowserEnabled = isRememberBrowserEnabled
+                }
+            );
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> VerifySecurityCode(VerifySecurityCodeViewModel model)
+        {
+            model.ReturnUrl = NormalizeReturnUrl(model.ReturnUrl);
+
+            CheckCurrentTenant(await _signInManager.GetVerifiedTenantIdAsync());
+
+            var result = await _signInManager.TwoFactorSignInAsync(
+                model.Provider,
+                model.Code,
+                model.RememberMe,
+                await IsRememberBrowserEnabledAsync() && model.RememberBrowser
+            );
+
+            if (result.Succeeded)
+            {
+                return Json(new AjaxResponse { TargetUrl = model.ReturnUrl });
+            }
+
+            if (result.IsLockedOut)
+            {
+                throw new UserFriendlyException(L("UserLockedOutMessage"));
+            }
+
+            throw new UserFriendlyException(L("InvalidSecurityCode"));
+        }
+
+        private Task<bool> IsRememberBrowserEnabledAsync()
+        {
+            return SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.TwoFactorLogin.IsRememberBrowserEnabled);
         }
 
         #endregion
@@ -280,7 +417,7 @@ namespace JK.Web.Controllers
         public virtual async Task<ActionResult> ExternalLoginCallback(string returnUrl, string remoteError = null)
         {
             returnUrl = NormalizeReturnUrl(returnUrl);
-            
+
             if (remoteError != null)
             {
                 Logger.Error("Remote Error in ExternalLoginCallback: " + remoteError);
@@ -319,7 +456,7 @@ namespace JK.Web.Controllers
         private async Task<ActionResult> RegisterForExternalLogin(ExternalLoginInfo externalLoginInfo)
         {
             var email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email);
-            var nameinfo = ExternalLoginInfoHelper.GetNameAndSurnameFromClaims(externalLoginInfo.Principal.Claims.ToList());
+            var (name, surname) = ExternalLoginInfoHelper.GetNameAndSurnameFromClaims(externalLoginInfo.Principal.Claims.ToList());
 
             var viewModel = new RegisterViewModel
             {
@@ -327,8 +464,8 @@ namespace JK.Web.Controllers
                 ExternalLoginAuthSchema = externalLoginInfo.LoginProvider
             };
 
-            if (nameinfo.name != null &&
-                nameinfo.surname != null &&
+            if (name != null &&
+                surname != null &&
                 email != null)
             {
                 return await Register(viewModel);
@@ -391,6 +528,14 @@ namespace JK.Web.Controllers
             }
 
             return _tenantCache.GetOrNull(AbpSession.TenantId.Value)?.TenancyName;
+        }
+
+        private void CheckCurrentTenant(int? tenantId)
+        {
+            if (AbpSession.TenantId != tenantId)
+            {
+                throw new Exception($"Current tenant is different than given tenant. AbpSession.TenantId: {AbpSession.TenantId}, given tenantId: {tenantId}");
+            }
         }
 
         private string NormalizeReturnUrl(string returnUrl, Func<string> defaultValueBuilder = null)

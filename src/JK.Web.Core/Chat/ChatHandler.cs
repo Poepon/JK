@@ -224,7 +224,7 @@ namespace JK.Chat
 
         public override async Task ReceiveTextAsync(WebSocket socket, WebSocketReceiveResult result, string receivedMessage)
         {
-
+            await Task.CompletedTask;
         }
         public override async Task OnConnected(string connectionId, WebSocketClient client)
         {

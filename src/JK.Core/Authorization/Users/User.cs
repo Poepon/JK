@@ -6,6 +6,8 @@ namespace JK.Authorization.Users
 {
     public class User : AbpUser<User>
     {
+        public string GoogleAuthenticatorKey { get; set; }
+
         public static string CreateRandomPassword()
         {
             return Guid.NewGuid().ToString("N").Truncate(16);

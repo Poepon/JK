@@ -100,7 +100,8 @@
       "wwwroot/lib/datatables.net-responsive-bs/js/responsive.bootstrap.js",
       "wwwroot/js/admin.js",
       "wwwroot/js/main.js",
-      "wwwroot/view-resources/Views/Shared/_Layout.js"
+      "wwwroot/view-resources/Views/Shared/_Layout.js",
+      "wwwroot/view-resources/Views/Profile/Profile.js"
     ]
   },
   {

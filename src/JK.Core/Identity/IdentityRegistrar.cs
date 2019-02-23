@@ -5,6 +5,7 @@ using JK.Authorization.Roles;
 using JK.Authorization.Users;
 using JK.Editions;
 using JK.MultiTenancy;
+using JK.Authentication.TwoFactor.Google;
 
 namespace JK.Identity
 {
@@ -14,7 +15,10 @@ namespace JK.Identity
         {
             services.AddLogging();
 
-            return services.AddAbpIdentity<Tenant, User, Role>()
+            return services.AddAbpIdentity<Tenant, User, Role>(options =>
+            {
+                options.Tokens.ProviderMap[GoogleAuthenticatorProvider.Name] = new TokenProviderDescriptor(typeof(GoogleAuthenticatorProvider));
+            })
                 .AddAbpTenantManager<TenantManager>()
                 .AddAbpUserManager<UserManager>()
                 .AddAbpRoleManager<RoleManager>()

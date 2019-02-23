@@ -135,5 +135,19 @@
     <text name="HangFire">HangFire</text>
     <text name="AdminPassword">Admin Password</text>
     <text name="Chat">Chat</text>
+
+    <text name="GoogleAuthenticatorReferrerLink">Not sure what this screen means? You may need to check this </text>
+    <text name="ScanQrCodeWithYourMobileApp">Scan this QR code with your mobile app</text>
+    <text name="Enable">Enable</text>
+    <text name="SendSecurityCode">Send security code.</text>
+    <text name="SendSecurityCode_Information">You should verify yourself to login. Please select a verification type. A code will be sent based on selected verification type.</text>
+    <text name="SendSecurityCodeErrorMessage">Security code could not be sent!</text>
+    <text name="VerifySecurityCodeNotLoggedInErrorMessage">You should be login first, in order to verify yourself! Probably, your login has been timeout. Please go to the login page and re-try it.</text>
+    <text name="VerificationCode">Verification code</text>
+    <text name="VerifySecurityCode">Verify Security Code</text>
+    <text name="VerifySecurityCode_Information">Please enter the verification code sent to you.</text>
+    <text name="RememberThisBrowser">Remember this browser</text>
+    <text name="Submit">Submit</text>
+    <text name="InvalidSecurityCode">Invalid security code!</text>
   </texts>
 </localizationDictionary>
