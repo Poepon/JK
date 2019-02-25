@@ -104,7 +104,15 @@
         /// <summary>
         /// 获取在线用户
         /// </summary>
-        GetOnlineUsers = 308
+        GetOnlineUsers = 308,
+        /// <summary>
+        /// 获取未读消息数
+        /// </summary>
+        GetGroupUnread = 309,
+        /// <summary>
+        /// 获取最后一条消息
+        /// </summary>
+        GetGroupLastMessage = 310
         #endregion
 
     }

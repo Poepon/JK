@@ -41,8 +41,6 @@ namespace JK.Chat
             AbpSession = NullAbpSession.Instance;
         }
 
-
-
         public override async Task ReceiveBinaryAsync(WebSocket socket, WebSocketReceiveResult result, BinaryMessage receivedMessage)
         {
             if (!AbpSession.UserId.HasValue)
@@ -63,11 +61,12 @@ namespace JK.Chat
                             Message = messageInput.Message,
                             UserId = AbpSession.GetUserId()
                         });
+                        await SendNewMessage(messageInput.GroupId, AbpSession.GetUserId(), socket);
                         var connections = WebSocketConnectionManager.GetAllFromGroup(messageInput.GroupId.ToString());
                         foreach (var connectionId in connections)
                         {
                             var client = WebSocketConnectionManager.GetWebSocketClient(connectionId);
-                            if (client != null)
+                            if (client != null && client.UserId != AbpSession.GetUserId())
                             {
                                 await SendNewMessage(messageInput.GroupId, client.UserId.GetValueOrDefault(), client.WebSocket);
                             }
@@ -193,6 +192,18 @@ namespace JK.Chat
                         await SendMsgPackAsync(socket, CommandType.GetGroups, dtos);
                     }
                     break;
+                case CommandType.GetGroupUnread:
+                    {
+                        var getGroupUnreadInput = DeserializeFromBytes<GetGroupUnreadInput>(receivedMessage.DataType, receivedMessage.Data);
+                        var count = await chatAppService.GetGroupUnread(new ChatGroupInputBase
+                        {
+                            GroupId = getGroupUnreadInput.GroupId,
+                            UserId = AbpSession.GetUserId()
+                        });
+                        var output = new GroupUnreadOutput { Count = count };
+                        await SendMsgPackAsync(socket, CommandType.GetGroupUnread, output, httpContextAccess.HttpContext.RequestAborted);
+                    }
+                    break;
                 case CommandType.PinToTop:
                     var pinToTopInput = DeserializeFromBytes<PinToTopInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
@@ -234,7 +245,7 @@ namespace JK.Chat
 
             await base.OnConnected(client.ConnectionId, client);
 
-            await SendOnlineUsers();
+            await SendOnlineUsers(client);
         }
 
         public override async Task OnDisconnected(WebSocketClient client)
@@ -245,7 +256,7 @@ namespace JK.Chat
 
             await base.OnDisconnected(client);
 
-            await SendOnlineUsers();
+            await SendOnlineUsers(client);
         }
 
         private async Task AddToGroup(WebSocketClient onlineClient)
@@ -325,27 +336,21 @@ namespace JK.Chat
             }
         }
 
+
         private async Task<ChatGroupOutput[]> GetGroups(long userId)
         {
             var groups = await chatAppService.GetUserGroups(new GetUserGroupsInput { UserId = userId });
-            var dtos = groups.Items.Select(x =>
+            var dtos = groups.Items.Select(x => new ChatGroupOutput
             {
-                var o = new ChatGroupOutput
-                {
-                    CreationTime = x.CreationTime,
-                    CreatorUserId = x.CreatorUserId,
-                    GroupType = x.GroupType,
-                    Id = x.Id,
-                    Name = x.Name,
-                    Status = x.Status,
-                    Unread = AsyncHelper.RunSync(() => chatAppService.GetUnreadCount(new ChatGroupInputBase { GroupId = x.Id, UserId = userId })),
-                    IsCurrent = false,
-                    Icon = "/images/user.png",
-                };
-                var lstmsg = AsyncHelper.RunSync(() => chatAppService.GetLastMessage(new GetLastMessageInput { GroupId = x.Id }));
-                o.LastMessage = lstmsg?.Message;
-                o.LastTime = lstmsg?.CreationTime;
-                return o;
+                CreationTime = x.CreationTime,
+                CreatorUserId = x.CreatorUserId,
+                GroupType = x.GroupType,
+                Id = x.Id,
+                Name = x.Name,
+                Status = x.Status,
+                Unread = 0,
+                IsCurrent = false,
+                Icon = "/images/user.png",
             }).ToArray();
             return dtos;
         }
@@ -362,13 +367,15 @@ namespace JK.Chat
             return onlineUsers;
         }
 
-        private async Task SendOnlineUsers()
+        private async Task SendOnlineUsers(WebSocketClient currentClient)
         {
             var clients = WebSocketConnectionManager.GetAllClients();
             var onlineUsers = GetOnlineUsers();
+            await SendMsgPackAsync(currentClient.WebSocket, CommandType.GetOnlineUsers, onlineUsers);
             foreach (var client in clients)
             {
-                await SendMsgPackAsync(client.WebSocket, CommandType.GetOnlineUsers, onlineUsers);
+                if (client.UserId != currentClient.UserId)
+                    await SendMsgPackAsync(client.WebSocket, CommandType.GetOnlineUsers, onlineUsers);
             }
         }
     }

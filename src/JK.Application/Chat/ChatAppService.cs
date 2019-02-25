@@ -148,7 +148,7 @@ namespace JK.Chat
             });
         }
 
-        public async Task<int> GetUnreadCount(ChatGroupInputBase input)
+        public async Task<int> GetGroupUnread(ChatGroupInputBase input)
         {
             long lastMessageId = await _userChatMessageLogRepository.GetAll()
                 .Where(log => log.GroupId == input.GroupId && log.UserId == input.UserId)
@@ -157,7 +157,24 @@ namespace JK.Chat
                 message.GroupId == input.GroupId &&
                 message.Id > lastMessageId);
         }
-
+        public async Task<IList<GetGroupsUnreadOutput>> GetGroupsUnread(GetGroupsUnreadInput input)
+        {
+            //TODO 有BUG，没有Log的群组会查不到记录
+            var linq = from g in _chatGroupRepository.GetAll()
+                       join msg in _chatMessageRepository.GetAll()
+                       on g.Id equals msg.GroupId
+                       join log in _userChatMessageLogRepository.GetAll()
+                       on g.Id equals log.GroupId
+                       where log.UserId == input.UserId && msg.Id > log.LastReadMessageId
+                       group g by g.Id
+                      into row
+                       select new GetGroupsUnreadOutput
+                       {
+                           GroupId = row.Key,
+                           Count = row.Count()
+                       };
+            return await linq.ToListAsync();
+        }
         public async Task<long> GetLastReceivedMessageId(ChatGroupInputBase input)
         {
             var lastReceivedMessageId = await _userChatMessageLogRepository.GetAll()

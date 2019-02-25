@@ -24,7 +24,9 @@ namespace JK.Chat
 
         Task LeaveGroup(ChatGroupInputBase input);
 
-        Task<int> GetUnreadCount(ChatGroupInputBase input);
+        Task<int> GetGroupUnread(ChatGroupInputBase input);
+
+        Task<IList<GetGroupsUnreadOutput>> GetGroupsUnread(GetGroupsUnreadInput input);
 
         Task<long> GetLastReceivedMessageId(ChatGroupInputBase input);
 

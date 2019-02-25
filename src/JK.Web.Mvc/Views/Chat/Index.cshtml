@@ -6,6 +6,8 @@
     {
     <environment names="Staging,Development">
         <script src="https://cdn.jsdelivr.net/npm/vue@2.6.6/dist/vue.js"></script>
+        <script src="https://unpkg.com/vuex@3.1.0/dist/vuex.js"></script>
+
         <script src="~/lib/websocket/reconnecting-websocket.js" asp-append-version="true"></script>
         <script src="~/lib/msgpack/msgpack.min.js" asp-append-version="true"></script>
         <script src="~/view-resources/Views/Chat/chatWebSocket.js"></script>
@@ -45,10 +47,10 @@
 
                     <div class="tab-content">
                         <div class="tab-pane active" id="SessionsTab" role="tabpanel">
-                            <vue-groups-container v-bind:groups="groups"></vue-groups-container>
+                            <vue-groups-container></vue-groups-container>
                         </div>
                         <div class="tab-pane" id="FriendsTab" role="tabpanel">
-                            <vue-friends-container v-bind:friends="friends"></vue-friends-container>
+                            <vue-friends-container></vue-friends-container>
                         </div>
                     </div>
                 </div>
@@ -56,15 +58,7 @@
         </div>
     </div>
     <div class="col-xs-12 col-sm-9">
-        <div class="tab-content">
-            <vue-messages-container v-for="group in groups" :key="group.gid"
-                                    :loginuid="@AbpSession.UserId.GetValueOrDefault()" 
-                                    :currentgroup="group"
-                                    :allgroupsmessages="allgroupsmessages"
-                                    :readystate="readystate"></vue-messages-container>
-
-        </div>
-
+        <vue-allmessages-container></vue-allmessages-container>
     </div>
     <div class="modal fade" id="NewGroupModal" tabindex="-1" role="dialog" aria-labelledby="NewGroupModalLabel" data-backdrop="static">
         <div class="modal-dialog" role="document">
@@ -84,26 +78,28 @@
 
 <script type="x-template" id="groupsContainerTemplate">
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" v-for="group in groups" href="#" :key="group.gid">
-            <a :href="'#group'+group.gid+'tab'" data-toggle="tab" aria-expanded="false">
-                <div class="media">
-                    <div class="media-left">
-                        <img :src="group.icon" class="img-circle">
-                    </div>
-                    <div class="media-body">
-                        <h4 class="media-heading">{{group.gname}}</h4>
-                        <span>{{group.lstmsg}}</span>
-                    </div>
-                    <div class="media-right">
-                        <span class="right">{{group.lsttime | grouptime}}</span>
-                        <span class="badge bg-pink">{{group.unread}}</span>
-                    </div>
-                </div>
-            </a>
-        </li>
+        <vue-group-item v-for="group in groups" :key="group.gid" :groupinfo="group"></vue-group-item>
     </ul>
 </script>
-
+<script id="groupItemTemplate" type="x-template">
+    <li role="presentation" href="#" :key="groupinfo.gid">
+        <a :href="'#group'+groupinfo.gid+'tab'" data-toggle="tab" aria-expanded="false">
+            <div class="media">
+                <div class="media-left">
+                    <img :src="groupinfo.icon" class="img-circle">
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading">{{groupinfo.gname}}</h4>
+                    <span>{{groupinfo.lstmsg}}</span>
+                </div>
+                <div class="media-right">
+                    <span class="right">{{groupinfo.lsttime | grouptime}}</span>
+                    <span class="badge bg-pink" v-if="groupinfo.unread>0">{{groupinfo.unread}}</span>
+                </div>
+            </div>
+        </a>
+    </li>
+</script>
 <script type="x-template" id="friendsContainerTemplate">
     <div class="list-group" id="friendsContainer">
         <a v-for="friend in friends" :key="friend.uid" href="#" class="list-group-item" v-on:click="goChat(friend.uid);">
@@ -112,7 +108,11 @@
         </a>
     </div>
 </script>
-
+<script type="x-template" id="allmessagesContainerTemplate">
+    <div class="tab-content">
+        <vue-messages-container v-for="group in groups" :currentgroup="group" :loginuid="@AbpSession.UserId.GetValueOrDefault()"></vue-messages-container>
+    </div>
+</script>
 <script type="x-template" id="messagesContainerTemplate">
     <div role="tabpanel" class="tab-pane" :id="'group'+currentgroup.gid+'tab'">
         <div class="card" style="height:85vh">

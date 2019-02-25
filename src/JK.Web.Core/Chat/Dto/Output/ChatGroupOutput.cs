@@ -28,12 +28,6 @@ namespace JK.Chat.Dto.Output
         [Key("s")]
         public int Status { get; set; }
 
-        [Key("lstmsg")]
-        public string LastMessage { get; set; }
-
-        [Key("lsttime")]
-        public long? LastTime { get; set; }
-
         [Key("unread")]
         public int Unread { get; set; }
 
