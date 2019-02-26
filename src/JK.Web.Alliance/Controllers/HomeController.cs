@@ -5,10 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using JK.Web.Alliance.Models;
+using Abp.AspNetCore.Mvc.Controllers;
 
 namespace JK.Web.Alliance.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : AbpController
     {
         public IActionResult Index()
         {
