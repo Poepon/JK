@@ -252,3 +252,5 @@ paket-files/
 *.sln.iml
 /build/outputs
 /src/JK.Web.Mvc/App_Data/Logs
+/src/JK.Web.Alliance/App_Data/Logs
+/src/JK.Web.Public/App_Data/Logs
