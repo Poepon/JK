@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>@ViewData["Title"]</title>
+    <!-- Favicon-->
+    <link rel="shortcut icon" href="~/favicon.ico">
+    @await Html.PartialAsync("_ImportStyles")
+</head>
+<body class="five-zero-zero">
+    <div class="five-zero-zero-container">
+        @RenderBody()
+        <div class="button-place">
+            <a href="@Url.Action("Index", "Home")" class="btn btn-default btn-lg waves-effect">返回首页</a>.
+        </div>
+    </div>
+</body>
+</html>

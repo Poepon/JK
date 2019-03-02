@@ -33,15 +33,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abp.ZeroCore.EntityFramewor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extension", "extension", "{A09E5FEA-F460-4B3F-919E-485D5A6A34B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JK.MultiThemes", "extension\JK.MultiThemes\JK.MultiThemes.csproj", "{5D1BA77E-63D0-4442-A2A0-63D1A134F785}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.MultiThemes", "extension\JK.MultiThemes\JK.MultiThemes.csproj", "{5D1BA77E-63D0-4442-A2A0-63D1A134F785}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JK.Web.CdnTagHelpers", "extension\JK.Web.CdnTagHelpers\JK.Web.CdnTagHelpers.csproj", "{41577AA4-8CED-4E68-ADF1-EE45A7FBDE0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Web.CdnTagHelpers", "extension\JK.Web.CdnTagHelpers\JK.Web.CdnTagHelpers.csproj", "{41577AA4-8CED-4E68-ADF1-EE45A7FBDE0C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JK.Captcha", "extension\JK.Captcha\JK.Captcha.csproj", "{471AFA94-37E5-4102-88D9-25B749459456}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Captcha", "extension\JK.Captcha\JK.Captcha.csproj", "{471AFA94-37E5-4102-88D9-25B749459456}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JK.Web.Public", "src\JK.Web.Public\JK.Web.Public.csproj", "{9023F3D0-5E73-447D-87F8-F6D4E36878B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Web.Public", "src\JK.Web.Public\JK.Web.Public.csproj", "{9023F3D0-5E73-447D-87F8-F6D4E36878B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JK.Web.Alliance", "src\JK.Web.Alliance\JK.Web.Alliance.csproj", "{B60CA9E1-570C-4C80-9144-6943E1BEF1C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Web.Alliance", "src\JK.Web.Alliance\JK.Web.Alliance.csproj", "{B60CA9E1-570C-4C80-9144-6943E1BEF1C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

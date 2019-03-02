@@ -4,12 +4,20 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Identity\**" />
+    <Content Remove="Identity\**" />
+    <EmbeddedResource Remove="Identity\**" />
+    <None Remove="Identity\**" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Abp.Castle.Log4Net" Version="4.3.0" />
     <PackageReference Include="Abp.AspNetCore" Version="4.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" />
   </ItemGroup>
 
 
@@ -17,6 +25,7 @@
     <ProjectReference Include="..\JK.Application\JK.Application.csproj" />
     <ProjectReference Include="..\JK.Core\JK.Core.csproj" />
     <ProjectReference Include="..\JK.EntityFrameworkCore\JK.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\JK.Web.Core\JK.Web.Core.csproj" />
   </ItemGroup>
 
 

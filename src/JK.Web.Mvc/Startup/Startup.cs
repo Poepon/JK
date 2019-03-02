@@ -58,6 +58,7 @@ namespace JK.Web.Startup
             }
             else
             {
+                app.UseStatusCodePagesWithRedirects("~/Error?statusCode={0}");
                 app.UseExceptionHandler("/Error");
             }
 

@@ -4,14 +4,16 @@ using JK.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace JK.Migrations
 {
     [DbContext(typeof(JKDbContext))]
-    partial class JKDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190301033751_Add_Customers")]
+    partial class Add_Customers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1171,13 +1173,13 @@ namespace JK.Migrations
 
                     b.Property<string>("ClaimValue");
 
-                    b.Property<long?>("CustomerId")
-                        .HasColumnName("CustomerClaim_CustomerId");
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long>("CustomerId");
 
                     b.Property<int>("TenantId");
-
-                    b.Property<long>("UserId")
-                        .HasColumnName("CustomerId");
 
                     b.HasKey("Id");
 
@@ -1192,8 +1194,7 @@ namespace JK.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("CustomerId")
-                        .HasColumnName("CustomerLogin_CustomerId");
+                    b.Property<long>("CustomerId");
 
                     b.Property<string>("LoginProvider")
                         .IsRequired()
@@ -1204,9 +1205,6 @@ namespace JK.Migrations
                         .HasMaxLength(256);
 
                     b.Property<int>("TenantId");
-
-                    b.Property<long>("UserId")
-                        .HasColumnName("CustomerId");
 
                     b.HasKey("Id");
 
@@ -1256,8 +1254,7 @@ namespace JK.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("CustomerId")
-                        .HasColumnName("CustomerToken_CustomerId");
+                    b.Property<long>("CustomerId");
 
                     b.Property<DateTime?>("ExpireDate");
 
@@ -1268,9 +1265,6 @@ namespace JK.Migrations
                         .HasMaxLength(128);
 
                     b.Property<int>("TenantId");
-
-                    b.Property<long>("UserId")
-                        .HasColumnName("CustomerId");
 
                     b.Property<string>("Value")
                         .HasMaxLength(512);
@@ -1530,21 +1524,24 @@ namespace JK.Migrations
                 {
                     b.HasOne("JK.Customers.Customer")
                         .WithMany("Claims")
-                        .HasForeignKey("CustomerId");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("JK.Customers.CustomerLogin", b =>
                 {
                     b.HasOne("JK.Customers.Customer")
                         .WithMany("Logins")
-                        .HasForeignKey("CustomerId");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("JK.Customers.CustomerToken", b =>
                 {
                     b.HasOne("JK.Customers.Customer")
                         .WithMany("Tokens")
-                        .HasForeignKey("CustomerId");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("JK.MultiTenancy.Tenant", b =>

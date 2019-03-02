@@ -1,9 +1,12 @@
 ﻿using Abp.AspNetCore;
 using Abp.Castle.Logging.Log4Net;
 using Castle.Facilities.Logging;
+using JK.Customers;
+using JK.Web.Public.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +36,8 @@ namespace JK.Web.Public
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            IdentityRegistrar.Register<Customer, CustomerLogin, CustomerClaim, CustomerToken>(services);
+
             // Configure Abp and Dependency Injection
             return services.AddAbp<JKWebPublicModule>(
                 // Configure Log4Net logging
@@ -53,14 +58,17 @@ namespace JK.Web.Public
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseStatusCodePagesWithRedirects("~/Error?statusCode={0}");
+                app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
+           
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
+
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {

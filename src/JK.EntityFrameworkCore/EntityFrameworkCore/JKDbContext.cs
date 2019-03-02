@@ -5,6 +5,7 @@ using JK.Authorization.Users;
 using JK.MultiTenancy;
 using JK.Storage;
 using JK.Chat;
+using JK.Customers;
 
 namespace JK.EntityFrameworkCore
 {
@@ -23,6 +24,26 @@ namespace JK.EntityFrameworkCore
         public virtual DbSet<ChatGroupMember> ChatGroupMembers { get; set; }
 
         public virtual DbSet<UserChatMessageLog> UserChatMessageLogs { get; set; }
+
+
+        #endregion
+
+        #region Customers
+
+        public virtual DbSet<Customer> Customers { get; set; }
+
+        public virtual DbSet<CustomerClaim> CustomerClaims { get; set; }
+
+        public virtual DbSet<CustomerLogin> CustomerLogins { get; set; }
+
+        public virtual DbSet<CustomerLoginAttempt> CustomerLoginAttempts { get; set; }
+
+        public virtual DbSet<CustomerToken> CustomerTokens { get; set; }
+
+        #endregion
+
+        #region Alliance
+
 
 
         #endregion

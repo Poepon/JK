@@ -6,7 +6,7 @@ using Abp.Web.Models;
 using Abp.Web.Mvc.Models;
 using Abp.Auditing;
 
-namespace JK.Web.Controllers
+namespace JK.Web.Public.Controllers
 {
     [DisableAuditing]
     public class ErrorController : AbpController
