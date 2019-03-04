@@ -41,7 +41,7 @@ namespace JK
         /// <summary>
         /// Gets or sets the primary key of the user that the token belongs to.
         /// </summary>
-        public virtual long UserId { get; set; }
+        public abstract long UserId { get; set; }
 
         /// <summary>
         /// Gets or sets the LoginProvider this token is from.

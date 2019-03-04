@@ -1,9 +1,5 @@
-﻿using Abp;
-using Abp.Authorization.Users;
-using Abp.Domain.Entities;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Alliance

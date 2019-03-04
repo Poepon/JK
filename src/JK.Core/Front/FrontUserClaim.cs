@@ -13,7 +13,7 @@ namespace JK
 
         public virtual int TenantId { get; set; }
 
-        public virtual long UserId { get; set; }
+        public abstract long UserId { get; set; }
 
         [StringLength(MaxClaimTypeLength)]
         public virtual string ClaimType { get; set; }

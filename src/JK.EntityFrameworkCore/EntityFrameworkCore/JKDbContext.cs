@@ -6,6 +6,7 @@ using JK.MultiTenancy;
 using JK.Storage;
 using JK.Chat;
 using JK.Customers;
+using JK.Alliance;
 
 namespace JK.EntityFrameworkCore
 {
@@ -44,7 +45,15 @@ namespace JK.EntityFrameworkCore
 
         #region Alliance
 
+        public virtual DbSet<Agent> Agents { get; set; }
 
+        public virtual DbSet<AgentClaim> AgentClaims { get; set; }
+
+        public virtual DbSet<AgentLogin> AgentLogins { get; set; }
+
+        public virtual DbSet<AgentToken> AgentTokens { get; set; }
+
+        public virtual DbSet<AgentLoginAttempt> AgentLoginAttempts { get; set; }
 
         #endregion
 

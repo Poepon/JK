@@ -28,7 +28,7 @@ namespace JK
         /// <summary>
         /// Id of the User.
         /// </summary>
-        public virtual long UserId { get; set; }
+        public abstract long UserId { get; set; }
 
         /// <summary>
         /// Login Provider.

@@ -15,6 +15,7 @@ namespace JK.Customers
     [Table("CustomerLoginAttempts")]
     public class CustomerLoginAttempt : FrontUserLoginAttempt
     {
-       
+        [Column("CustomerId")]
+        public override long? UserId { get; set; }
     }
 }

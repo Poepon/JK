@@ -50,7 +50,7 @@ namespace JK
         /// <summary>
         /// User's Id, if <see cref="UserName"/> was a valid username.
         /// </summary>
-        public virtual long? CustomerId { get; set; }
+        public abstract long? UserId { get; set; }
 
         /// <summary>
         /// User name
