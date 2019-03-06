@@ -55,6 +55,9 @@ namespace JK.EntityFrameworkCore
 
         public virtual DbSet<AgentLoginAttempt> AgentLoginAttempts { get; set; }
 
+        public virtual DbSet<AgentRelationship> AgentRelationships { get; set; }
+        
+
         #endregion
 
         public JKDbContext(DbContextOptions<JKDbContext> options)

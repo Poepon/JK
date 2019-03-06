@@ -29,7 +29,7 @@ namespace JK.MultiThemes
         public bool SupportRegex { get; set; }
 
         /// <summary>
-        /// Theme目录相对路径。如：/Themes/Xpj/PC
+        /// Theme目录相对路径。如：/Themes/Demo/PC
         /// </summary>
         public string ThemeDirPath { get; set; }
 

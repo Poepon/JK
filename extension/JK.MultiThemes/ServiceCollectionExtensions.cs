@@ -9,18 +9,17 @@ namespace JK.MultiThemes
     public static class ServiceCollectionExtensions
     {
         public static void AddThemes(this IServiceCollection services,
-            ThemeOptions themeOptions)
+            ThemeOptions themeOptions = null)
         {
-            services.Configure<ThemeOptions>(options=> {
-                options.DefaultTheme = themeOptions.DefaultTheme;
-                options.Themes = themeOptions.Themes;
-                options.StoreType = themeOptions.StoreType;
+            services.Configure<ThemeOptions>(options =>
+            {
+                options.StoreType = themeOptions?.StoreType;
             });
 
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddSingleton<IThemeProvider, ThemeProvider>();
-            if (themeOptions.StoreType != null && typeof(IThemeConfigStore).IsAssignableFrom(themeOptions.StoreType))
+            if (themeOptions != null && themeOptions.StoreType != null && typeof(IThemeConfigStore).IsAssignableFrom(themeOptions.StoreType))
             {
                 services.AddSingleton(typeof(IThemeConfigStore), themeOptions.StoreType);
             }

@@ -22,6 +22,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\..\extension\JK.MultiThemes\JK.MultiThemes.csproj" />
     <ProjectReference Include="..\JK.Application\JK.Application.csproj" />
     <ProjectReference Include="..\JK.Core\JK.Core.csproj" />
     <ProjectReference Include="..\JK.EntityFrameworkCore\JK.EntityFrameworkCore.csproj" />

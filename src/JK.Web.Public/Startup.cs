@@ -2,6 +2,7 @@
 using Abp.Castle.Logging.Log4Net;
 using Castle.Facilities.Logging;
 using JK.Customers;
+using JK.MultiThemes;
 using JK.Web.Public.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -33,6 +34,9 @@ namespace JK.Web.Public
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.Configure<ThemeOptions>(Configuration.GetSection("ThemeOptions"));
+
+            services.AddThemes();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 

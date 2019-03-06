@@ -3,6 +3,13 @@
 @inject SignInManager<Customer> SignInManager
 @inject UserManager<Customer> UserManager
 
+<form asp-controller="Home" asp-action="ChangeTheme" method="get" class="navbar-right">
+    <select name="themeName">
+        <option value="DemoA">DemoA</option>
+        <option value="DemoB">DemoB</option>
+    </select>
+    <button type="submit">submit</button>
+</form>
 @if (SignInManager.IsSignedIn(User))
 {
     <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="navbar-right">

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Abp.AspNetCore.Mvc.Controllers;
+using JK.MultiThemes;
 using Microsoft.AspNetCore.Mvc;
-using JK.Web.Public.Models;
-using Abp.AspNetCore.Mvc.Controllers;
 
 namespace JK.Web.Public.Controllers
 {
@@ -19,6 +14,13 @@ namespace JK.Web.Public.Controllers
         public IActionResult Privacy()
         {
             return View();
+        }
+
+        public IActionResult ChangeTheme(string themeName)
+        {
+            var p = HttpContext.RequestServices.GetService(typeof(IThemeProvider)) as IThemeProvider;
+            p.SetWorkingTheme(HttpContext.Request.Host.Host, themeName);
+            return RedirectToAction("Index");
         }
 
     }
