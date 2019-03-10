@@ -10,7 +10,6 @@ using Abp.Runtime.Session;
 using Abp.UI;
 using Abp.Zero;
 using Abp.Zero.Configuration;
-using JK.Customers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

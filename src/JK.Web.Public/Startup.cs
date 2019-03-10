@@ -40,7 +40,7 @@ namespace JK.Web.Public
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            IdentityRegistrar.Register<Customer, CustomerLogin, CustomerClaim, CustomerToken>(services);
+            IdentityRegistrar.RegisterCustomer(services);
 
             // Configure Abp and Dependency Injection
             return services.AddAbp<JKWebPublicModule>(

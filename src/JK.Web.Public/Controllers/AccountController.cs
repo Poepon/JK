@@ -14,27 +14,30 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using CustomerLoginResult = JK.Web.Public.Identity.JKLoginResult<JK.Customers.Customer, JK.Customers.CustomerLogin, JK.Customers.CustomerClaim, JK.Customers.CustomerToken>;
 
 namespace JK.Web.Public.Controllers
 {
     public class AccountController : AbpController
     {
-        private readonly UserManager<Customer> _userManager;
+        private readonly CustomerManager _userManager;
         private readonly ITenantCache _tenantCache;
         private readonly SignInManager<Customer> _signInManager;
         private readonly IMultiTenancyConfig _multiTenancyConfig;
-
+        private readonly CustomerLogInManager _logInManager;
 
         public AccountController(
             IMultiTenancyConfig multiTenancyConfig,
             ITenantCache tenantCache,
-            UserManager<Customer> userManager,
-            SignInManager<Customer> signInManager)
+            CustomerManager userManager,
+            SignInManager<Customer> signInManager,
+            CustomerLogInManager logInManager)
         {
             _multiTenancyConfig = multiTenancyConfig;
             _tenantCache = tenantCache;
             _signInManager = signInManager;
             _userManager = userManager;
+            _logInManager = logInManager;
         }
 
 
@@ -53,36 +56,49 @@ namespace JK.Web.Public.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel loginModel, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
+
+                var loginResult = await GetLoginResultAsync(loginModel.Username, loginModel.Password, GetTenancyNameOrNull());
+               if (loginResult.Result == AbpLoginResultType.Success)
                 {
+                    await _signInManager.SignInAsync(loginResult.User, loginModel.RememberMe);
+                    await UnitOfWorkManager.Current.SaveChangesAsync();
                     return RedirectToLocal(returnUrl);
                 }
-                //if (result.RequiresTwoFactor)
-                //{
-                //    return RedirectToAction(nameof(SendCode), new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
-                //}
-                if (result.IsLockedOut)
+                
+                if (loginResult.Result== AbpLoginResultType.LockedOut)
                 {
                     return View("Lockout");
                 }
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return View(model);
+                    return View(loginModel);
                 }
             }
 
             // If we got this far, something failed, redisplay form
-            return View(model);
+            return View(loginModel);
         }
+
+
+        private async Task<CustomerLoginResult> GetLoginResultAsync(string usernameOrEmailAddress, string password, string tenancyName)
+        {
+            var loginResult = await _logInManager.LoginAsync(usernameOrEmailAddress, password,AbpSession.TenantId.GetValueOrDefault(1));
+
+            switch (loginResult.Result)
+            {
+                case AbpLoginResultType.Success:
+                    return loginResult;
+                default:
+                    throw new Exception("Login Failed.");
+            }
+        }
+
 
         //
         // GET: /Account/Register
@@ -107,8 +123,10 @@ namespace JK.Web.Public.Controllers
                 var user = new Customer
                 {
                     UserName = model.UserName,
+                    IsActive=true, 
                     TenantId = 1
                 };
+                await _userManager.InitializeOptionsAsync(AbpSession.TenantId.GetValueOrDefault(1));
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {

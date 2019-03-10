@@ -9,7 +9,6 @@ using Abp.Linq;
 using Abp.Runtime.Session;
 using Castle.Core.Logging;
 using JetBrains.Annotations;
-using JK.Customers;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
