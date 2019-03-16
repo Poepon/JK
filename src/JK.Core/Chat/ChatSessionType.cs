@@ -1,16 +1,16 @@
 ﻿namespace JK.Chat
 {
     /// <summary>
-    /// 聊天组类型
+    /// 会话类型
     /// </summary>
-    public enum ChatGroupType
+    public enum ChatSessionType
     {
         /// <summary>
-        /// 私聊
+        /// 一对一
         /// </summary>
         Private = 0,
         /// <summary>
-        /// 公聊
+        /// 多对多
         /// </summary>
         Public = 1
     }

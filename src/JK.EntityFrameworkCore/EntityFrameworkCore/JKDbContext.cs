@@ -20,9 +20,9 @@ namespace JK.EntityFrameworkCore
 
         public virtual DbSet<ChatMessage> ChatMessages { get; set; }
 
-        public virtual DbSet<ChatGroup> ChatGroups { get; set; }
+        public virtual DbSet<ChatSession> ChatSession { get; set; }
 
-        public virtual DbSet<ChatGroupMember> ChatGroupMembers { get; set; }
+        public virtual DbSet<ChatSessionMember> ChatSessionMembers { get; set; }
 
         public virtual DbSet<UserChatMessageLog> UserChatMessageLogs { get; set; }
 
@@ -68,9 +68,9 @@ namespace JK.EntityFrameworkCore
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<UserChatMessageLog>().HasIndex(log => new { log.GroupId, log.UserId });
-            modelBuilder.Entity<ChatGroupMember>().HasIndex(member => member.GroupId);
-            modelBuilder.Entity<ChatMessage>().HasIndex(msg => msg.GroupId);
+            modelBuilder.Entity<UserChatMessageLog>().HasIndex(log => new { log.SessionId, log.UserId });
+            modelBuilder.Entity<ChatSessionMember>().HasIndex(member => member.SessionId);
+            modelBuilder.Entity<ChatMessage>().HasIndex(msg => msg.SessionId);
         }
     }
 }

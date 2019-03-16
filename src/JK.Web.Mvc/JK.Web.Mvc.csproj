@@ -50,5 +50,7 @@
     <PackageReference Include="Abp.HangFire" Version="4.3.0" />
     <PackageReference Include="Abp.RedisCache" Version="4.3.0" />
     <PackageReference Include="Abp.Castle.Log4Net" Version="4.3.0" />
+    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.0.165" />
+    <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.0.165" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,5 @@
 ﻿using Abp.AutoMapper;
 using MessagePack;
-using System;
 
 namespace JK.Chat.Dto.Output
 {
@@ -12,7 +11,7 @@ namespace JK.Chat.Dto.Output
         public long Id { get; set; }
 
         [Key("gid")]
-        public long GroupId { get; set; }
+        public long SessionId { get; set; }
 
         [Key("uid")]
         public long UserId { get; set; }

@@ -1,9 +1,8 @@
 ﻿namespace JK.Chat.Dto.Input
 {
-    public class PinMessageToTopInput
+    public class DeleteSessionInput
     {
         public long SessionId { get; set; }
 
-        public long MessageId { get; set; }
     }
 }

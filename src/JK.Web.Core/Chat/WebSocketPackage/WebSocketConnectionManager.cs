@@ -1,5 +1,4 @@
-﻿using Abp.Dependency;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -7,8 +6,9 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Abp.Dependency;
 
-namespace JK.Chat
+namespace JK.Chat.WebSocketPackage
 {
     public class WebSocketClient
     {

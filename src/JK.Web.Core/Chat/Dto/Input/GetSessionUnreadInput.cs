@@ -3,9 +3,9 @@
 namespace JK.Chat.Dto.Input
 {
     [MessagePackObject]
-    public class GetGroupUnreadInput
+    public class GetSessionUnreadInput
     {
         [Key("gid")]
-        public long GroupId { get; set; }
+        public long SessionId { get; set; }
     }
 }

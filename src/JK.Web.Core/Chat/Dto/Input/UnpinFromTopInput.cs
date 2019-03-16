@@ -4,6 +4,6 @@
     {
         public long UserId { get; set; }
 
-        public long GroupId { get; set; }
+        public long SessionId { get; set; }
     }
 }

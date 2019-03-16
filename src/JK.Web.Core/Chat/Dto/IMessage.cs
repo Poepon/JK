@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace JK.Chat.Dto
+﻿namespace JK.Chat.Dto
 {
     public interface IMessage<T>
     {

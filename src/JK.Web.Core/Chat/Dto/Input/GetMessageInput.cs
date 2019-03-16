@@ -6,7 +6,7 @@ namespace JK.Chat.Dto.Input
     public class GetMessageInput
     {
         [Key("gid")]
-        public long GroupId { get; set; }
+        public long SessionId { get; set; }
 
         [Key("mid")]
         public long MessageId { get; set; }

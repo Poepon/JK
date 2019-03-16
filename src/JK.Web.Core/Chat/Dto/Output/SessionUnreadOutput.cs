@@ -3,7 +3,7 @@
 namespace JK.Chat.Dto.Output
 {
     [MessagePackObject]
-    public class GroupUnreadOutput
+    public class SessionUnreadOutput
     {
         [Key("count")]
         public int Count { get; set; }

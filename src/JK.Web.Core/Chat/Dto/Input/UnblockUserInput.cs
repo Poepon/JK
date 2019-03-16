@@ -2,7 +2,7 @@
 {
     public class UnblockUserInput
     {
-        public long GroupId { get; set; }
+        public long SessionId { get; set; }
 
         public long UserId { get; set; }
     }

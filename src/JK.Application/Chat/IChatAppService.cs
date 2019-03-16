@@ -1,8 +1,8 @@
-﻿using Abp.Application.Services;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using JK.Chat.Dto;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace JK.Chat
 {
@@ -14,31 +14,31 @@ namespace JK.Chat
 
         Task<ChatMessageDto> GetLastMessage(GetLastMessageInput input);
 
-        Task CreatePrivate(CreatePrivateInput input);
+        Task CreatePrivate(CreatePrivateSessionInput input);
 
-        Task CreateGroup(CreateGroupInput input);
+        Task CreateGroup(CreatePublicSessionInput input);
 
-        Task DeleteGroup(DeleteGroupInput input);
+        Task DeleteGroup(DeleteSessionInput input);
 
-        Task JoinGroup(ChatGroupInputBase input);
+        Task JoinGroup(ChatSessionInputBase input);
 
-        Task LeaveGroup(ChatGroupInputBase input);
+        Task LeaveGroup(ChatSessionInputBase input);
 
-        Task<int> GetGroupUnread(ChatGroupInputBase input);
+        Task<int> GetGroupUnread(ChatSessionInputBase input);
 
-        Task<IList<GetGroupsUnreadOutput>> GetGroupsUnread(GetGroupsUnreadInput input);
+        Task<IList<GetSessionsUnreadOutput>> GetGroupsUnread(GetSessionsUnreadInput input);
 
-        Task<long> GetLastReceivedMessageId(ChatGroupInputBase input);
+        Task<long> GetLastReceivedMessageId(ChatSessionInputBase input);
 
-        Task<long> GetLastReadMessageId(ChatGroupInputBase input);
+        Task<long> GetLastReadMessageId(ChatSessionInputBase input);
 
         Task SetLastReceivedMessageId(SetLastReceivedIdInput input);
 
         Task SetLastReadMessageId(SetLastReadIdInput input);
 
-        Task<IList<long>> GetUserGroupsId(GetUserGroupsInput input);
+        Task<IList<long>> GetUserGroupsId(GetUserSessionsInput input);
 
-        Task<ListResultDto<ChatGroupDto>> GetUserGroups(GetUserGroupsInput input);
+        Task<ListResultDto<ChatSessionDto>> GetUserGroups(GetUserSessionsInput input);
 
         Task<string> GetUserName(EntityDto<long> idDto);
     }

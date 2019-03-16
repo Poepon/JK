@@ -1,4 +1,9 @@
-﻿using Abp;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.WebSockets;
+using System.Threading.Tasks;
+using Abp;
 using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using Abp.Dependency;
@@ -9,13 +14,9 @@ using Abp.UI;
 using JK.Chat.Dto;
 using JK.Chat.Dto.Input;
 using JK.Chat.Dto.Output;
+using JK.Chat.WebSocketPackage;
 using Microsoft.AspNetCore.Http;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.WebSockets;
-using System.Threading.Tasks;
 
 namespace JK.Chat
 {
@@ -57,18 +58,18 @@ namespace JK.Chat
                         var messageInput = DeserializeFromBytes<SendMessageModel>(receivedMessage.DataType, receivedMessage.Data);
                         await chatAppService.SendMessage(new SendMessageInput
                         {
-                            GroupId = messageInput.GroupId,
+                            SessionId = messageInput.SessionId,
                             Message = messageInput.Message,
                             UserId = AbpSession.GetUserId()
                         });
-                        await SendNewMessage(messageInput.GroupId, AbpSession.GetUserId(), socket);
-                        var connections = WebSocketConnectionManager.GetAllFromGroup(messageInput.GroupId.ToString());
+                        await SendNewMessage(messageInput.SessionId, AbpSession.GetUserId(), socket);
+                        var connections = WebSocketConnectionManager.GetAllFromGroup(messageInput.SessionId.ToString());
                         foreach (var connectionId in connections)
                         {
                             var client = WebSocketConnectionManager.GetWebSocketClient(connectionId);
                             if (client != null && client.UserId != AbpSession.GetUserId())
                             {
-                                await SendNewMessage(messageInput.GroupId, client.UserId.GetValueOrDefault(), client.WebSocket);
+                                await SendNewMessage(messageInput.SessionId, client.UserId.GetValueOrDefault(), client.WebSocket);
                             }
                         }
                     }
@@ -77,9 +78,9 @@ namespace JK.Chat
                     {
                         ChatMessageOutput[] list = null;
                         var getMessageInput = DeserializeFromBytes<GetMessageInput>(receivedMessage.DataType, receivedMessage.Data);
-                        var lastId = await chatAppService.GetLastReceivedMessageId(new ChatGroupInputBase
+                        var lastId = await chatAppService.GetLastReceivedMessageId(new ChatSessionInputBase
                         {
-                            GroupId = getMessageInput.GroupId,
+                            SessionId = getMessageInput.SessionId,
                             UserId = AbpSession.GetUserId()
                         });
                         var oldLastId = lastId;
@@ -90,7 +91,7 @@ namespace JK.Chat
                                 MaxResultCount = getMessageInput.MaxCount,
                                 SkipCount = 0,
                                 LastReceivedMessageId = lastId,
-                                GroupId = getMessageInput.GroupId,
+                                SessionId = getMessageInput.SessionId,
                                 UserId = AbpSession.GetUserId(),
                                 Direction = getMessageInput.Direction,
                                 Sorting = "Id " + (getMessageInput.Direction == QueryDirection.New ? "asc" : "desc")
@@ -123,7 +124,7 @@ namespace JK.Chat
                         {
                             await chatAppService.SetLastReceivedMessageId(new SetLastReceivedIdInput
                             {
-                                GroupId = getMessageInput.GroupId,
+                                SessionId = getMessageInput.SessionId,
                                 UserId = AbpSession.GetUserId(),
                                 LastReceivedMessageId = lastId
                             });
@@ -141,10 +142,10 @@ namespace JK.Chat
                     break;
                 case CommandType.CreatePrivate:
                     {
-                        var createPrivateInput = DeserializeFromBytes<Dto.Input.CreatePrivateInput>(receivedMessage.DataType, receivedMessage.Data);
+                        var createPrivateInput = DeserializeFromBytes<Dto.Input.CreatePrivateSessionInput>(receivedMessage.DataType, receivedMessage.Data);
                         if (createPrivateInput.TargetUserId != AbpSession.GetUserId())
                         {
-                            await chatAppService.CreatePrivate(new Dto.CreatePrivateInput
+                            await chatAppService.CreatePrivate(new Dto.CreatePrivateSessionInput
                             {
                                 CreatorUserId = AbpSession.GetUserId(),
                                 TargetUserId = createPrivateInput.TargetUserId
@@ -160,10 +161,10 @@ namespace JK.Chat
                     break;
                 case CommandType.CreateGroup:
                     {
-                        var createGroupInput = DeserializeFromBytes<Dto.Input.CreateGroupInput>(receivedMessage.DataType, receivedMessage.Data);
-                        await chatAppService.CreateGroup(new Dto.CreateGroupInput
+                        var createGroupInput = DeserializeFromBytes<Dto.Input.CreatePublicSessionInput>(receivedMessage.DataType, receivedMessage.Data);
+                        await chatAppService.CreateGroup(new Dto.CreatePublicSessionInput
                         {
-                            GroupName = createGroupInput.GroupName,
+                            SessionName = createGroupInput.SessionName,
                             CreatorUserId = AbpSession.GetUserId()
                         });
                         var dtos = await GetGroups(AbpSession.GetUserId());
@@ -171,20 +172,20 @@ namespace JK.Chat
                     }
                     break;
                 case CommandType.DeleteGroup:
-                    var deleteGroupInput = DeserializeFromBytes<Dto.Input.DeleteGroupInput>(receivedMessage.DataType, receivedMessage.Data);
-                    await chatAppService.DeleteGroup(new Dto.DeleteGroupInput
+                    var deleteGroupInput = DeserializeFromBytes<Dto.Input.DeleteSessionInput>(receivedMessage.DataType, receivedMessage.Data);
+                    await chatAppService.DeleteGroup(new Dto.DeleteSessionInput
                     {
-                        GroupId = deleteGroupInput.GroupId,
+                        SessionId = deleteGroupInput.SessionId,
                         UserId = AbpSession.GetUserId()
                     });
                     //TODO 通知群组成员
 
                     break;
                 case CommandType.JoinGroup:
-                    var joinGroupInput = DeserializeFromBytes<JoinGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var joinGroupInput = DeserializeFromBytes<JoinSessionInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.LeaveGroup:
-                    var leaveGroupInput = DeserializeFromBytes<LeaveGroupInput>(receivedMessage.DataType, receivedMessage.Data);
+                    var leaveGroupInput = DeserializeFromBytes<LeaveSessionInput>(receivedMessage.DataType, receivedMessage.Data);
                     break;
                 case CommandType.GetGroups:
                     {
@@ -194,13 +195,13 @@ namespace JK.Chat
                     break;
                 case CommandType.GetGroupUnread:
                     {
-                        var getGroupUnreadInput = DeserializeFromBytes<GetGroupUnreadInput>(receivedMessage.DataType, receivedMessage.Data);
-                        var count = await chatAppService.GetGroupUnread(new ChatGroupInputBase
+                        var getGroupUnreadInput = DeserializeFromBytes<GetSessionUnreadInput>(receivedMessage.DataType, receivedMessage.Data);
+                        var count = await chatAppService.GetGroupUnread(new ChatSessionInputBase
                         {
-                            GroupId = getGroupUnreadInput.GroupId,
+                            SessionId = getGroupUnreadInput.SessionId,
                             UserId = AbpSession.GetUserId()
                         });
-                        var output = new GroupUnreadOutput { Count = count };
+                        var output = new SessionUnreadOutput { Count = count };
                         await SendMsgPackAsync(socket, CommandType.GetGroupUnread, output, httpContextAccess.HttpContext.RequestAborted);
                     }
                     break;
@@ -261,7 +262,7 @@ namespace JK.Chat
 
         private async Task AddToGroup(WebSocketClient onlineClient)
         {
-            var groups = await chatAppService.GetUserGroupsId(new GetUserGroupsInput { UserId = onlineClient.UserId.GetValueOrDefault() });
+            var groups = await chatAppService.GetUserGroupsId(new GetUserSessionsInput { UserId = onlineClient.UserId.GetValueOrDefault() });
             foreach (var groupId in groups)
             {
                 WebSocketConnectionManager.AddToGroup(onlineClient.ConnectionId, groupId.ToString());
@@ -270,7 +271,7 @@ namespace JK.Chat
 
         private async Task RemoveFromGroup(WebSocketClient onlineClient)
         {
-            var groups = await chatAppService.GetUserGroupsId(new GetUserGroupsInput { UserId = onlineClient.UserId.GetValueOrDefault() });
+            var groups = await chatAppService.GetUserGroupsId(new GetUserSessionsInput { UserId = onlineClient.UserId.GetValueOrDefault() });
             foreach (var groupId in groups)
             {
                 WebSocketConnectionManager.RemoveFromGroup(onlineClient.ConnectionId, groupId.ToString());
@@ -296,9 +297,9 @@ namespace JK.Chat
 
         private async Task SendNewMessage(long groupId, long userId, WebSocket socket)
         {
-            var lastId = await chatAppService.GetLastReceivedMessageId(new ChatGroupInputBase
+            var lastId = await chatAppService.GetLastReceivedMessageId(new ChatSessionInputBase
             {
-                GroupId = groupId,
+                SessionId = groupId,
                 UserId = userId
             });
             var oldLastId = lastId;
@@ -306,7 +307,7 @@ namespace JK.Chat
             {
                 var list = await chatAppService.GetMessages(new GetMessagesInput
                 {
-                    GroupId = groupId,
+                    SessionId = groupId,
                     UserId = userId,
                     LastReceivedMessageId = lastId,
                     MaxResultCount = 100,
@@ -329,7 +330,7 @@ namespace JK.Chat
             {
                 await chatAppService.SetLastReceivedMessageId(new SetLastReceivedIdInput
                 {
-                    GroupId = groupId,
+                    SessionId = groupId,
                     UserId = userId,
                     LastReceivedMessageId = lastId
                 });
@@ -337,14 +338,14 @@ namespace JK.Chat
         }
 
 
-        private async Task<ChatGroupOutput[]> GetGroups(long userId)
+        private async Task<ChatSessionOutput[]> GetGroups(long userId)
         {
-            var groups = await chatAppService.GetUserGroups(new GetUserGroupsInput { UserId = userId });
-            var dtos = groups.Items.Select(x => new ChatGroupOutput
+            var groups = await chatAppService.GetUserGroups(new GetUserSessionsInput { UserId = userId });
+            var dtos = groups.Items.Select(x => new ChatSessionOutput
             {
                 CreationTime = x.CreationTime,
                 CreatorUserId = x.CreatorUserId,
-                GroupType = x.GroupType,
+                SessionType = x.SessionType,
                 Id = x.Id,
                 Name = x.Name,
                 Status = x.Status,

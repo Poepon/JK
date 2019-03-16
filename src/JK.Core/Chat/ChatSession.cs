@@ -1,16 +1,14 @@
-﻿using Abp.Domain.Entities;
-using Abp.Domain.Entities.Auditing;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Abp.Domain.Entities;
 
 namespace JK.Chat
 {
     /// <summary>
-    /// 群组
+    /// 会话
     /// </summary>
-    [Table("ChatGroups")]
-    public class ChatGroup : Entity<long>, IPassivable, IMayHaveTenant
+    [Table("ChatSessions")]
+    public class ChatSession : Entity<long>, IPassivable, IMayHaveTenant
     {
         public const int MaxNameLength = 100;
         [StringLength(MaxNameLength)]
@@ -19,7 +17,7 @@ namespace JK.Chat
         [StringLength(2048)]
         public string Description { get; set; }
 
-        public ChatGroupType GroupType { get; set; }
+        public ChatSessionType SessionType { get; set; }
 
         public long CreatorUserId { get; set; }
 

@@ -1,7 +1,6 @@
-﻿using Abp.Application.Services.Dto;
+﻿using System.ComponentModel.DataAnnotations;
+using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
-using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace JK.Chat.Dto
 {
@@ -12,7 +11,7 @@ namespace JK.Chat.Dto
 
         public string UserName { get; set; }
 
-        public long GroupId { get; set; }
+        public long SessionId { get; set; }
 
         [StringLength(ChatMessage.MaxMessageLength)]
         public string Message { get; set; }

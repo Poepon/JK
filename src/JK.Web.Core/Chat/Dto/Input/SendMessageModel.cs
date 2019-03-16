@@ -8,7 +8,7 @@ namespace JK.Chat.Dto.Input
     public class SendMessageModel
     {
         [Key("gid")]
-        public long GroupId { get; set; }
+        public long SessionId { get; set; }
 
         [Key("msg")]
         public string Message { get; set; }

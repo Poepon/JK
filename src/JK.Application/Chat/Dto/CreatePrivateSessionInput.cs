@@ -1,6 +1,6 @@
 ﻿namespace JK.Chat.Dto
 {
-    public class CreatePrivateInput
+    public class CreatePrivateSessionInput
     {
         public long CreatorUserId { get; set; }
 

@@ -3,9 +3,9 @@
 namespace JK.Chat.Dto.Input
 {
     [MessagePackObject]
-    public class CreateGroupInput
+    public class CreatePublicSessionInput
     {
         [Key("gname")]
-        public string GroupName { get; set; }        
+        public string SessionName { get; set; }        
     }
 }

@@ -2,7 +2,7 @@
 {
     public class BlockUserInput
     {
-        public long GroupId { get; set; }
+        public long SessionId { get; set; }
 
         public long UserId { get; set; }
     }

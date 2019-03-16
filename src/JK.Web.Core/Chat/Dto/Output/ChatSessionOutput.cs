@@ -4,8 +4,8 @@ using MessagePack;
 namespace JK.Chat.Dto.Output
 {
     [MessagePackObject]
-    [AutoMapFrom(typeof(ChatGroupDto))]
-    public class ChatGroupOutput
+    [AutoMapFrom(typeof(ChatSessionDto))]
+    public class ChatSessionOutput
     {
         [Key("gid")]
         public long Id { get; set; }
@@ -17,7 +17,7 @@ namespace JK.Chat.Dto.Output
         public string Icon { get; set; }
 
         [Key("gt")]
-        public ChatGroupType GroupType { get; set; }
+        public ChatSessionType SessionType { get; set; }
 
         [Key("owner")]
         public long CreatorUserId { get; set; }

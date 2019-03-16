@@ -1,6 +1,6 @@
 ﻿namespace JK.Chat.Dto
 {
-    public class SetLastReceivedIdInput : ChatGroupInputBase
+    public class SetLastReceivedIdInput : ChatSessionInputBase
     {
         public long LastReceivedMessageId { get; set; }
     }

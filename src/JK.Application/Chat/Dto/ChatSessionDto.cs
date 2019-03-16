@@ -1,17 +1,14 @@
 ﻿using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace JK.Chat.Dto
 {
-    [AutoMap(typeof(ChatGroup))]
-    public class ChatGroupDto : EntityDto<long>
+    [AutoMap(typeof(ChatSession))]
+    public class ChatSessionDto : EntityDto<long>
     {
         public string Name { get; set; }
 
-        public ChatGroupType GroupType { get; set; }
+        public ChatSessionType SessionType { get; set; }
 
         public long CreatorUserId { get; set; }
 

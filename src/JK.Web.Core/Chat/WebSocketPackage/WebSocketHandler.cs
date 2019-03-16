@@ -1,15 +1,15 @@
-﻿using Abp.Json;
-using JK.Chat.Dto;
-using JK.Chat.Dto.Input;
-using MessagePack;
-using System;
+﻿using System;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Abp.Json;
+using JK.Chat.Dto;
+using JK.Chat.Dto.Input;
+using MessagePack;
 
-namespace JK.Chat
+namespace JK.Chat.WebSocketPackage
 {
     public abstract class WebSocketHandler
     {

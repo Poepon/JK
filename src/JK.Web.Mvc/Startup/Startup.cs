@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using Abp.AspNetCore;
 using Abp.Castle.Logging.Log4Net;
+using Abp.Extensions;
 using Castle.Facilities.Logging;
 using Exceptionless;
 using JK.Authentication.JwtBearer;
@@ -19,6 +21,7 @@ namespace JK.Web.Startup
 {
     public class Startup
     {
+        private const string _defaultCorsPolicyName = "localhost";
         private readonly IConfigurationRoot _appConfiguration;
 
         public Startup(IHostingEnvironment env)
@@ -28,6 +31,8 @@ namespace JK.Web.Startup
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            services.AddMiniProfiler().AddEntityFramework();
+
             // MVC
             services.AddMvc(
                 options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute())
@@ -35,6 +40,24 @@ namespace JK.Web.Startup
 
             IdentityRegistrar.Register(services);
             AuthConfigurer.Configure(services, _appConfiguration);
+
+            // Configure CORS for angular2 UI
+            services.AddCors(
+                options => options.AddPolicy(
+                    _defaultCorsPolicyName,
+                    builder => builder
+                        .WithOrigins(
+                            // App:CorsOrigins in appsettings.json can contain more than one address separated by comma.
+                            _appConfiguration["App:CorsOrigins"]
+                                .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                                .Select(o => o.RemovePostFix("/"))
+                                .ToArray()
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials()
+                )
+            );
 
             services.AddScoped<IWebResourceManager, WebResourceManager>();
 
@@ -51,6 +74,8 @@ namespace JK.Web.Startup
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider service, ILoggerFactory loggerFactory)
         {
             app.UseAbp(); // Initializes ABP framework.
+
+            app.UseCors(_defaultCorsPolicyName); // Enable CORS!
 
             if (env.IsDevelopment())
             {
@@ -72,7 +97,11 @@ namespace JK.Web.Startup
 
             app.MapWebSocketManager("/chatws", service.GetService<ChatHandler>());
 
-            app.UseExceptionless("LVk6YzNKOHm4E0eGrCJpWvPtdQG3ONptcNWCJuMz");
+            if (Environment.GetEnvironmentVariable("EnableExceptionless") == "true")
+                app.UseExceptionless(_appConfiguration);
+
+            if (Environment.GetEnvironmentVariable("EnableProfiler") == "true")
+                app.UseMiniProfiler();
 
             app.UseMvc(routes =>
             {

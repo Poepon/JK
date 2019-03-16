@@ -3,8 +3,11 @@ using Abp.Domain.Entities;
 
 namespace JK.Chat
 {
-    [Table("UserChatMessageLogs")]
-    public class UserChatMessageLog : Entity<long>
+    /// <summary>
+    /// 会话成员
+    /// </summary>
+    [Table("ChatSessionMembers")]
+    public class ChatSessionMember : Entity<long>, IPassivable
     {
         public long SessionId { get; set; }
 
@@ -13,8 +16,8 @@ namespace JK.Chat
 
         public long UserId { get; set; }
 
-        public long LastReceivedMessageId { get; set; }
+        public long CreationTime { get; set; }
 
-        public long LastReadMessageId { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

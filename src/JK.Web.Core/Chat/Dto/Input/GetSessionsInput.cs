@@ -1,9 +1,7 @@
 ﻿namespace JK.Chat.Dto.Input
 {
-    public class LeaveGroupInput
+    public class GetSessionsInput
     {
         public long UserId { get; set; }
-
-        public long GroupId { get; set; }
     }
 }
