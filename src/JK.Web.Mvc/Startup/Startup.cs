@@ -1,12 +1,11 @@
-﻿using System;
-using System.Linq;
-using Abp.AspNetCore;
+﻿using Abp.AspNetCore;
 using Abp.Castle.Logging.Log4Net;
 using Abp.Extensions;
 using Castle.Facilities.Logging;
 using Exceptionless;
 using JK.Authentication.JwtBearer;
 using JK.Chat;
+using JK.Chat.WebSocketPackage;
 using JK.Configuration;
 using JK.Identity;
 using JK.Web.Resources;
@@ -16,6 +15,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
 
 namespace JK.Web.Startup
 {
@@ -95,7 +96,7 @@ namespace JK.Web.Startup
 
             app.UseWebSockets();
 
-            app.MapWebSocketManager("/chatws", service.GetService<ChatHandler>());
+            app.MapWebSocketManager("/chatws", service.GetService<ChatHub>());
 
             if (Environment.GetEnvironmentVariable("EnableExceptionless") == "true")
                 app.UseExceptionless(_appConfiguration);

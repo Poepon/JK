@@ -1,10 +1,12 @@
-﻿using Abp.Modules;
+﻿using Abp.Dependency;
+using Abp.Modules;
 using Abp.Reflection.Extensions;
 using Abp.Timing;
 using Abp.Zero;
 using Abp.Zero.Configuration;
 using JK.Authorization.Roles;
 using JK.Authorization.Users;
+using JK.Chat;
 using JK.Configuration;
 using JK.Localization;
 using JK.MultiTenancy;
@@ -42,6 +44,7 @@ namespace JK
 
         public override void PostInitialize()
         {
+            IocManager.RegisterIfNot<IChatCommunicator, NullChatCommunicator>();
             IocManager.Resolve<AppTimes>().StartupTime = Clock.Now;
         }
     }

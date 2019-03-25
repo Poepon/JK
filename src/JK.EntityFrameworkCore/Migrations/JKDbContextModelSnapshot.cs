@@ -1004,6 +1004,31 @@ namespace JK.Migrations
                     b.ToTable("AgentLoginAttempts");
                 });
 
+            modelBuilder.Entity("JK.Alliance.AgentRelationship", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("AgentId");
+
+                    b.Property<decimal>("CommissionRate");
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<int>("Level");
+
+                    b.Property<decimal>("NodeCommissionRate");
+
+                    b.Property<long>("SubAgentId");
+
+                    b.Property<long>("SubParentId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AgentRelationships");
+                });
+
             modelBuilder.Entity("JK.Alliance.AgentToken", b =>
                 {
                     b.Property<long>("Id")
@@ -1190,7 +1215,33 @@ namespace JK.Migrations
                     b.ToTable("AbpUsers");
                 });
 
-            modelBuilder.Entity("JK.Chat.ChatGroup", b =>
+            modelBuilder.Entity("JK.Chat.ChatMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("CreationTime");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(4096);
+
+                    b.Property<int>("ReadState");
+
+                    b.Property<long>("SessionId");
+
+                    b.Property<long>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ChatMessages");
+                });
+
+            modelBuilder.Entity("JK.Chat.ChatSession", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1203,65 +1254,39 @@ namespace JK.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(2048);
 
-                    b.Property<int>("GroupType");
-
                     b.Property<bool>("IsActive");
 
                     b.Property<string>("Name")
                         .HasMaxLength(100);
 
+                    b.Property<int>("SessionType");
+
                     b.Property<int?>("TenantId");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ChatGroups");
+                    b.ToTable("ChatSessions");
                 });
 
-            modelBuilder.Entity("JK.Chat.ChatGroupMember", b =>
+            modelBuilder.Entity("JK.Chat.ChatSessionMember", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<long>("CreationTime");
-
-                    b.Property<long>("GroupId");
 
                     b.Property<bool>("IsActive");
 
-                    b.Property<long>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.ToTable("ChatGrouppMembers");
-                });
-
-            modelBuilder.Entity("JK.Chat.ChatMessage", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long>("CreationTime");
-
-                    b.Property<long>("GroupId");
-
-                    b.Property<string>("Message")
-                        .HasMaxLength(4096);
-
-                    b.Property<int>("ReadState");
+                    b.Property<long>("SessionId");
 
                     b.Property<long>("UserId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupId");
+                    b.HasIndex("SessionId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ChatSessionMembers");
                 });
 
             modelBuilder.Entity("JK.Chat.UserChatMessageLog", b =>
@@ -1270,17 +1295,17 @@ namespace JK.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long>("GroupId");
-
                     b.Property<long>("LastReadMessageId");
 
                     b.Property<long>("LastReceivedMessageId");
+
+                    b.Property<long>("SessionId");
 
                     b.Property<long>("UserId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupId", "UserId");
+                    b.HasIndex("SessionId", "UserId");
 
                     b.ToTable("UserChatMessageLogs");
                 });
@@ -1711,19 +1736,11 @@ namespace JK.Migrations
                         .HasForeignKey("LastModifierUserId");
                 });
 
-            modelBuilder.Entity("JK.Chat.ChatGroupMember", b =>
-                {
-                    b.HasOne("JK.Chat.ChatGroup", "ChatGroup")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("JK.Chat.ChatMessage", b =>
                 {
-                    b.HasOne("JK.Chat.ChatGroup", "ChatGroup")
+                    b.HasOne("JK.Chat.ChatSession", "ChatSession")
                         .WithMany()
-                        .HasForeignKey("GroupId")
+                        .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("JK.Authorization.Users.User", "User")
@@ -1732,11 +1749,19 @@ namespace JK.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("JK.Chat.ChatSessionMember", b =>
+                {
+                    b.HasOne("JK.Chat.ChatSession", "ChatSession")
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("JK.Chat.UserChatMessageLog", b =>
                 {
-                    b.HasOne("JK.Chat.ChatGroup", "ChatGroup")
+                    b.HasOne("JK.Chat.ChatSession", "ChatSession")
                         .WithMany()
-                        .HasForeignKey("GroupId")
+                        .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

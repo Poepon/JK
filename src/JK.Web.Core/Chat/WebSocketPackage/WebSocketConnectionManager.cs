@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -7,53 +6,19 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Abp.Dependency;
+using Abp.RealTime;
 
 namespace JK.Chat.WebSocketPackage
 {
-    public class WebSocketClient
-    {
-        public WebSocketClient()
-        {
-            ConnectTime = DateTimeOffset.Now;
-        }
-        public WebSocketClient(string connectionId, string ipAddress, WebSocket webSocket) : this()
-        {
-            ConnectionId = connectionId;
-            IpAddress = ipAddress;
-            WebSocket = webSocket;
-        }
-        public long? UserId { get; set; }
-
-        public string IpAddress { get; set; }
-
-        public string ConnectionId { get; set; }
-
-        public WebSocket WebSocket { get; set; }
-
-        public DateTimeOffset ConnectTime { get; set; }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is WebSocketClient)
-            {
-                var b = obj as WebSocketClient;
-                return this.UserId == b.UserId && this.WebSocket == b.WebSocket;
-            }
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-    }
     public class WebSocketConnectionManager : ISingletonDependency
     {
+        protected IOnlineClientManager OnlineClientManager { get; }
         protected ConcurrentDictionary<string, WebSocketClient> Clients { get; }
         protected ConcurrentDictionary<string, List<string>> Groups { get; }
 
-        public WebSocketConnectionManager()
+        public WebSocketConnectionManager(IOnlineClientManager onlineClientManager)
         {
+            OnlineClientManager = onlineClientManager;
             Clients = new ConcurrentDictionary<string, WebSocketClient>();
             Groups = new ConcurrentDictionary<string, List<string>>();
         }

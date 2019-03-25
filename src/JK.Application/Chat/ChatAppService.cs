@@ -1,17 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Dynamic.Core;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using Abp;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
+using Abp.RealTime;
+using Abp.Runtime.Session;
 using Abp.UI;
 using JK.Authorization.Users;
 using JK.Chat.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace JK.Chat
 {
@@ -22,13 +25,17 @@ namespace JK.Chat
         private readonly IRepository<ChatSession, long> _chatSessionRepository;
         private readonly IRepository<ChatSessionMember, long> _chatSessionMemberRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IChatCommunicator _chatCommunicator;
+        private readonly IOnlineClientManager<ChatChannel> _onlineClientManager;
         private readonly IRepository<UserChatMessageLog, long> _userChatMessageLogRepository;
         public ChatAppService(IRepository<ChatMessage, long> chatMessageRepository,
             IRepository<UserChatMessageLog, long> userChatMessageLogRepository,
             IRepository<ChatSession, long> chatSessionRepository,
             IRepository<ChatSessionMember, long> chatSessionMemberRepository,
             IRepository<User, long> userRepository,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IChatCommunicator chatCommunicator,
+            IOnlineClientManager<ChatChannel> onlineClientManager)
         {
             _chatMessageRepository = chatMessageRepository;
             _userChatMessageLogRepository = userChatMessageLogRepository;
@@ -36,10 +43,12 @@ namespace JK.Chat
             _chatSessionMemberRepository = chatSessionMemberRepository;
             _userRepository = userRepository;
             _httpContextAccessor = httpContextAccessor;
+            _chatCommunicator = chatCommunicator;
+            _onlineClientManager = onlineClientManager;
         }
 
 
-        public async Task CreateGroup(CreatePublicSessionInput input)
+        public async Task CreatePublicSession(CreatePublicSessionInput input)
         {
             var sessionId = await _chatSessionRepository.InsertAndGetIdAsync(new ChatSession
             {
@@ -115,7 +124,7 @@ namespace JK.Chat
             return new PagedResultDto<ChatMessageDto>(totalCount, list);
         }
 
-        public async Task JoinGroup(ChatSessionInputBase input)
+        public async Task JoinSession(ChatSessionInputBase input)
         {
             var exists = await _chatSessionMemberRepository.GetAll()
                    .AnyAsync(member => member.SessionId == input.SessionId && member.UserId == input.UserId, _httpContextAccessor.HttpContext.RequestAborted);
@@ -131,14 +140,14 @@ namespace JK.Chat
             }
         }
 
-        public Task LeaveGroup(ChatSessionInputBase input)
+        public Task LeaveSession(ChatSessionInputBase input)
         {
             return _chatSessionMemberRepository.DeleteAsync(member => member.SessionId == input.SessionId && member.UserId == input.UserId);
         }
 
-        public Task SendMessage(SendMessageInput input)
+        public async Task SendMessage(SendMessageInput input)
         {
-            return _chatMessageRepository.InsertAsync(new ChatMessage
+            var message = await _chatMessageRepository.InsertAsync(new ChatMessage
             {
                 SessionId = input.SessionId,
                 UserId = input.UserId,
@@ -146,9 +155,70 @@ namespace JK.Chat
                 CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 ReadState = ChatMessageReadState.Unread
             });
+            await CurrentUnitOfWork.SaveChangesAsync();
+            // 推送消息给发送人
+            var senders = _onlineClientManager.GetAllByUserId(AbpSession.ToUserIdentifier());
+            await _chatCommunicator.SendMessageToClient(senders, message);
+            // 推送消息给接收人
+            var receivers = await GetSessionMembersUserId(input.SessionId);
+            foreach (var item in receivers)
+            {
+                if (item != AbpSession.UserId)
+                {
+                    var clients = _onlineClientManager.GetAllByUserId(new UserIdentifier(AbpSession.TenantId, item));
+                    await _chatCommunicator.SendMessageToClient(clients, message);
+                }
+            }
         }
 
-        public async Task<int> GetGroupUnread(ChatSessionInputBase input)
+        public async Task<long[]> GetSessionMembersUserId(long sessionId)
+        {
+            return await _chatSessionMemberRepository.GetAll()
+                   .Where(m => m.SessionId == sessionId).Select(m => m.UserId)
+                   .ToArrayAsync();
+        }
+
+        private async Task SendNewMessage(long groupId, long userId)
+        {
+            var lastId = await GetLastReceivedMessageId(new ChatSessionInputBase
+            {
+                SessionId = groupId,
+                UserId = userId
+            });
+            var oldLastId = lastId;
+            do
+            {
+                var list = await GetMessages(new GetMessagesInput
+                {
+                    SessionId = groupId,
+                    UserId = userId,
+                    LastReceivedMessageId = lastId,
+                    MaxResultCount = 100,
+                    SkipCount = 0,
+                    Direction = QueryDirection.New,
+                    Sorting = "Id asc"
+                });
+                if (list.TotalCount > 0)
+                {
+
+                }
+                else
+                {
+                    break;
+                }
+            } while (true);
+            if (lastId > oldLastId)
+            {
+                await SetLastReceivedMessageId(new SetLastReceivedIdInput
+                {
+                    SessionId = groupId,
+                    UserId = userId,
+                    LastReceivedMessageId = lastId
+                });
+            }
+        }
+
+        public async Task<int> GetSessionUnread(ChatSessionInputBase input)
         {
             long lastMessageId = await _userChatMessageLogRepository.GetAll()
                 .Where(log => log.SessionId == input.SessionId && log.UserId == input.UserId)
@@ -157,7 +227,7 @@ namespace JK.Chat
                 message.SessionId == input.SessionId &&
                 message.Id > lastMessageId);
         }
-        public async Task<IList<GetSessionsUnreadOutput>> GetGroupsUnread(GetSessionsUnreadInput input)
+        public async Task<IList<GetSessionsUnreadOutput>> GetSessionsUnread(GetSessionsUnreadInput input)
         {
             //TODO 有BUG，没有Log的群组会查不到记录
             var linq = from g in _chatSessionRepository.GetAll()
@@ -233,7 +303,7 @@ namespace JK.Chat
             }
         }
 
-        public async Task<IList<long>> GetUserGroupsId(GetUserSessionsInput input)
+        public async Task<IList<long>> GetUserSessionsId(GetUserSessionsInput input)
         {
             var list = await _chatSessionMemberRepository.GetAll()
                      .Where(member => member.UserId == input.UserId)
@@ -242,7 +312,7 @@ namespace JK.Chat
             return list;
         }
 
-        public async Task<ListResultDto<ChatSessionDto>> GetUserGroups(GetUserSessionsInput input)
+        public async Task<ListResultDto<ChatSessionDto>> GetUserSessions(GetUserSessionsInput input)
         {
             var list = await _chatSessionMemberRepository.GetAllIncluding(member => member.ChatSession)
                       .Where(member => member.UserId == input.UserId)
@@ -250,8 +320,8 @@ namespace JK.Chat
                       .ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
             var dtos = list.Select(item =>
             {
-                ChatSessionDto chatGroupDto = ObjectMapper.Map<ChatSessionDto>(item);
-                if (chatGroupDto.SessionType == ChatSessionType.Private)
+                ChatSessionDto chatSessionDto = ObjectMapper.Map<ChatSessionDto>(item);
+                if (chatSessionDto.SessionType == ChatSessionType.Private)
                 {
                     const string reg = @"^(?<uid1>[1-9]\d*)_(?<uid2>[1-9]\d*)$";
                     var match = Regex.Match(item.Name, reg);
@@ -260,12 +330,12 @@ namespace JK.Chat
                         var uid1 = long.Parse(match.Groups["uid1"].Value);
                         var uid2 = long.Parse(match.Groups["uid2"].Value);
                         if (uid1 != input.UserId)
-                            chatGroupDto.Name = _userRepository.GetAll().Where(u => u.Id == uid1).Select(u => u.Name).SingleOrDefault();
+                            chatSessionDto.Name = _userRepository.GetAll().Where(u => u.Id == uid1).Select(u => u.Name).SingleOrDefault();
                         if (uid2 != input.UserId)
-                            chatGroupDto.Name = _userRepository.GetAll().Where(u => u.Id == uid2).Select(u => u.Name).SingleOrDefault();
+                            chatSessionDto.Name = _userRepository.GetAll().Where(u => u.Id == uid2).Select(u => u.Name).SingleOrDefault();
                     }
                 }
-                return chatGroupDto;
+                return chatSessionDto;
             }).ToList();
 
             return new ListResultDto<ChatSessionDto>(dtos);
@@ -282,7 +352,7 @@ namespace JK.Chat
             return ObjectMapper.Map<ChatMessageDto>(entity);
         }
 
-        public async Task DeleteGroup(DeleteSessionInput input)
+        public async Task DeleteSession(DeleteSessionInput input)
         {
             var group = await _chatSessionRepository.GetAsync(input.SessionId);
             if (group != null)

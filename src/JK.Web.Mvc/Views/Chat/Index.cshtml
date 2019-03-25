@@ -110,7 +110,7 @@
 </script>
 <script type="x-template" id="allmessagesContainerTemplate">
     <div class="tab-content">
-        <vue-messages-container v-for="group in groups" :currentgroup="group" :loginuid="@AbpSession.UserId.GetValueOrDefault()"></vue-messages-container>
+        <vue-messages-container v-for="group in groups" :key="group.gid" :currentgroup="group" :loginuid="@AbpSession.UserId.GetValueOrDefault()"></vue-messages-container>
     </div>
 </script>
 <script type="x-template" id="messagesContainerTemplate">

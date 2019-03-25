@@ -4,7 +4,7 @@ using MessagePack;
 namespace JK.Chat.Dto.Output
 {
     [MessagePackObject]
-    [AutoMapFrom(typeof(ChatMessageDto))]
+    [AutoMapFrom(typeof(ChatMessageDto),typeof(ChatMessage))]
     public class ChatMessageOutput
     {
         [Key("mid")]

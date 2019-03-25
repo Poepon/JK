@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JK.Migrations
 {
     [DbContext(typeof(JKDbContext))]
-    [Migration("20190222092511_Add_User_GoogleAuthenticatorKey")]
-    partial class Add_User_GoogleAuthenticatorKey
+    [Migration("20190325051833_InitChat")]
+    partial class InitChat
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
+                .HasAnnotation("ProductVersion", "2.2.2-servicing-10034")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -850,6 +850,219 @@ namespace JK.Migrations
                     b.ToTable("AbpOrganizationUnits");
                 });
 
+            modelBuilder.Entity("JK.Alliance.Agent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AccessFailedCount");
+
+                    b.Property<string>("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<string>("Email");
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<bool>("IsEmailConfirmed");
+
+                    b.Property<bool>("IsLockoutEnabled");
+
+                    b.Property<bool>("IsPhoneNumberConfirmed");
+
+                    b.Property<bool>("IsTwoFactorEnabled");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("NormalizedEmail");
+
+                    b.Property<string>("NormalizedUserName");
+
+                    b.Property<long?>("ParentId");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("PhoneNumber");
+
+                    b.Property<string>("SecurityStamp");
+
+                    b.Property<int>("TenantId");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Agents");
+                });
+
+            modelBuilder.Entity("JK.Alliance.AgentClaim", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long?>("AgentId")
+                        .HasColumnName("AgentClaim_AgentId");
+
+                    b.Property<string>("ClaimType")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("ClaimValue");
+
+                    b.Property<int>("TenantId");
+
+                    b.Property<long>("UserId")
+                        .HasColumnName("AgentId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgentId");
+
+                    b.ToTable("AgentClaims");
+                });
+
+            modelBuilder.Entity("JK.Alliance.AgentLogin", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long?>("AgentId")
+                        .HasColumnName("AgentLogin_AgentId");
+
+                    b.Property<string>("LoginProvider")
+                        .IsRequired()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("ProviderKey")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.Property<int>("TenantId");
+
+                    b.Property<long>("UserId")
+                        .HasColumnName("AgentId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgentId");
+
+                    b.ToTable("AgentLogins");
+                });
+
+            modelBuilder.Entity("JK.Alliance.AgentLoginAttempt", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("BrowserInfo")
+                        .HasMaxLength(512);
+
+                    b.Property<string>("ClientIpAddress")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("ClientName")
+                        .HasMaxLength(128);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<byte>("Result");
+
+                    b.Property<string>("TenancyName")
+                        .IsRequired()
+                        .HasMaxLength(64);
+
+                    b.Property<int>("TenantId");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnName("AgentId");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(255);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AgentLoginAttempts");
+                });
+
+            modelBuilder.Entity("JK.Alliance.AgentRelationship", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("AgentId");
+
+                    b.Property<decimal>("CommissionRate");
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<int>("Level");
+
+                    b.Property<decimal>("NodeCommissionRate");
+
+                    b.Property<long>("SubAgentId");
+
+                    b.Property<long>("SubParentId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AgentRelationships");
+                });
+
+            modelBuilder.Entity("JK.Alliance.AgentToken", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long?>("AgentId")
+                        .HasColumnName("AgentToken_AgentId");
+
+                    b.Property<DateTime?>("ExpireDate");
+
+                    b.Property<string>("LoginProvider")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(128);
+
+                    b.Property<int>("TenantId");
+
+                    b.Property<long>("UserId")
+                        .HasColumnName("AgentId");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(512);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgentId");
+
+                    b.ToTable("AgentTokens");
+                });
+
             modelBuilder.Entity("JK.Authorization.Roles.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -1004,7 +1217,33 @@ namespace JK.Migrations
                     b.ToTable("AbpUsers");
                 });
 
-            modelBuilder.Entity("JK.Chat.ChatGroup", b =>
+            modelBuilder.Entity("JK.Chat.ChatMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("CreationTime");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(4096);
+
+                    b.Property<int>("ReadState");
+
+                    b.Property<long>("SessionId");
+
+                    b.Property<long>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ChatMessages");
+                });
+
+            modelBuilder.Entity("JK.Chat.ChatSession", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1017,65 +1256,39 @@ namespace JK.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(2048);
 
-                    b.Property<int>("GroupType");
-
                     b.Property<bool>("IsActive");
 
                     b.Property<string>("Name")
                         .HasMaxLength(100);
 
+                    b.Property<int>("SessionType");
+
                     b.Property<int?>("TenantId");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ChatGroups");
+                    b.ToTable("ChatSessions");
                 });
 
-            modelBuilder.Entity("JK.Chat.ChatGroupMember", b =>
+            modelBuilder.Entity("JK.Chat.ChatSessionMember", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<long>("CreationTime");
-
-                    b.Property<long>("GroupId");
 
                     b.Property<bool>("IsActive");
 
-                    b.Property<long>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.ToTable("ChatGrouppMembers");
-                });
-
-            modelBuilder.Entity("JK.Chat.ChatMessage", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long>("CreationTime");
-
-                    b.Property<long>("GroupId");
-
-                    b.Property<string>("Message")
-                        .HasMaxLength(4096);
-
-                    b.Property<int>("ReadState");
+                    b.Property<long>("SessionId");
 
                     b.Property<long>("UserId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupId");
+                    b.HasIndex("SessionId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ChatSessionMembers");
                 });
 
             modelBuilder.Entity("JK.Chat.UserChatMessageLog", b =>
@@ -1084,19 +1297,209 @@ namespace JK.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long>("GroupId");
-
                     b.Property<long>("LastReadMessageId");
 
                     b.Property<long>("LastReceivedMessageId");
+
+                    b.Property<long>("SessionId");
 
                     b.Property<long>("UserId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupId", "UserId");
+                    b.HasIndex("SessionId", "UserId");
 
                     b.ToTable("UserChatMessageLogs");
+                });
+
+            modelBuilder.Entity("JK.Customers.Customer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AccessFailedCount");
+
+                    b.Property<long?>("AgentId");
+
+                    b.Property<string>("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<string>("Email");
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<bool>("IsEmailConfirmed");
+
+                    b.Property<bool>("IsLockoutEnabled");
+
+                    b.Property<bool>("IsPhoneNumberConfirmed");
+
+                    b.Property<bool>("IsTwoFactorEnabled");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("NormalizedEmail");
+
+                    b.Property<string>("NormalizedUserName");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("PhoneNumber");
+
+                    b.Property<long?>("RefCustomerId");
+
+                    b.Property<string>("SecurityStamp");
+
+                    b.Property<int>("TenantId");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("JK.Customers.CustomerClaim", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ClaimType")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("ClaimValue");
+
+                    b.Property<long?>("CustomerId")
+                        .HasColumnName("CustomerClaim_CustomerId");
+
+                    b.Property<int>("TenantId");
+
+                    b.Property<long>("UserId")
+                        .HasColumnName("CustomerId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("CustomerClaims");
+                });
+
+            modelBuilder.Entity("JK.Customers.CustomerLogin", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long?>("CustomerId")
+                        .HasColumnName("CustomerLogin_CustomerId");
+
+                    b.Property<string>("LoginProvider")
+                        .IsRequired()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("ProviderKey")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.Property<int>("TenantId");
+
+                    b.Property<long>("UserId")
+                        .HasColumnName("CustomerId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("CustomerLogins");
+                });
+
+            modelBuilder.Entity("JK.Customers.CustomerLoginAttempt", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("BrowserInfo")
+                        .HasMaxLength(512);
+
+                    b.Property<string>("ClientIpAddress")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("ClientName")
+                        .HasMaxLength(128);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<byte>("Result");
+
+                    b.Property<string>("TenancyName")
+                        .IsRequired()
+                        .HasMaxLength(64);
+
+                    b.Property<int>("TenantId");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnName("CustomerId");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(255);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CustomerLoginAttempts");
+                });
+
+            modelBuilder.Entity("JK.Customers.CustomerToken", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long?>("CustomerId")
+                        .HasColumnName("CustomerToken_CustomerId");
+
+                    b.Property<DateTime?>("ExpireDate");
+
+                    b.Property<string>("LoginProvider")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(128);
+
+                    b.Property<int>("TenantId");
+
+                    b.Property<long>("UserId")
+                        .HasColumnName("CustomerId");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(512);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("CustomerTokens");
                 });
 
             modelBuilder.Entity("JK.MultiTenancy.Tenant", b =>
@@ -1284,6 +1687,27 @@ namespace JK.Migrations
                         .HasForeignKey("ParentId");
                 });
 
+            modelBuilder.Entity("JK.Alliance.AgentClaim", b =>
+                {
+                    b.HasOne("JK.Alliance.Agent")
+                        .WithMany("Claims")
+                        .HasForeignKey("AgentId");
+                });
+
+            modelBuilder.Entity("JK.Alliance.AgentLogin", b =>
+                {
+                    b.HasOne("JK.Alliance.Agent")
+                        .WithMany("Logins")
+                        .HasForeignKey("AgentId");
+                });
+
+            modelBuilder.Entity("JK.Alliance.AgentToken", b =>
+                {
+                    b.HasOne("JK.Alliance.Agent")
+                        .WithMany("Tokens")
+                        .HasForeignKey("AgentId");
+                });
+
             modelBuilder.Entity("JK.Authorization.Roles.Role", b =>
                 {
                     b.HasOne("JK.Authorization.Users.User", "CreatorUser")
@@ -1314,19 +1738,11 @@ namespace JK.Migrations
                         .HasForeignKey("LastModifierUserId");
                 });
 
-            modelBuilder.Entity("JK.Chat.ChatGroupMember", b =>
-                {
-                    b.HasOne("JK.Chat.ChatGroup", "ChatGroup")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("JK.Chat.ChatMessage", b =>
                 {
-                    b.HasOne("JK.Chat.ChatGroup", "ChatGroup")
+                    b.HasOne("JK.Chat.ChatSession", "ChatSession")
                         .WithMany()
-                        .HasForeignKey("GroupId")
+                        .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("JK.Authorization.Users.User", "User")
@@ -1335,12 +1751,41 @@ namespace JK.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("JK.Chat.ChatSessionMember", b =>
+                {
+                    b.HasOne("JK.Chat.ChatSession", "ChatSession")
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("JK.Chat.UserChatMessageLog", b =>
                 {
-                    b.HasOne("JK.Chat.ChatGroup", "ChatGroup")
+                    b.HasOne("JK.Chat.ChatSession", "ChatSession")
                         .WithMany()
-                        .HasForeignKey("GroupId")
+                        .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("JK.Customers.CustomerClaim", b =>
+                {
+                    b.HasOne("JK.Customers.Customer")
+                        .WithMany("Claims")
+                        .HasForeignKey("CustomerId");
+                });
+
+            modelBuilder.Entity("JK.Customers.CustomerLogin", b =>
+                {
+                    b.HasOne("JK.Customers.Customer")
+                        .WithMany("Logins")
+                        .HasForeignKey("CustomerId");
+                });
+
+            modelBuilder.Entity("JK.Customers.CustomerToken", b =>
+                {
+                    b.HasOne("JK.Customers.Customer")
+                        .WithMany("Tokens")
+                        .HasForeignKey("CustomerId");
                 });
 
             modelBuilder.Entity("JK.MultiTenancy.Tenant", b =>

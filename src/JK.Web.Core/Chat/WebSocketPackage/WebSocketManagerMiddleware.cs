@@ -109,7 +109,7 @@ namespace JK.Chat.WebSocketPackage
                         Type = AlertType.Warning,
                         Text = e.Message
                     };
-                    await _webSocketHandler.SendMsgPackAsync(socket, CommandType.AlertMessage, warn, cancellationToken);
+                    await socket.SendMsgPackAsync(CommandType.AlertMessage, warn, cancellationToken);
                 }
                 catch (AggregateException)
                 {

@@ -16,8 +16,10 @@
     <text name="Password" value="密码" />
     <text name="RememberMe" value="记住我" />
     <text name="ForgetPassword" value="忘记密码"/>
-    <text name="NotSelected" value="未选"/>
-    <text name="ChangeTenant" value="更改租户"/>
+    <text name="CurrentTenant" value="当前租户"/>
+    <text name="NotSelected" value="未选择"/>
+    <text name="Change" value="变更"/>
+    <text name="ChangeTenant" value="变更租户"/>
     <text name="LeaveEmptyToSwitchToHost" value="留空以切换到Host"/>
     <text name="LogIn" value="登录" />
     <text name="LoginFailed" value="登录失败!" />
@@ -69,10 +71,10 @@
     <text name="All">全部</text>
     <text name="Actived">启用</text>
     <text name="NoActive">未启用</text>
-    
+
     <text name="Yes">是</text>
     <text name="No">否</text>
-    
+
     <text name="Cancel">取消</text>
     <text name="OK">确定</text>
     <text name="CreateNewRole">创建新角色</text>

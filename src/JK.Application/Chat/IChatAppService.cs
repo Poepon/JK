@@ -16,17 +16,17 @@ namespace JK.Chat
 
         Task CreatePrivate(CreatePrivateSessionInput input);
 
-        Task CreateGroup(CreatePublicSessionInput input);
+        Task CreatePublicSession(CreatePublicSessionInput input);
 
-        Task DeleteGroup(DeleteSessionInput input);
+        Task DeleteSession(DeleteSessionInput input);
 
-        Task JoinGroup(ChatSessionInputBase input);
+        Task JoinSession(ChatSessionInputBase input);
 
-        Task LeaveGroup(ChatSessionInputBase input);
+        Task LeaveSession(ChatSessionInputBase input);
 
-        Task<int> GetGroupUnread(ChatSessionInputBase input);
+        Task<int> GetSessionUnread(ChatSessionInputBase input);
 
-        Task<IList<GetSessionsUnreadOutput>> GetGroupsUnread(GetSessionsUnreadInput input);
+        Task<IList<GetSessionsUnreadOutput>> GetSessionsUnread(GetSessionsUnreadInput input);
 
         Task<long> GetLastReceivedMessageId(ChatSessionInputBase input);
 
@@ -36,9 +36,9 @@ namespace JK.Chat
 
         Task SetLastReadMessageId(SetLastReadIdInput input);
 
-        Task<IList<long>> GetUserGroupsId(GetUserSessionsInput input);
+        Task<IList<long>> GetUserSessionsId(GetUserSessionsInput input);
 
-        Task<ListResultDto<ChatSessionDto>> GetUserGroups(GetUserSessionsInput input);
+        Task<ListResultDto<ChatSessionDto>> GetUserSessions(GetUserSessionsInput input);
 
         Task<string> GetUserName(EntityDto<long> idDto);
     }
