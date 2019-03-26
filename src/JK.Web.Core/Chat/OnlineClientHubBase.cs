@@ -20,14 +20,14 @@ namespace JK.Chat
         {
             await base.OnConnected(connectionId, client);
 
-            var clienta = new OnlineClient(
+            var onlineClient = new OnlineClient(
                 client.ConnectionId,
                 client.IpAddress,
                 client.TenantId,
                 client.UserId
             );
-
-            OnlineClientManager.Add(clienta);
+            onlineClient["UserName"] = "";
+            OnlineClientManager.Add(onlineClient);
         }
 
         public override async Task OnDisconnected(WebSocketClient client)

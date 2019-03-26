@@ -8,19 +8,19 @@
                 allmessages: []
             },
             mutations: {
-                changereadystate(state, payload) {
+                changereadystate:function(state, payload) {
                     state.readystate = payload.readystate;
                     console.log("changereadystate", state.readystate);
                 },
-                changegroups(state, payload) {
+                changegroups: function(state, payload) {
                     state.groups = payload.groups;
                     console.log("changegroups", state.groups);
                 },
-                changeonlineusers(state, payload) {
+                changeonlineusers: function(state, payload) {
                     state.onlineusers = payload.onlineusers;
                     console.log("changeonlineusers", state.onlineusers);
                 },
-                changeallmessages(state, payload) {
+                changeallmessages: function(state, payload) {
                     state.allmessages = state.allmessages.concat(payload.messages);
                     console.log("changeallmessages", state.allmessages);
                 }
@@ -32,7 +32,7 @@
         });
         Vue.filter('timeago', function (value) {
             if (!value) return '';
-            return moment(value).fromNow();
+            return moment(value).format("HH:mm");
         });
         Vue.component('vue-group-item', {
             props: ['groupinfo'],
@@ -80,7 +80,7 @@
                 createGroup: function () {
                     var commanddto = { gname: this.gname };
                     var bytes = serializeMsgPack(commanddto);
-                    chat.sendCommand(chat.commandType.CreateGroup, chat.dataType.MessagePack, bytes);
+                    chat.sendCommand(chat.commandType.CreatePublicSession, chat.dataType.MessagePack, bytes);
                     this.gname = "";
                 }
             }
@@ -96,7 +96,7 @@
                 goChat: function (uid) {
                     var commanddto = { tguid: uid };
                     var bytes = serializeMsgPack(commanddto);
-                    chat.sendCommand(chat.commandType.CreatePrivate, chat.dataType.MessagePack, bytes);
+                    chat.sendCommand(chat.commandType.CreatePrivateSession, chat.dataType.MessagePack, bytes);
                 }
             }
         });
@@ -201,7 +201,7 @@
                 getGroups: function () {
                     var commanddto = {};
                     var bytes = serializeMsgPack(commanddto);
-                    chat.sendCommand(chat.commandType.GetGroups, chat.dataType.MessagePack, bytes);
+                    chat.sendCommand(chat.commandType.GetSessions, chat.dataType.MessagePack, bytes);
                 },
                 getOnlineUsers: function () {
                     var commanddto = {};
@@ -241,7 +241,7 @@
                             messages: decodedObj
                         });
                         break;
-                    case chat.commandType.GetGroups:
+                    case chat.commandType.GetSessions:
                         store.commit('changegroups', {
                             groups: decodedObj
                         });

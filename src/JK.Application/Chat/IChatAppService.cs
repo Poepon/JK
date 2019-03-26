@@ -14,7 +14,7 @@ namespace JK.Chat
 
         Task<ChatMessageDto> GetLastMessage(GetLastMessageInput input);
 
-        Task CreatePrivate(CreatePrivateSessionInput input);
+        Task CreatePrivateSession(CreatePrivateSessionInput input);
 
         Task CreatePublicSession(CreatePublicSessionInput input);
 

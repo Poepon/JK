@@ -131,18 +131,18 @@ namespace JK.Chat
                 case CommandType.ReadMessage:
                     var readMessageInput = receivedMessage.DeserializeFromBytes<ReadMessageInput>();
                     break;
-                case CommandType.CreatePrivate:
+                case CommandType.CreatePrivateSession:
                     {
                         var createPrivateInput = receivedMessage.DeserializeFromBytes<Dto.Input.CreatePrivateSessionInput>();
                         if (createPrivateInput.TargetUserId != AbpSession.GetUserId())
                         {
-                            await chatAppService.CreatePrivate(new Dto.CreatePrivateSessionInput
+                            await chatAppService.CreatePrivateSession(new Dto.CreatePrivateSessionInput
                             {
                                 CreatorUserId = AbpSession.GetUserId(),
                                 TargetUserId = createPrivateInput.TargetUserId
                             });
                             var dtos = await GetSessions(AbpSession.GetUserId());
-                            await socket.SendMsgPackAsync(CommandType.GetGroups, dtos);
+                            await socket.SendMsgPackAsync(CommandType.GetSessions, dtos);
                         }
                         else
                         {
@@ -150,7 +150,7 @@ namespace JK.Chat
                         }
                     }
                     break;
-                case CommandType.CreateGroup:
+                case CommandType.CreatePublicSession:
                     {
                         var createGroupInput = receivedMessage.DeserializeFromBytes<Dto.Input.CreatePublicSessionInput>();
                         await chatAppService.CreatePublicSession(new Dto.CreatePublicSessionInput
@@ -159,10 +159,10 @@ namespace JK.Chat
                             CreatorUserId = AbpSession.GetUserId()
                         });
                         var dtos = await GetSessions(AbpSession.GetUserId());
-                        await socket.SendMsgPackAsync(CommandType.GetGroups, dtos);
+                        await socket.SendMsgPackAsync(CommandType.GetSessions, dtos);
                     }
                     break;
-                case CommandType.DeleteGroup:
+                case CommandType.DeleteSession:
                     var deleteGroupInput = receivedMessage.DeserializeFromBytes<Dto.Input.DeleteSessionInput>();
                     await chatAppService.DeleteSession(new Dto.DeleteSessionInput
                     {
@@ -172,19 +172,19 @@ namespace JK.Chat
                     //TODO 通知群组成员
 
                     break;
-                case CommandType.JoinGroup:
+                case CommandType.JoinSession:
                     var joinGroupInput = receivedMessage.DeserializeFromBytes<JoinSessionInput>();
                     break;
-                case CommandType.LeaveGroup:
+                case CommandType.LeaveSession:
                     var leaveGroupInput = receivedMessage.DeserializeFromBytes<LeaveSessionInput>();
                     break;
-                case CommandType.GetGroups:
+                case CommandType.GetSessions:
                     {
                         var dtos = await GetSessions(AbpSession.GetUserId());
-                        await socket.SendMsgPackAsync(CommandType.GetGroups, dtos);
+                        await socket.SendMsgPackAsync(CommandType.GetSessions, dtos);
                     }
                     break;
-                case CommandType.GetGroupUnread:
+                case CommandType.GetSessionUnread:
                     {
                         var getGroupUnreadInput = receivedMessage.DeserializeFromBytes<GetSessionUnreadInput>();
                         var count = await chatAppService.GetSessionUnread(new ChatSessionInputBase
@@ -193,7 +193,7 @@ namespace JK.Chat
                             UserId = AbpSession.GetUserId()
                         });
                         var output = new SessionUnreadOutput { Count = count };
-                        await socket.SendMsgPackAsync(CommandType.GetGroupUnread, output, httpContextAccess.HttpContext.RequestAborted);
+                        await socket.SendMsgPackAsync(CommandType.GetSessionUnread, output, httpContextAccess.HttpContext.RequestAborted);
                     }
                     break;
                 case CommandType.PinToTop:

@@ -65,27 +65,27 @@ chat.commandType = {
     /// <summary>
     /// 创建私聊
     /// </summary>
-    CreatePrivate: 300,
+    CreatePrivateSession: 300,
     /// <summary>
     /// 创建群组
     /// </summary>
-    CreateGroup: 301,
+    CreatePublicSession: 301,
     /// <summary>
     /// 删除群组
     /// </summary>
-    DeleteGroup: 302,
+    DeleteSession: 302,
     /// <summary>
     /// 加入群组
     /// </summary>
-    JoinGroup: 303,
+    JoinSession: 303,
     /// <summary>
     /// 离开群组
     /// </summary>
-    LeaveGroup: 304,
+    LeaveSession: 304,
     /// <summary>
     /// 获取群组
     /// </summary>
-    GetGroups: 305,
+    GetSessions: 305,
     /// <summary>
     /// 置顶
     /// </summary>

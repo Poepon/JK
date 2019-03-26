@@ -30,5 +30,38 @@ namespace JK.Chat
                 }
             }
         }
+
+        public async Task SendMessagesToClient(IReadOnlyList<IOnlineClient> clients, List<ChatMessage> messages)
+        {
+            foreach (var item in clients)
+            {
+                var client = _connectionManager.GetWebSocketClient(item.ConnectionId);
+                if (client != null)
+                {
+                    var output = messages.MapTo<List<ChatMessageOutput>>();
+                    await client.WebSocket.SendMsgPackAsync(CommandType.GetMessage, output);
+                }
+            }
+        }
+
+        public Task SendSessionToClient(IReadOnlyList<IOnlineClient> clients, ChatSession session)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task SendSessionsToClient(IReadOnlyList<IOnlineClient> clients, List<ChatSession> sessions)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task SendOnlineClientToClient(IReadOnlyList<IOnlineClient> clients, IOnlineClient onlineClient)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task SendOnlineClientsToClient(IReadOnlyList<IOnlineClient> clients, List<IOnlineClient> onlineClients)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

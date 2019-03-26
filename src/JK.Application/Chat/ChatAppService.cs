@@ -69,7 +69,7 @@ namespace JK.Chat
             });
         }
 
-        public async Task CreatePrivate(CreatePrivateSessionInput input)
+        public async Task CreatePrivateSession(CreatePrivateSessionInput input)
         {
             var exists = await _chatSessionRepository.GetAll().AnyAsync(group =>
                group.SessionType == ChatSessionType.Private &&

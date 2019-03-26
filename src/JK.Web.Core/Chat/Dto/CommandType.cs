@@ -68,31 +68,31 @@
         DownloadFile = 208,
         #endregion
 
-        #region 群组
+        #region 会话
         /// <summary>
-        /// 创建私聊
+        /// 创建私人会话
         /// </summary>
-        CreatePrivate = 300,
+        CreatePrivateSession = 300,
         /// <summary>
-        /// 创建群组
+        /// 创建公共会话
         /// </summary>
-        CreateGroup = 301,
+        CreatePublicSession = 301,
         /// <summary>
-        /// 删除群组
+        /// 删除会话
         /// </summary>
-        DeleteGroup = 302,
+        DeleteSession = 302,
         /// <summary>
-        /// 加入群组
+        /// 加入会话
         /// </summary>
-        JoinGroup = 303,
+        JoinSession = 303,
         /// <summary>
-        /// 离开群组
+        /// 离开会话
         /// </summary>
-        LeaveGroup = 304,
+        LeaveSession = 304,
         /// <summary>
         /// 获取群组
         /// </summary>
-        GetGroups = 305,
+        GetSessions = 305,
         /// <summary>
         /// 置顶
         /// </summary>
@@ -108,11 +108,11 @@
         /// <summary>
         /// 获取未读消息数
         /// </summary>
-        GetGroupUnread = 309,
+        GetSessionUnread = 309,
         /// <summary>
         /// 获取最后一条消息
         /// </summary>
-        GetGroupLastMessage = 310
+        GetSessionLastMessage = 310
         #endregion
 
     }
