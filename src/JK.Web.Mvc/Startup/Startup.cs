@@ -10,11 +10,13 @@ using JK.Configuration;
 using JK.Identity;
 using JK.Web.Resources;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 using System;
 using System.Linq;
 
@@ -32,6 +34,14 @@ namespace JK.Web.Startup
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            services.AddDataProtection()
+                .PersistKeysToStackExchangeRedis(() =>
+                {
+                    return
+                        ConnectionMultiplexer.Connect(_appConfiguration["RedisCache:ConnectionString"])
+                            .GetDatabase(_appConfiguration.GetValue<int>("RedisCache:DatabaseId"));
+                }, "JKProtection-Keys");
+
             services.AddMiniProfiler().AddEntityFramework();
 
             // MVC

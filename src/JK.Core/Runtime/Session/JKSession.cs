@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Security.Claims;
 using Abp.Configuration.Startup;
 using Abp.Dependency;
 using Abp.MultiTenancy;
@@ -17,13 +18,13 @@ namespace JK.Runtime.Session
         {
             get
             {
-                var userEmailClaim = PrincipalAccessor.Principal?.Claims.FirstOrDefault(c => c.Type == "Application_UserEmail");
-                if (string.IsNullOrEmpty(userEmailClaim?.Value))
+                var username = PrincipalAccessor.Principal?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+                if (string.IsNullOrEmpty(username?.Value))
                 {
                     return null;
                 }
 
-                return userEmailClaim.Value;
+                return username.Value;
             }
         }
     }

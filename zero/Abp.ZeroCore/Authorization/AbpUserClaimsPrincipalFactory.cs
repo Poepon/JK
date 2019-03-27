@@ -28,13 +28,18 @@ namespace Abp.Authorization
         public override async Task<ClaimsPrincipal> CreateAsync(TUser user)
         {
             var principal = await base.CreateAsync(user);
+            
+            return principal;
+        }
 
+        protected async override Task<ClaimsIdentity> GenerateClaimsAsync(TUser user)
+        {
+            var id = await base.GenerateClaimsAsync(user);
             if (user.TenantId.HasValue)
             {
-                principal.Identities.First().AddClaim(new Claim(AbpClaimTypes.TenantId,user.TenantId.ToString()));
+               id.AddClaim(new Claim(AbpClaimTypes.TenantId, user.TenantId.ToString()));
             }
-
-            return principal;
+            return id;
         }
     }
 }
