@@ -1,21 +1,22 @@
 ﻿using Abp.RealTime;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Abp;
 
 namespace JK.Chat
 {
     public interface IChatCommunicator
     {
-        Task SendMessageToClient(IReadOnlyList<IOnlineClient> clients, ChatMessage message);
+        Task SendMessageToUser(IUserIdentifier userId, ChatMessage message);
 
-        Task SendMessagesToClient(IReadOnlyList<IOnlineClient> clients, List<ChatMessage> messages);
+        Task SendMessagesToUser(IUserIdentifier userId, List<ChatMessage> messages);
 
-        Task SendSessionToClient(IReadOnlyList<IOnlineClient> clients, ChatSession session);
+        Task SendSessionToUser(IUserIdentifier userId, ChatSession session);
 
-        Task SendSessionsToClient(IReadOnlyList<IOnlineClient> clients, List<ChatSession> sessions);
+        Task SendSessionsToUser(IUserIdentifier userId, List<ChatSession> sessions);
 
-        Task SendOnlineClientToClient(IReadOnlyList<IOnlineClient> clients, IOnlineClient onlineClient);
+        Task SendOnlineClientToUser(IUserIdentifier userId, IOnlineClient onlineClient);
 
-        Task SendOnlineClientsToClient(IReadOnlyList<IOnlineClient> clients, List<IOnlineClient> onlineClients);
+        Task SendOnlineClientsToUser(IUserIdentifier userId, List<IOnlineClient> onlineClients);
     }
 }

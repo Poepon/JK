@@ -1,6 +1,7 @@
 ﻿using JK.Chat.Dto;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace JK.Chat.WebSocketPackage
 {
@@ -22,7 +23,7 @@ namespace JK.Chat.WebSocketPackage
         /// </summary>
         /// <param name="client">The web-socket of the client.</param>
         /// <returns>Awaitable Task.</returns>
-        public virtual Task OnConnected(string connectionId, WebSocketClient client)
+        public virtual Task OnConnected(string connectionId, WebSocketClient client, HttpContext context)
         {
             WebSocketConnectionManager.AddWebSocketClient(connectionId, client);
             return Task.CompletedTask;

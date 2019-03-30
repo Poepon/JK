@@ -1,37 +1,38 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Abp;
 using Abp.RealTime;
 
 namespace JK.Chat
 {
     public class NullChatCommunicator : IChatCommunicator
     {
-        public Task SendMessagesToClient(IReadOnlyList<IOnlineClient> clients, List<ChatMessage> messages)
+        public Task SendMessagesToUser(IUserIdentifier userId, List<ChatMessage> messages)
         {
             return Task.CompletedTask;
         }
 
-        public Task SendMessageToClient(IReadOnlyList<IOnlineClient> clients, ChatMessage message)
+        public Task SendMessageToUser(IUserIdentifier userId, ChatMessage message)
         {
             return Task.CompletedTask;
         }
 
-        public Task SendOnlineClientsToClient(IReadOnlyList<IOnlineClient> clients, List<IOnlineClient> onlineClients)
+        public Task SendOnlineClientsToUser(IUserIdentifier userId, List<IOnlineClient> onlineClients)
         {
             return Task.CompletedTask;
         }
 
-        public Task SendOnlineClientToClient(IReadOnlyList<IOnlineClient> clients, IOnlineClient onlineClient)
+        public Task SendOnlineClientToUser(IUserIdentifier userId, IOnlineClient onlineClient)
         {
             return Task.CompletedTask;
         }
 
-        public Task SendSessionsToClient(IReadOnlyList<IOnlineClient> clients, List<ChatSession> sessions)
+        public Task SendSessionsToUser(IUserIdentifier userId, List<ChatSession> sessions)
         {
             return Task.CompletedTask;
         }
 
-        public Task SendSessionToClient(IReadOnlyList<IOnlineClient> clients, ChatSession session)
+        public Task SendSessionToUser(IUserIdentifier userId, ChatSession session)
         {
             return Task.CompletedTask;
         }

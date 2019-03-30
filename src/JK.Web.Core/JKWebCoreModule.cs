@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Abp.AspNetCore;
 using Abp.AspNetCore.Configuration;
+using Abp.Configuration.Startup;
 using Abp.Modules;
 using Abp.Reflection.Extensions;
 using Abp.Zero.Configuration;
@@ -12,6 +13,9 @@ using JK.Authentication.JwtBearer;
 using JK.Configuration;
 using JK.EntityFrameworkCore;
 using Abp.Runtime.Caching.Redis;
+using JK.Chat.Distributed;
+using Abp.RealTime;
+using JK.Chat;
 
 namespace JK
 {
@@ -73,6 +77,11 @@ namespace JK
         public override void Initialize()
         {
             IocManager.RegisterAssemblyByConvention(typeof(JKWebCoreModule).GetAssembly());
+        }
+
+        public override void PostInitialize()
+        {
+           Configuration.ReplaceService<IOnlineClientManager<ChatChannel>,ChatDistributedOnlineClientManager>();
         }
     }
 }

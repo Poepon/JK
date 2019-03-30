@@ -1,4 +1,5 @@
-﻿using Abp.MultiTenancy;
+﻿using System.ComponentModel;
+using Abp.MultiTenancy;
 using JK.Authorization.Users;
 
 namespace JK.MultiTenancy
@@ -6,7 +7,7 @@ namespace JK.MultiTenancy
     public class Tenant : AbpTenant<User>
     {
         public Tenant()
-        {            
+        {
         }
 
         public Tenant(string tenancyName, string name)

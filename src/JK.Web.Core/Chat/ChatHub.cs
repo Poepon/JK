@@ -3,17 +3,16 @@ using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using Abp.Dependency;
 using Abp.RealTime;
-using Abp.Runtime.Caching.Redis;
 using Abp.Runtime.Session;
 using Abp.Threading;
 using Abp.UI;
+using JK.Chat.Distributed;
 using JK.Chat.Dto;
 using JK.Chat.Dto.Input;
 using JK.Chat.Dto.Output;
 using JK.Chat.WebSocketPackage;
+using JK.Runtime.Session;
 using Microsoft.AspNetCore.Http;
-using StackExchange.Redis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
@@ -25,22 +24,25 @@ namespace JK.Chat
     {
         private readonly IHttpContextAccessor httpContextAccess;
         private readonly IChatAppService chatAppService;
-        private readonly IAbpRedisCacheDatabaseProvider databaseProvider;
+        private readonly RedisPubSub _redisPubSub;
 
-        public IAbpSession AbpSession { get; set; }
+        private readonly JKSession AbpSession;
 
         public ChatHub(WebSocketConnectionManager webSocketConnectionManager,
             IHttpContextAccessor httpContextAccess,
             IOnlineClientManager<ChatChannel> onlineClientManager,
             IChatAppService chatAppService,
-            IAbpRedisCacheDatabaseProvider databaseProvider) :
-            base(onlineClientManager, webSocketConnectionManager)
+            JKSession jkSession,
+            IAppContext appContext,
+            RedisPubSub redisPubSub) :
+            base(appContext, onlineClientManager, webSocketConnectionManager)
         {
             this.httpContextAccess = httpContextAccess;
 
             this.chatAppService = chatAppService;
-            this.databaseProvider = databaseProvider;
-            AbpSession = NullAbpSession.Instance;
+            AbpSession = jkSession;
+            _redisPubSub = redisPubSub;
+            _redisPubSub.Subscribe(appContext.LocalHostName);
         }
 
         public override async Task ReceiveBinaryAsync(WebSocket socket, WebSocketReceiveResult result, BinaryMessage receivedMessage)
@@ -61,7 +63,8 @@ namespace JK.Chat
                         {
                             SessionId = messageInput.SessionId,
                             Message = messageInput.Message,
-                            UserId = AbpSession.GetUserId()
+                            UserId = AbpSession.GetUserId(),
+                            SenderName = AbpSession.FullName
                         });
                     }
                     break;
@@ -229,14 +232,14 @@ namespace JK.Chat
         {
             await Task.CompletedTask;
         }
-        public override async Task OnConnected(string connectionId, WebSocketClient client)
+        public override async Task OnConnected(string connectionId, WebSocketClient client, HttpContext context)
         {
             client.UserId = AbpSession.UserId;
             client.TenantId = AbpSession.TenantId;
 
             await AddToGroup(client);
 
-            await base.OnConnected(client.ConnectionId, client);
+            await base.OnConnected(client.ConnectionId, client, context);
 
             await SendOnlineUsers(client);
         }
@@ -269,23 +272,6 @@ namespace JK.Chat
             {
                 WebSocketConnectionManager.RemoveFromGroup(onlineClient.ConnectionId, groupId.ToString());
             }
-        }
-
-        private async Task Subscribe(long groupId, Action<RedisChannel, RedisValue> handler = null)
-        {
-            var _connection = databaseProvider.GetDatabase().Multiplexer;
-            await _connection.GetSubscriber().SubscribeAsync("chatgroup_" + groupId.ToString(), handler);
-        }
-
-        private async Task Unsubscribe(long groupId)
-        {
-            var _connection = databaseProvider.GetDatabase().Multiplexer;
-            await _connection.GetSubscriber().UnsubscribeAsync("chatgroup_" + groupId.ToString());
-        }
-        private async Task UnsubscribeAll()
-        {
-            var _connection = databaseProvider.GetDatabase().Multiplexer;
-            await _connection.GetSubscriber().UnsubscribeAllAsync();
         }
 
 

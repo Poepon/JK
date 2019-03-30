@@ -1,65 +1,104 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Abp;
 using Abp.AutoMapper;
 using Abp.Dependency;
 using Abp.RealTime;
+using JK.Chat.Distributed;
 using JK.Chat.Dto;
 using JK.Chat.Dto.Output;
 using JK.Chat.WebSocketPackage;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace JK.Chat
 {
     public class ChatCommunicator : IChatCommunicator, ITransientDependency
     {
-        private readonly WebSocketConnectionManager _connectionManager;
+        private readonly ChatSender _chatSender;
+        private readonly IOnlineClientManager<ChatChannel> _onlineClientManager;
+        private readonly IAppContext _appContext;
+        private readonly RedisPubSub _redisPubSub;
 
-        public ChatCommunicator(WebSocketConnectionManager connectionManager)
+        public ChatCommunicator(
+            ChatSender chatPost,
+            IOnlineClientManager<ChatChannel> onlineClientManager,
+            IAppContext appContext, RedisPubSub redisPubSub)
         {
-            _connectionManager = connectionManager;
+            _chatSender = chatPost;
+            _onlineClientManager = onlineClientManager;
+            _appContext = appContext;
+            _redisPubSub = redisPubSub;
         }
 
-        public async Task SendMessageToClient(IReadOnlyList<IOnlineClient> clients, ChatMessage message)
+        private bool IsSameServer(IOnlineClient onlineClient)
+        {
+            return (onlineClient["Server"] as string) == _appContext.LocalHostName;
+        }
+
+        private async Task SendMessageToClient(IReadOnlyList<IOnlineClient> clients, ChatMessage message)
+        {
+            var data = new[] { message.MapTo<ChatMessageOutput>() }
+                  .SerializeToBytes(MessageDataType.MessagePack)
+                  .WrapPackage(MessageDataType.MessagePack, CommandType.GetMessage);
+            await Send(clients, data);
+        }
+
+        private async Task Send(IReadOnlyList<IOnlineClient> clients, byte[] data)
         {
             foreach (var item in clients)
             {
-                var client = _connectionManager.GetWebSocketClient(item.ConnectionId);
-                if (client != null)
+                if (IsSameServer(item))
                 {
-                    var output = message.MapTo<ChatMessageOutput>();
-                    await client.WebSocket.SendMsgPackAsync(CommandType.GetMessage, new[] { output });
+                    await _chatSender.SendData(item.ConnectionId, data);
+                }
+                else
+                {
+                    await _redisPubSub.PublishAsync(item["Server"].ToString(),
+                        new ChatQueueDto()
+                        {
+                            ConnectionId = item.ConnectionId,
+                            Data = data
+                        });
                 }
             }
         }
 
-        public async Task SendMessagesToClient(IReadOnlyList<IOnlineClient> clients, List<ChatMessage> messages)
+
+        private async Task SendMessagesToClient(IReadOnlyList<IOnlineClient> clients, List<ChatMessage> messages)
         {
-            foreach (var item in clients)
-            {
-                var client = _connectionManager.GetWebSocketClient(item.ConnectionId);
-                if (client != null)
-                {
-                    var output = messages.MapTo<List<ChatMessageOutput>>();
-                    await client.WebSocket.SendMsgPackAsync(CommandType.GetMessage, output);
-                }
-            }
+            var data = messages.MapTo<List<ChatMessageOutput>>()
+                .SerializeToBytes(MessageDataType.MessagePack)
+                .WrapPackage(MessageDataType.MessagePack, CommandType.GetMessage);
+            await Send(clients, data);
         }
 
-        public Task SendSessionToClient(IReadOnlyList<IOnlineClient> clients, ChatSession session)
+        public Task SendMessageToUser(IUserIdentifier userId, ChatMessage message)
         {
-            throw new System.NotImplementedException();
+            var senders = _onlineClientManager.GetAllByUserId(userId);
+            return SendMessageToClient(senders, message);
         }
 
-        public Task SendSessionsToClient(IReadOnlyList<IOnlineClient> clients, List<ChatSession> sessions)
+        public Task SendMessagesToUser(IUserIdentifier userId, List<ChatMessage> messages)
         {
-            throw new System.NotImplementedException();
+            var senders = _onlineClientManager.GetAllByUserId(userId);
+            return SendMessagesToClient(senders, messages);
         }
 
-        public Task SendOnlineClientToClient(IReadOnlyList<IOnlineClient> clients, IOnlineClient onlineClient)
+        public Task SendSessionToUser(IUserIdentifier userId, ChatSession session)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task SendOnlineClientsToClient(IReadOnlyList<IOnlineClient> clients, List<IOnlineClient> onlineClients)
+        public Task SendSessionsToUser(IUserIdentifier userId, List<ChatSession> sessions)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task SendOnlineClientToUser(IUserIdentifier userId, IOnlineClient onlineClient)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task SendOnlineClientsToUser(IUserIdentifier userId, List<IOnlineClient> onlineClients)
         {
             throw new System.NotImplementedException();
         }

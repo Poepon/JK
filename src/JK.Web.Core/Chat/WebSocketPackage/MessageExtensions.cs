@@ -100,7 +100,7 @@ namespace JK.Chat.WebSocketPackage
             return value;
         }
 
-        public static string SerializeToText<T>(this T obj,MessageDataType dataType)
+        public static string SerializeToText<T>(this T obj, MessageDataType dataType)
         {
             //TODO
             string value = "";
@@ -133,5 +133,14 @@ namespace JK.Chat.WebSocketPackage
             return value;
         }
 
+        public static byte[] WrapPackage(this byte[] msgdata, MessageDataType dataType, CommandType commandType)
+        {
+            var packagedata = new byte[msgdata.Length + 9];
+            Array.Copy(BitConverter.GetBytes(Convert.ToInt32(commandType)), 0, packagedata, 0, 4);
+            Array.Copy(BitConverter.GetBytes(Convert.ToByte(dataType)), 0, packagedata, 4, 1);
+            Array.Copy(BitConverter.GetBytes(Convert.ToInt64(msgdata.Length)), 0, packagedata, 5, 4);
+            Array.Copy(msgdata, 0, packagedata, 9, msgdata.Length);
+            return packagedata;
+        }
     }
 }

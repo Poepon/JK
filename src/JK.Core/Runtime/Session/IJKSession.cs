@@ -4,6 +4,8 @@ namespace JK.Runtime.Session
 {
     public interface IJKSession : IAbpSession
     {
-        string UserName { get;}
+        string UserName { get; }
+
+        string FullName { get; }
     }
 }

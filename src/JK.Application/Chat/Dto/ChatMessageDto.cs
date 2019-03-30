@@ -9,7 +9,7 @@ namespace JK.Chat.Dto
     {
         public long UserId { get; set; }
 
-        public string UserName { get; set; }
+        public string SenderName { get; set; }
 
         public long SessionId { get; set; }
 

@@ -17,7 +17,7 @@ namespace JK.Chat.Dto.Output
         public long UserId { get; set; }
 
         [Key("uname")]
-        public string UserName { get; set; }
+        public string SenderName { get; set; }
 
         [Key("msg")]
         public string Message { get; set; }

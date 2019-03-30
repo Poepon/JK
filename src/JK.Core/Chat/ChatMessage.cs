@@ -12,6 +12,9 @@ namespace JK.Chat
 
         public long UserId { get; set; }
 
+        [StringLength(20)]
+        public string SenderName { get; set; }
+
         [ForeignKey(nameof(UserId))]
         public virtual User User { get; set; }
 

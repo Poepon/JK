@@ -56,7 +56,13 @@ namespace JK.EntityFrameworkCore
         public virtual DbSet<AgentLoginAttempt> AgentLoginAttempts { get; set; }
 
         public virtual DbSet<AgentRelationship> AgentRelationships { get; set; }
-        
+
+
+        #endregion
+
+        #region Tenant
+
+        public virtual DbSet<TenantDomain> TenantDomains { get; set; }
 
         #endregion
 

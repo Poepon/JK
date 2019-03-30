@@ -38,7 +38,7 @@ namespace JK.Chat.WebSocketPackage
             CancellationToken ct = context.RequestAborted;
             var socket = await context.WebSockets.AcceptWebSocketAsync();
             string connectionId = Guid.NewGuid().ToString("N");
-            await _webSocketHandler.OnConnected(connectionId, CreateClientForCurrentConnection(connectionId, socket));
+            await _webSocketHandler.OnConnected(connectionId, CreateClientForCurrentConnection(connectionId, socket),context);
 
             await Receive(socket, ct);
         }

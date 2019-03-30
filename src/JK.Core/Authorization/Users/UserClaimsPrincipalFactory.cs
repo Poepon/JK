@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Abp.Authorization;
 using JK.Authorization.Roles;
+using JK.Runtime.Session;
 
 namespace JK.Authorization.Users
 {
@@ -16,6 +19,13 @@ namespace JK.Authorization.Users
                   roleManager,
                   optionsAccessor)
         {
+        }
+
+        protected async override Task<ClaimsIdentity> GenerateClaimsAsync(User user)
+        {
+            var id = await base.GenerateClaimsAsync(user);
+            id.AddClaim(new Claim(JKClaimTypes.FullName, user.Name));
+            return id;
         }
     }
 }

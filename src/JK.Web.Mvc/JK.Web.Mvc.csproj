@@ -18,9 +18,11 @@
   <ItemGroup>
     <Content Remove="appMenus.config" />
     <Content Remove="appPermissions.config" />
+    <Content Remove="wwwroot\view-resources\Views\Chat\Index.min.js" />
     <Content Remove="wwwroot\view-resources\Views\_Bundles\common-scripts.js" />
   </ItemGroup>
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\view-resources\Views\Chat\Index.min.js" />
     <_ContentIncludedByDefault Remove="wwwroot\view-resources\Views\_Bundles\common-scripts.js" />
   </ItemGroup>
   <ItemGroup>
@@ -29,6 +31,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="wwwroot\view-resources\Views\Chat\Index.min.js" />
     <None Include="wwwroot\view-resources\Views\_Bundles\common-scripts.js" />
     <None Update="Dockerfile">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

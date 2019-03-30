@@ -11,6 +11,8 @@ using JK.Configuration;
 using JK.Localization;
 using JK.MultiTenancy;
 using JK.Timing;
+using System.Linq;
+using System.Net;
 
 namespace JK
 {
@@ -45,6 +47,8 @@ namespace JK
         public override void PostInitialize()
         {
             IocManager.RegisterIfNot<IChatCommunicator, NullChatCommunicator>();
+            var appContext = IocManager.Resolve<IAppContext>();
+            appContext.LocalHostName = Dns.GetHostName();
             IocManager.Resolve<AppTimes>().StartupTime = Clock.Now;
         }
     }

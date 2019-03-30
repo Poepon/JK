@@ -15,6 +15,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Abp.AutoMapper;
 
 namespace JK.Chat
 {
@@ -26,7 +27,6 @@ namespace JK.Chat
         private readonly IRepository<ChatSessionMember, long> _chatSessionMemberRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IChatCommunicator _chatCommunicator;
-        private readonly IOnlineClientManager<ChatChannel> _onlineClientManager;
         private readonly IRepository<UserChatMessageLog, long> _userChatMessageLogRepository;
         public ChatAppService(IRepository<ChatMessage, long> chatMessageRepository,
             IRepository<UserChatMessageLog, long> userChatMessageLogRepository,
@@ -34,8 +34,7 @@ namespace JK.Chat
             IRepository<ChatSessionMember, long> chatSessionMemberRepository,
             IRepository<User, long> userRepository,
             IHttpContextAccessor httpContextAccessor,
-            IChatCommunicator chatCommunicator,
-            IOnlineClientManager<ChatChannel> onlineClientManager)
+            IChatCommunicator chatCommunicator)
         {
             _chatMessageRepository = chatMessageRepository;
             _userChatMessageLogRepository = userChatMessageLogRepository;
@@ -44,7 +43,6 @@ namespace JK.Chat
             _userRepository = userRepository;
             _httpContextAccessor = httpContextAccessor;
             _chatCommunicator = chatCommunicator;
-            _onlineClientManager = onlineClientManager;
         }
 
 
@@ -115,7 +113,7 @@ namespace JK.Chat
                     Id = x.Id,
                     SessionId = x.SessionId,
                     UserId = x.UserId,
-                    UserName = x.User.UserName,
+                    SenderName = x.User.UserName,
                     Message = x.Message,
                     CreationTime = x.CreationTime,
                     ReadState = x.ReadState
@@ -151,23 +149,17 @@ namespace JK.Chat
             {
                 SessionId = input.SessionId,
                 UserId = input.UserId,
+                SenderName = input.SenderName,
                 Message = input.Message,
                 CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 ReadState = ChatMessageReadState.Unread
             });
             await CurrentUnitOfWork.SaveChangesAsync();
-            // 推送消息给发送人
-            var senders = _onlineClientManager.GetAllByUserId(AbpSession.ToUserIdentifier());
-            await _chatCommunicator.SendMessageToClient(senders, message);
             // 推送消息给接收人
             var receivers = await GetSessionMembersUserId(input.SessionId);
             foreach (var item in receivers)
             {
-                if (item != AbpSession.UserId)
-                {
-                    var clients = _onlineClientManager.GetAllByUserId(new UserIdentifier(AbpSession.TenantId, item));
-                    await _chatCommunicator.SendMessageToClient(clients, message);
-                }
+                await _chatCommunicator.SendMessageToUser(new UserIdentifier(AbpSession.TenantId, item), message);
             }
         }
 
