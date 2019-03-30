@@ -7,6 +7,7 @@ namespace JK.MultiTenancy
     [Table("TenantDomains")]
     public class TenantDomain : Entity
     {
+        [StringLength(500)]
         public string Host { get; set; }
 
         [Range(0, 65535)]
