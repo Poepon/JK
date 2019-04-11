@@ -16,6 +16,7 @@ using Abp.Runtime.Caching.Redis;
 using JK.Chat.Distributed;
 using Abp.RealTime;
 using JK.Chat;
+using JK.MultiTenancy;
 
 namespace JK
 {
@@ -60,6 +61,8 @@ namespace JK
 
 
             ConfigureTokenAuth();
+
+            Configuration.MultiTenancy.Resolvers.Add<MyDomainTenantResolveContributor>();
         }
 
         private void ConfigureTokenAuth()
