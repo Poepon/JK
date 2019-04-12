@@ -141,8 +141,10 @@ namespace JK.Chat
                         {
                             await chatAppService.CreatePrivateSession(new Dto.CreatePrivateSessionInput
                             {
+                                CreatorTenantId = AbpSession.TenantId,
                                 CreatorUserId = AbpSession.GetUserId(),
-                                TargetUserId = createPrivateInput.TargetUserId
+                                TargetUserId = createPrivateInput.TargetUserId,
+                                TargetTenantId = createPrivateInput.TargetTenantId
                             });
                             var dtos = await GetSessions(AbpSession.GetUserId());
                             await socket.SendMsgPackAsync(CommandType.GetSessions, dtos);
@@ -159,6 +161,7 @@ namespace JK.Chat
                         await chatAppService.CreatePublicSession(new Dto.CreatePublicSessionInput
                         {
                             SessionName = createGroupInput.SessionName,
+                            CreatorTenantId = AbpSession.TenantId,
                             CreatorUserId = AbpSession.GetUserId()
                         });
                         var dtos = await GetSessions(AbpSession.GetUserId());

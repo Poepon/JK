@@ -14,6 +14,8 @@ namespace JK.Chat
         [ForeignKey(nameof(SessionId))]
         public virtual ChatSession ChatSession { get; set; }
 
+        public int? TenantId { get; set; }
+
         public long UserId { get; set; }
 
         public long CreationTime { get; set; }

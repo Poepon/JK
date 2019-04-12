@@ -50,7 +50,6 @@ namespace JK.Chat
         {
             var sessionId = await _chatSessionRepository.InsertAndGetIdAsync(new ChatSession
             {
-                TenantId = AbpSession.TenantId,
                 CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 Name = input.SessionName,
                 SessionType = ChatSessionType.Public,
@@ -63,6 +62,7 @@ namespace JK.Chat
                 SessionId = sessionId,
                 CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 IsActive = true,
+                TenantId = input.CreatorTenantId,
                 UserId = input.CreatorUserId
             });
         }
@@ -71,15 +71,14 @@ namespace JK.Chat
         {
             var exists = await _chatSessionRepository.GetAll().AnyAsync(group =>
                group.SessionType == ChatSessionType.Private &&
-               (group.Name == $"{input.CreatorUserId}_{input.TargetUserId}" ||
-               group.Name == $"{input.TargetUserId}_{input.CreatorUserId}"),
+               (group.Name == $"{input.CreatorTenantId}_{input.CreatorUserId}_{input.TargetTenantId}_{input.TargetUserId}" ||
+               group.Name == $"{input.TargetTenantId}_{input.TargetUserId}_{input.CreatorTenantId}_{input.CreatorUserId}"),
                _httpContextAccessor.HttpContext.RequestAborted);
             if (!exists)
             {
                 var sessionId = await _chatSessionRepository.InsertAndGetIdAsync(new ChatSession
                 {
-                    TenantId = AbpSession.TenantId,
-                    Name = $"{input.CreatorUserId}_{input.TargetUserId}",
+                    Name = $"{input.CreatorTenantId}_{input.CreatorUserId}_{input.TargetTenantId}_{input.TargetUserId}",
                     CreatorUserId = input.CreatorUserId,
                     SessionType = ChatSessionType.Private,
                     CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
@@ -89,12 +88,14 @@ namespace JK.Chat
                 {
                     SessionId = sessionId,
                     CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                    TenantId = input.CreatorTenantId,
                     UserId = input.CreatorUserId
                 });
                 await _chatSessionMemberRepository.InsertAsync(new ChatSessionMember
                 {
                     SessionId = sessionId,
                     CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                    TenantId = input.TargetTenantId,
                     UserId = input.TargetUserId
                 });
             }
@@ -132,6 +133,7 @@ namespace JK.Chat
                       new ChatSessionMember
                       {
                           SessionId = input.SessionId,
+                          TenantId = input.TenantId,
                           UserId = input.UserId,
                           CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
                       });

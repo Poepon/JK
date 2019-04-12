@@ -8,7 +8,7 @@ namespace JK.Chat
     /// 会话
     /// </summary>
     [Table("ChatSessions")]
-    public class ChatSession : Entity<long>, IPassivable, IMayHaveTenant
+    public class ChatSession : Entity<long>, IPassivable
     {
         public const int MaxNameLength = 100;
         [StringLength(MaxNameLength)]
@@ -19,12 +19,13 @@ namespace JK.Chat
 
         public ChatSessionType SessionType { get; set; }
 
+        public int? CreatorTenantId { get; set; }
+
         public long CreatorUserId { get; set; }
 
         public long CreationTime { get; set; }
 
         public bool IsActive { get; set; } = true;
 
-        public int? TenantId { get; set; }
     }
 }
