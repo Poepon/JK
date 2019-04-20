@@ -6,6 +6,8 @@ namespace JK.Chat.Dto
     [AutoMap(typeof(ChatSession))]
     public class ChatSessionDto : EntityDto<long>
     {
+        public int? SourceTenantId { get; set; }
+
         public string Name { get; set; }
 
         public ChatSessionType SessionType { get; set; }

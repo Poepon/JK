@@ -1,8 +1,10 @@
-﻿namespace JK.Chat.Dto
+﻿using Abp;
+
+namespace JK.Chat.Dto
 {
     public class GetUserSessionsInput
     {
-        public long UserId { get; set; }
+        public UserIdentifier User { get; set; }
     }
 
 }

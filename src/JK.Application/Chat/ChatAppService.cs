@@ -2,8 +2,6 @@
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
-using Abp.RealTime;
-using Abp.Runtime.Session;
 using Abp.UI;
 using JK.Authorization.Users;
 using JK.Chat.Dto;
@@ -15,7 +13,6 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Abp.AutoMapper;
 
 namespace JK.Chat
 {
@@ -67,18 +64,42 @@ namespace JK.Chat
             });
         }
 
+        private string GetPrivateSessionName(UserIdentifier sender, UserIdentifier receiver)
+        {
+            return $"{sender.TenantId}@{sender.UserId}:{receiver.TenantId}@{receiver.UserId}";
+        }
+        private Tuple<UserIdentifier, UserIdentifier> GetUserByPrivateSessionName(string sessionName)
+        {
+            const string reg = @"^(?<tid1>[1-9]\d*)@(?<uid1>[1-9]\d*):(?<tid2>[1-9]\d*)@(?<uid2>[1-9]\d*)$";
+            var match = Regex.Match(sessionName, reg);
+            if (match.Success)
+            {
+                int? tid1 = match.Groups["tid1"].Success ? int.Parse(match.Groups["tid1"].Value) : new int?();
+                int? tid2 = match.Groups["tid2"].Success ? int.Parse(match.Groups["tid2"].Value) : new int?();
+                var uid1 = long.Parse(match.Groups["uid1"].Value);
+                var uid2 = long.Parse(match.Groups["uid2"].Value);
+                var sender = new UserIdentifier(tid1, uid1);
+                var receiver = new UserIdentifier(tid2, uid2);
+                return new Tuple<UserIdentifier, UserIdentifier>(sender, receiver);
+            }
+            return null;
+        }
         public async Task CreatePrivateSession(CreatePrivateSessionInput input)
         {
+            var sender = new UserIdentifier(input.CreatorTenantId, input.CreatorUserId);
+            var receiver = new UserIdentifier(input.TargetTenantId, input.TargetUserId);
+            var name1 = GetPrivateSessionName(sender, receiver);
+            var name2 = GetPrivateSessionName(receiver, sender);
             var exists = await _chatSessionRepository.GetAll().AnyAsync(group =>
                group.SessionType == ChatSessionType.Private &&
-               (group.Name == $"{input.CreatorTenantId}_{input.CreatorUserId}_{input.TargetTenantId}_{input.TargetUserId}" ||
-               group.Name == $"{input.TargetTenantId}_{input.TargetUserId}_{input.CreatorTenantId}_{input.CreatorUserId}"),
+               (group.Name == name1 ||
+               group.Name == name2),
                _httpContextAccessor.HttpContext.RequestAborted);
             if (!exists)
             {
                 var sessionId = await _chatSessionRepository.InsertAndGetIdAsync(new ChatSession
                 {
-                    Name = $"{input.CreatorTenantId}_{input.CreatorUserId}_{input.TargetTenantId}_{input.TargetUserId}",
+                    Name = name1,
                     CreatorUserId = input.CreatorUserId,
                     SessionType = ChatSessionType.Private,
                     CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
@@ -300,7 +321,7 @@ namespace JK.Chat
         public async Task<IList<long>> GetUserSessionsId(GetUserSessionsInput input)
         {
             var list = await _chatSessionMemberRepository.GetAll()
-                     .Where(member => member.UserId == input.UserId)
+                     .Where(member => member.UserId == input.User.UserId)
                      .Select(member => member.SessionId)
                      .ToListAsync();
             return list;
@@ -309,7 +330,7 @@ namespace JK.Chat
         public async Task<ListResultDto<ChatSessionDto>> GetUserSessions(GetUserSessionsInput input)
         {
             var list = await _chatSessionMemberRepository.GetAllIncluding(member => member.ChatSession)
-                      .Where(member => member.UserId == input.UserId)
+                      .Where(member => member.UserId == input.User.UserId)
                       .Select(member => member.ChatSession)
                       .ToListAsync(_httpContextAccessor.HttpContext.RequestAborted);
             var dtos = list.Select(item =>
@@ -317,16 +338,22 @@ namespace JK.Chat
                 ChatSessionDto chatSessionDto = ObjectMapper.Map<ChatSessionDto>(item);
                 if (chatSessionDto.SessionType == ChatSessionType.Private)
                 {
-                    const string reg = @"^(?<uid1>[1-9]\d*)_(?<uid2>[1-9]\d*)$";
-                    var match = Regex.Match(item.Name, reg);
-                    if (match.Success)
+                    var rs = GetUserByPrivateSessionName(item.Name);
+
+                    if (rs != null)
                     {
-                        var uid1 = long.Parse(match.Groups["uid1"].Value);
-                        var uid2 = long.Parse(match.Groups["uid2"].Value);
-                        if (uid1 != input.UserId)
-                            chatSessionDto.Name = _userRepository.GetAll().Where(u => u.Id == uid1).Select(u => u.Name).SingleOrDefault();
-                        if (uid2 != input.UserId)
-                            chatSessionDto.Name = _userRepository.GetAll().Where(u => u.Id == uid2).Select(u => u.Name).SingleOrDefault();
+
+                        if (rs.Item1.TenantId != input.User.TenantId && rs.Item1.UserId != input.User.UserId)
+                        {
+                            chatSessionDto.SourceTenantId = rs.Item1.TenantId;
+                            chatSessionDto.Name = _userRepository.GetAll().Where(u => u.Id == rs.Item1.UserId).Select(u => u.Name).SingleOrDefault();
+                        }
+
+                        if (rs.Item2.TenantId != input.User.TenantId && rs.Item2.UserId != input.User.UserId)
+                        {
+                            chatSessionDto.SourceTenantId = rs.Item2.TenantId;
+                            chatSessionDto.Name = _userRepository.GetAll().Where(u => u.Id == rs.Item2.UserId).Select(u => u.Name).SingleOrDefault();
+                        }
                     }
                 }
                 return chatSessionDto;

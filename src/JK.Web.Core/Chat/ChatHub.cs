@@ -146,7 +146,7 @@ namespace JK.Chat
                                 TargetUserId = createPrivateInput.TargetUserId,
                                 TargetTenantId = createPrivateInput.TargetTenantId
                             });
-                            var dtos = await GetSessions(AbpSession.GetUserId());
+                            var dtos = await GetSessions(AbpSession.ToUserIdentifier());
                             await socket.SendMsgPackAsync(CommandType.GetSessions, dtos);
                         }
                         else
@@ -164,7 +164,7 @@ namespace JK.Chat
                             CreatorTenantId = AbpSession.TenantId,
                             CreatorUserId = AbpSession.GetUserId()
                         });
-                        var dtos = await GetSessions(AbpSession.GetUserId());
+                        var dtos = await GetSessions(AbpSession.ToUserIdentifier());
                         await socket.SendMsgPackAsync(CommandType.GetSessions, dtos);
                     }
                     break;
@@ -186,7 +186,7 @@ namespace JK.Chat
                     break;
                 case CommandType.GetSessions:
                     {
-                        var dtos = await GetSessions(AbpSession.GetUserId());
+                        var dtos = await GetSessions(AbpSession.ToUserIdentifier());
                         await socket.SendMsgPackAsync(CommandType.GetSessions, dtos);
                     }
                     break;
@@ -261,7 +261,7 @@ namespace JK.Chat
 
         private async Task AddToGroup(WebSocketClient onlineClient)
         {
-            var groups = await chatAppService.GetUserSessionsId(new GetUserSessionsInput { UserId = onlineClient.UserId.GetValueOrDefault() });
+            var groups = await chatAppService.GetUserSessionsId(new GetUserSessionsInput { User = AbpSession.ToUserIdentifier() });
             foreach (var groupId in groups)
             {
                 WebSocketConnectionManager.AddToGroup(onlineClient.ConnectionId, groupId.ToString());
@@ -270,18 +270,16 @@ namespace JK.Chat
 
         private async Task RemoveFromGroup(WebSocketClient onlineClient)
         {
-            var groups = await chatAppService.GetUserSessionsId(new GetUserSessionsInput { UserId = onlineClient.UserId.GetValueOrDefault() });
+            var groups = await chatAppService.GetUserSessionsId(new GetUserSessionsInput { User = AbpSession.ToUserIdentifier() });
             foreach (var groupId in groups)
             {
                 WebSocketConnectionManager.RemoveFromGroup(onlineClient.ConnectionId, groupId.ToString());
             }
         }
 
-
-
-        private async Task<ChatSessionOutput[]> GetSessions(long userId)
+        private async Task<ChatSessionOutput[]> GetSessions(UserIdentifier user)
         {
-            var groups = await chatAppService.GetUserSessions(new GetUserSessionsInput { UserId = userId });
+            var groups = await chatAppService.GetUserSessions(new GetUserSessionsInput { User = user });
             var dtos = groups.Items.Select(x => new ChatSessionOutput
             {
                 CreationTime = x.CreationTime,
