@@ -25,4 +25,13 @@
   <ItemGroup>
     <ProjectReference Include="..\..\zero\Abp.ZeroCore.EntityFrameworkCore\Abp.ZeroCore.EntityFrameworkCore.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Payments\" />
+    <Folder Include="Payments\ThirdParty\" />
+    <Folder Include="Payments\Bacis\" />
+    <Folder Include="Payments\TenantConfigs\" />
+    <Folder Include="Payments\Orders\" />
+    <Folder Include="Payments\Count\" />
+    <Folder Include="Http\" />
+  </ItemGroup>
 </Project>
