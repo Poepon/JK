@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <VersionPrefix>1.0.0.0</VersionPrefix>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -26,12 +26,6 @@
     <ProjectReference Include="..\..\zero\Abp.ZeroCore.EntityFrameworkCore\Abp.ZeroCore.EntityFrameworkCore.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Payments\" />
-    <Folder Include="Payments\ThirdParty\" />
-    <Folder Include="Payments\Bacis\" />
-    <Folder Include="Payments\TenantConfigs\" />
-    <Folder Include="Payments\Orders\" />
     <Folder Include="Payments\Count\" />
-    <Folder Include="Http\" />
   </ItemGroup>
 </Project>
