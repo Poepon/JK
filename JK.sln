@@ -43,6 +43,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Web.Public", "src\JK.Web
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Web.Alliance", "src\JK.Web.Alliance\JK.Web.Alliance.csproj", "{B60CA9E1-570C-4C80-9144-6943E1BEF1C1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A4447F7B-9ED0-4B20-A7D5-D62DC67F6D23}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
