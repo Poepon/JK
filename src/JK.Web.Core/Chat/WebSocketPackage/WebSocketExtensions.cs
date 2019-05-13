@@ -12,21 +12,14 @@ namespace JK.Chat.WebSocketPackage
     {
         public static async Task SendMsgPackAsync<T>(this WebSocket webSocket, CommandType commandType, T dto, CancellationToken? cancellationToken = null)
         {
-            var data = dto.SerializeToBytes(MessageDataType.MessagePack);
-            var packagedata = data.WrapPackage(MessageDataType.MessagePack, commandType);
+            var packagedata = dto.WrapPackage(WebSocketMessageType.Binary, MessageDataType.MessagePack, commandType);
             await SendAsync(webSocket, WebSocketMessageType.Binary, packagedata, cancellationToken);
         }
 
         public static async Task SendProtobufAsync<T>(this WebSocket webSocket, CommandType commandType, T dto, CancellationToken? cancellationToken = null)
         {
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                ProtoBuf.Serializer.Serialize(memoryStream, dto);
-                memoryStream.Seek(0, SeekOrigin.Begin);
-                var data = memoryStream.ToArray();
-                var packagedata = data.WrapPackage(MessageDataType.Protobuf, commandType);
-                await SendAsync(webSocket, WebSocketMessageType.Binary, packagedata, cancellationToken);
-            }
+            var packagedata = dto.WrapPackage(WebSocketMessageType.Binary, MessageDataType.Protobuf, commandType);
+            await SendAsync(webSocket, WebSocketMessageType.Binary, packagedata, cancellationToken);
         }
 
         public static async Task SendTextAsync(this WebSocket webSocket,

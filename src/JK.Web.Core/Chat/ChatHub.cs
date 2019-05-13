@@ -2,6 +2,7 @@
 using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using Abp.Dependency;
+using Abp.Json;
 using Abp.RealTime;
 using Abp.Runtime.Session;
 using Abp.Threading;
@@ -243,7 +244,9 @@ namespace JK.Chat
             await AddToGroup(client);
 
             await base.OnConnected(client.ConnectionId, client, context);
-
+            await client.WebSocket.SendAsync(
+                WebSocketMessageType.Text,
+                new { client.ConnectionId }.WrapPackage(WebSocketMessageType.Text, MessageDataType.Json, CommandType.Connected));
             await SendOnlineUsers(client);
         }
 

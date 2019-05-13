@@ -7,6 +7,7 @@ namespace JK.Chat.Distributed
     {
         [Key("cid")]
         public string ConnectionId { get; set; }
+
         [Key("data")]
         public byte[] Data { get; set; }
     }

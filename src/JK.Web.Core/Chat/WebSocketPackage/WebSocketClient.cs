@@ -25,6 +25,8 @@ namespace JK.Chat.WebSocketPackage
 
         public WebSocket WebSocket { get; set; }
 
+        public WebSocketMessageType MessageType { get; set; }
+
         public DateTimeOffset ConnectTime { get; set; }
 
         public override bool Equals(object obj)

@@ -17,7 +17,7 @@ namespace JK.Chat
             var client = _connectionManager.GetWebSocketClient(connectionId);
             if (client != null)
             {
-                await client.WebSocket.SendAsync(WebSocketMessageType.Binary, data);
+                await client.WebSocket.SendAsync(client.MessageType, data);
             }
         }
     }

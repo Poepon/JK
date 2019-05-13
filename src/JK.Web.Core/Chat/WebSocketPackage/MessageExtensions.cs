@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net.WebSockets;
 using System.Text;
 using Abp.Json;
 using JK.Chat.Dto;
@@ -133,14 +134,34 @@ namespace JK.Chat.WebSocketPackage
             return value;
         }
 
-        public static byte[] WrapPackage(this byte[] msgdata, MessageDataType dataType, CommandType commandType)
+        public static byte[] WrapPackage<T>(this T obj, WebSocketMessageType messageType, MessageDataType dataType, CommandType commandType)
         {
-            var packagedata = new byte[msgdata.Length + 9];
-            Array.Copy(BitConverter.GetBytes(Convert.ToInt32(commandType)), 0, packagedata, 0, 4);
-            Array.Copy(BitConverter.GetBytes(Convert.ToByte(dataType)), 0, packagedata, 4, 1);
-            Array.Copy(BitConverter.GetBytes(Convert.ToInt64(msgdata.Length)), 0, packagedata, 5, 4);
-            Array.Copy(msgdata, 0, packagedata, 9, msgdata.Length);
-            return packagedata;
+            if (messageType == WebSocketMessageType.Binary)
+            {
+                byte[] msgdata = obj.SerializeToBytes<T>(dataType);
+                var packagedata = new byte[msgdata.Length + 9];
+                Array.Copy(BitConverter.GetBytes(Convert.ToInt32(commandType)), 0, packagedata, 0, 4);
+                Array.Copy(BitConverter.GetBytes(Convert.ToByte(dataType)), 0, packagedata, 4, 1);
+                Array.Copy(BitConverter.GetBytes(Convert.ToInt64(msgdata.Length)), 0, packagedata, 5, 4);
+                Array.Copy(msgdata, 0, packagedata, 9, msgdata.Length);
+                return packagedata;
+            }
+            else if (messageType == WebSocketMessageType.Text)
+            {
+                var message = new TextMessage
+                {
+                    CommandType = commandType,
+                    DataType = dataType,
+                    Data = obj.SerializeToText(dataType)
+                };
+                var packagedata = message.ToJsonString().ToBytes();
+                return packagedata;
+            }
+            else
+            {
+                throw new NotSupportedException("WebSocketMessageType. Close is not supported.");
+            }
         }
+
     }
 }

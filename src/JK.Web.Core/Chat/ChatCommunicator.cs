@@ -37,8 +37,7 @@ namespace JK.Chat
         private async Task SendMessageToClient(IReadOnlyList<IOnlineClient> clients, ChatMessage message)
         {
             var data = new[] { message.MapTo<ChatMessageOutput>() }
-                  .SerializeToBytes(MessageDataType.MessagePack)
-                  .WrapPackage(MessageDataType.MessagePack, CommandType.GetMessage);
+                  .WrapPackage(System.Net.WebSockets.WebSocketMessageType.Binary, MessageDataType.MessagePack, CommandType.GetMessage);
             await Send(clients, data);
         }
 
@@ -66,8 +65,7 @@ namespace JK.Chat
         private async Task SendMessagesToClient(IReadOnlyList<IOnlineClient> clients, List<ChatMessage> messages)
         {
             var data = messages.MapTo<List<ChatMessageOutput>>()
-                .SerializeToBytes(MessageDataType.MessagePack)
-                .WrapPackage(MessageDataType.MessagePack, CommandType.GetMessage);
+                .WrapPackage(System.Net.WebSockets.WebSocketMessageType.Binary, MessageDataType.MessagePack, CommandType.GetMessage);
             await Send(clients, data);
         }
 

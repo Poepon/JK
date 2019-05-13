@@ -39,10 +39,10 @@ namespace JK.Chat.Distributed
                  _distributedHandler.HandleEventAsync(r);
              });
         }
-        public  long Publish<T>(string channel, T msg)
+        public long Publish<T>(string channel, T msg)
         {
             ISubscriber sub = Database.Multiplexer.GetSubscriber();
-            return  sub.Publish(channel, msg.SerializeToBytes(MessageDataType.MessagePack));
+            return sub.Publish(channel, msg.SerializeToBytes(MessageDataType.MessagePack));
         }
         public async Task<long> PublishAsync<T>(string channel, T msg)
         {
