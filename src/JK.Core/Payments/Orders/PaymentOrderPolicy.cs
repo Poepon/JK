@@ -1,17 +1,18 @@
 ﻿using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
+using JK.Payments.TenantConfigs;
 using JK.Payments.ThirdParty;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace JK.Payments.TenantConfigs
+namespace JK.Payments.Orders
 {
     /// <summary>
-    /// 订单负载策略
+    /// 支付订单下单策略
     /// </summary>
-    public class LoadBalancePolicy: Entity
+    public class PaymentOrderPolicy: Entity
     {
         public int TenantId { get; set; }
 
@@ -33,16 +34,16 @@ namespace JK.Payments.TenantConfigs
     }
 
     /// <summary>
-    /// 订单负载策略规则
+    /// 支付订单下单策略规则
     /// </summary>
-    public class LoadBalancePolicyRule: Entity
+    public class PaymentOrderPolicyRule : Entity
     {
         public int TenantId { get; set; }
 
         public int PolicyId { get; set; }
 
         [ForeignKey(nameof(PolicyId))]
-        public virtual LoadBalancePolicy Policy { get; set; }
+        public virtual PaymentOrderPolicy Policy { get; set; }
 
         public int? ParentId { get; set; }
 
@@ -53,10 +54,10 @@ namespace JK.Payments.TenantConfigs
         public bool IsGroup { get; set; }
 
         [ForeignKey("ParentId")]
-        public virtual ICollection<LoadBalancePolicyRule> ChildPolicyConditions { get; set; }
+        public virtual ICollection<PaymentOrderPolicyRule> ChildPolicyRules { get; set; }
     }
 
-    public class LoadBalancePolicyRuleValue: AuditedEntity
+    public class PaymentOrderPolicyRuleValue : AuditedEntity
     {
         /// <summary>
         /// Maximum length of the <see cref="Value"/> property.
@@ -68,7 +69,7 @@ namespace JK.Payments.TenantConfigs
         public int RuleId { get; set; }
 
         [ForeignKey(nameof(RuleId))]
-        public virtual LoadBalancePolicyRule Rule { get; set; }
+        public virtual PaymentOrderPolicyRule Rule { get; set; }
 
         /// <summary>
         /// Value of the setting.

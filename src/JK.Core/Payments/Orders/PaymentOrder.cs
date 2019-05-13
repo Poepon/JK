@@ -36,9 +36,7 @@ namespace JK.Payments.Orders
         /// <summary>
         /// 系统订单号
         /// </summary>
-        [Required]
-        [StringLength(50)]
-        public string SystemOrderId { get; set; }
+        public long SystemOrderId { get; set; }
 
         /// <summary>
         /// 外部订单号
@@ -60,7 +58,7 @@ namespace JK.Payments.Orders
         /// <summary>
         /// 支付金额
         /// </summary>
-        public long PaidAmount { get; set; }
+        public long? PaidAmount { get; set; }
 
         /// <summary>
         /// 手续费
@@ -106,6 +104,8 @@ namespace JK.Payments.Orders
         /// </summary>
         [StringLength(2000)]
         public string AsyncCallback { get; set; }
+
+        public string ExtData { get; set; }
 
         public void ChangePaymentStatus(PaymentStatus paymentStatus)
         {

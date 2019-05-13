@@ -9,7 +9,7 @@ namespace JK.Payments.TenantConfigs
     /// <summary>
     /// 第三方帐户配置
     /// </summary>
-    public class ThirdPartyAccount: FullAuditedEntity
+    public class ThirdPartyAccount : FullAuditedEntity
     {
         public int TenantId { get; set; }
 
@@ -58,6 +58,11 @@ namespace JK.Payments.TenantConfigs
         /// </summary>
         [StringLength(1000)]
         public string PrivateKey { get; set; }
+
+        /// <summary>
+        /// 手续费率
+        /// </summary>
+        public decimal? FeeRate { get; set; }
 
     }
 }

@@ -2,11 +2,12 @@
 using Abp.Modules;
 using Abp.Reflection.Extensions;
 using JK.Authorization;
+using JK.Payments.Orders;
 
 namespace JK
 {
     [DependsOn(
-        typeof(JKCoreModule), 
+        typeof(JKCoreModule),
         typeof(AbpAutoMapperModule))]
     public class JKApplicationModule : AbpModule
     {
@@ -14,7 +15,10 @@ namespace JK
         {
             Configuration.Authorization.Providers.Add<AppXmlAuthorizationProvider>();
         }
-
+        public override void PostInitialize()
+        {
+            IocManager.Resolve<IIdGenerator>().Init(0, 0);
+        }
         public override void Initialize()
         {
             var thisAssembly = typeof(JKApplicationModule).GetAssembly();

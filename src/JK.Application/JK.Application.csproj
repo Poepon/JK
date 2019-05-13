@@ -17,11 +17,6 @@
     <ProjectReference Include="..\JK.Core\JK.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Payments\" />
-    <Folder Include="Payments\Orders\" />
-    <Folder Include="Payments\Orders\Dto\" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Remove="Payments\Orders\OrderIdGenerator.cs" />
   </ItemGroup>
 </Project>
