@@ -62,7 +62,7 @@ namespace JK.Payments.TenantConfigs
         /// <summary>
         /// 手续费率
         /// </summary>
-        public decimal? FeeRate { get; set; }
+        public decimal? OverrideFeeRate { get; set; }
 
     }
 }

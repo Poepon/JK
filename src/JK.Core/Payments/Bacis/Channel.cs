@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Abp.Domain.Entities;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace JK.Payments.Bacis
@@ -6,7 +7,7 @@ namespace JK.Payments.Bacis
     /// <summary>
     /// 支付通道
     /// </summary>
-    public class Channel
+    public class Channel : Entity
     {
         [Required]
         [StringLength(20)]
@@ -18,6 +19,11 @@ namespace JK.Payments.Bacis
         [Required]
         [StringLength(20)]
         public string ChannelCode { get; set; }
+
+        /// <summary>
+        /// 是否要求银行
+        /// </summary>
+        public bool RequiredBank { get; set; }
 
         public bool IsActive { get; set; }
     }

@@ -1,21 +1,22 @@
-﻿using JK.Payments.Bacis;
+﻿using Abp.Domain.Entities;
+using JK.Payments.Bacis;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Payments.ThirdParty
 {
-    public class ChannelCodeOverwrite
+    public class BankOverride : Entity
     {
-        public int ChannelId { get; set; }
-
-        [ForeignKey(nameof(ChannelId))]
-        public virtual Channel Channel { get; set; }
-
         public int CompanyId { get; set; }
 
         [ForeignKey(nameof(CompanyId))]
         public virtual Company Company { get; set; }
+
+        public int BankId { get; set; }
+
+        [ForeignKey(nameof(BankId))]
+        public virtual Bank Bank { get; set; }
 
         [Required]
         [StringLength(20)]

@@ -1,5 +1,6 @@
 ﻿using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
+using JK.Payments.Bacis;
 using JK.Payments.TenantConfigs;
 using JK.Payments.ThirdParty;
 using System;
@@ -12,7 +13,7 @@ namespace JK.Payments.Orders
     /// <summary>
     /// 支付订单下单策略
     /// </summary>
-    public class PaymentOrderPolicy: Entity
+    public class PaymentOrderPolicy : Entity
     {
         public int TenantId { get; set; }
 
@@ -31,6 +32,21 @@ namespace JK.Payments.Orders
         public int Priority { get; set; }
 
         public bool IsActive { get; set; }
+
+        public virtual ICollection<PaymentOrderPolicyChannel> SupportedChannels { get; set; }
+    }
+
+    public class PaymentOrderPolicyChannel
+    {
+        public int ChannelId { get; set; }
+
+        [ForeignKey(nameof(ChannelId))]
+        public virtual Channel Channel { get; set; }
+
+        public int PolicyId { get; set; }
+
+        [ForeignKey(nameof(PolicyId))]
+        public virtual PaymentOrderPolicy PaymentOrderPolicy { get; set; }
     }
 
     /// <summary>

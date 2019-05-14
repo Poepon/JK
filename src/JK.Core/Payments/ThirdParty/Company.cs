@@ -22,7 +22,11 @@ namespace JK.Payments.ThirdParty
         /// <summary>
         /// 手续费率
         /// </summary>
-        public decimal? FeeRate { get; set; }
+        public decimal? DefaultFeeRate { get; set; }
+
+        public long? MinOrderAmount { get; set; }
+
+        public long? MaxOrderAmount { get; set; }
 
         public virtual ICollection<CompanyChannel> SupportedChannels { get; set; }
     }

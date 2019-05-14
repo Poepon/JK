@@ -14,6 +14,9 @@ namespace JK.Payments.Orders
 
     public class PaymentOrder : FullAuditedAggregateRoot<long>
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public override long Id { get; set; }
+
         public int TenantId { get; set; }
 
         public int CompanyId { get; set; }
@@ -32,12 +35,7 @@ namespace JK.Payments.Orders
         public virtual ThirdPartyAccount Account { get; set; }
 
         public int? BankId { get; set; }
-
-        /// <summary>
-        /// 系统订单号
-        /// </summary>
-        public long SystemOrderId { get; set; }
-
+        
         /// <summary>
         /// 外部订单号
         /// </summary>
@@ -88,7 +86,7 @@ namespace JK.Payments.Orders
         [StringLength(64)]
         public string CreateIp { get; set; }
 
-        public string Device { get; set; }
+        public DeviceType Device { get; set; }
 
         [Required]
         public string Md5 { get; set; }
@@ -107,18 +105,18 @@ namespace JK.Payments.Orders
 
         public string ExtData { get; set; }
 
+        public void SetNewOrder()
+        {
+            this.PaymentStatus = PaymentStatus.Pending;
+            this.CreationTime = Clock.Now;
+            this.DomainEvents.Add(new PaymentOrderCreatedEventData(this));
+        }
+
         public void ChangePaymentStatus(PaymentStatus paymentStatus)
         {
             this.PaymentStatus = paymentStatus;
             switch (paymentStatus)
             {
-                case PaymentStatus.Pending:
-                    if (IsTransient())
-                    {
-                        CreationTime = Clock.Now;
-                        this.DomainEvents.Add(new PaymentOrderCreatedEventData(this));
-                    }
-                    break;
                 case PaymentStatus.Paid:
                     PaidDate = Clock.Now;
                     this.DomainEvents.Add(new PaymentOrderPaidEventData(this));

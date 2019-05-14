@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using Abp;
 using Abp.AutoMapper;
 using Abp.Domain.Repositories;
 using Abp.MultiTenancy;
 using Abp.Timing;
 using JK.Dto;
+using JK.Payments.Bacis;
 using JK.Payments.Enumerates;
 using JK.Payments.Orders.Dto;
 using JK.Payments.TenantConfigs;
@@ -13,12 +13,6 @@ using JK.Payments.ThirdParty;
 
 namespace JK.Payments.Orders
 {
-    public interface IPaymentOrderPolicyService
-    {
-        List<PaymentOrderPolicy> GetPolicies(int tenantId, int channelId);
-
-        bool VerifyPolicy(PaymentOrderPolicy paymentOrderPolicy, CreatePaymentOrderDto input);
-    }
     public interface IOrderProcessingService
     {
 
@@ -34,6 +28,9 @@ namespace JK.Payments.Orders
         private readonly IPaymentOrderPolicyService paymentOrderPolicyService;
         private readonly IIdGenerator idGenerator;
         private readonly IRepository<Company> companyRepository;
+        private readonly IRepository<Channel> channelRepository;
+        private readonly IRepository<Bank> bankRepository;
+        private readonly IRepository<ChannelOverride> channelOverrideRepository;
         private readonly IRepository<ThirdPartyAccount> accountRepository;
         private readonly IRepository<PaymentOrder, long> paymentOrderRepository;
 
@@ -42,6 +39,9 @@ namespace JK.Payments.Orders
             IPaymentOrderPolicyService paymentOrderPolicyService,
             IIdGenerator idGenerator,
             IRepository<Company> companyRepository,
+            IRepository<Channel> channelRepository,
+            IRepository<ChannelOverride> channelOverrideRepository,
+            IRepository<Bank> bankRepository,
             IRepository<ThirdPartyAccount> accountRepository,
             IRepository<PaymentOrder, long> paymentOrderRepository)
         {
@@ -49,9 +49,13 @@ namespace JK.Payments.Orders
             this.paymentOrderPolicyService = paymentOrderPolicyService;
             this.idGenerator = idGenerator;
             this.companyRepository = companyRepository;
+            this.channelRepository = channelRepository;
+            this.channelOverrideRepository = channelOverrideRepository;
+            this.bankRepository = bankRepository;
             this.accountRepository = accountRepository;
             this.paymentOrderRepository = paymentOrderRepository;
         }
+
         public ResultDto<PaymentOrderDto> PlaceOrder(CreatePaymentOrderDto input)
         {
             var tenant = tenantCache.Get(input.TenantId);
@@ -64,12 +68,16 @@ namespace JK.Payments.Orders
                     return new ResultDto<PaymentOrderDto> { IsSuccess = false, ErrorMessage = "商户订单号重复！" };
                 }
             }
-            //TODO 支付通道
-            int channelId = input.ChannelCode.GetHashCode();
-
-            //TODO 银行
-            int? bankId = input.BankCode.GetHashCode();
-
+            //支付通道
+            var channel = channelRepository.FirstOrDefault(c => c.ChannelCode == input.ChannelCode);
+            int channelId = channel.Id;
+            //银行
+            int? bankId = null;
+            if (channel.RequiredBank)
+            {
+                var bank = bankRepository.FirstOrDefault(b => b.BankCode == input.BankCode);
+                bankId = bank.Id;
+            }
             //TODO 支付订单策略
 
             var policies = paymentOrderPolicyService.GetPolicies(input.TenantId, channelId);
@@ -100,7 +108,8 @@ namespace JK.Payments.Orders
 
             var company = companyRepository.Get(verifiedPaymentOrder.CompanyId);
             var account = accountRepository.Get(verifiedPaymentOrder.AccountId);
-            var paymentOrder = BuildPaymentOrder(verifiedPaymentOrder, GetFeeRate(company, account));
+            var channelOverride = channelOverrideRepository.FirstOrDefault(co => co.CompanyId == company.Id && co.ChannelId == channelId);
+            var paymentOrder = BuildPaymentOrder(verifiedPaymentOrder, GetFeeRate(company, channelOverride, account));
             paymentOrderRepository.Insert(paymentOrder);
             CurrentUnitOfWork.SaveChanges();
 
@@ -110,7 +119,6 @@ namespace JK.Payments.Orders
                 Data = paymentOrder.MapTo<PaymentOrderDto>(),
                 ErrorMessage = "提交成功"
             };
-            throw new NotImplementedException();
         }
 
         private PaymentOrder BuildPaymentOrder(VerifiedPaymentOrderDto verifiedPaymentOrder, decimal feeRate)
@@ -123,7 +131,7 @@ namespace JK.Payments.Orders
                 Fee = Convert.ToInt32(input.Amount * (feeRate / 100)),
                 CompanyId = verifiedPaymentOrder.CompanyId,
                 AccountId = verifiedPaymentOrder.AccountId,
-                SystemOrderId = idGenerator.NextId(),
+                Id = idGenerator.NextId(),
                 ExternalOrderId = input.ExternalOrderId,
                 ChannelId = verifiedPaymentOrder.ChannelId,
                 BankId = verifiedPaymentOrder.BankId,
@@ -133,22 +141,22 @@ namespace JK.Payments.Orders
                 CallbackStatus = CallbackStatus.Pending,
                 Expire = Clock.Now.AddHours(2),
                 ExtData = input.ExtData,
-                Md5 = "",
-                Device = ""
+                Device = input.Device
             };
             //TODO Order MD5
-
-            //Insert into Database
-            paymentOrder.ChangePaymentStatus(PaymentStatus.Pending);
+            paymentOrder.Md5 = paymentOrder.GetMd5();
+            paymentOrder.SetNewOrder();
             return paymentOrder;
         }
 
-        private decimal GetFeeRate(Company company, ThirdPartyAccount account)
+        private decimal GetFeeRate(Company company, ChannelOverride channelOverride, ThirdPartyAccount account)
         {
-            if (account.FeeRate.HasValue)
-                return account.FeeRate.GetValueOrDefault();
+            if (account.OverrideFeeRate.HasValue)
+                return account.OverrideFeeRate.GetValueOrDefault();
+            else if (channelOverride.OverrideFeeRate.HasValue)
+                return channelOverride.OverrideFeeRate.GetValueOrDefault();
             else
-                return company.FeeRate.GetValueOrDefault();
+                return company.DefaultFeeRate.GetValueOrDefault();
         }
 
         private bool CheckDuplicateOrders(int tenant, string orderId)

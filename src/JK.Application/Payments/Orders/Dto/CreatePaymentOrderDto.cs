@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JK.Payments.Enumerates;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -20,6 +21,8 @@ namespace JK.Payments.Orders.Dto
         [Required]
         [StringLength(64)]
         public string CreateIp { get; set; }
+
+        public DeviceType Device { get; set; }
 
         /// <summary>
         /// 同步回调

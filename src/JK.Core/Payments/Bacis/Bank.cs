@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Abp.Domain.Entities;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace JK.Payments.Bacis
@@ -6,7 +7,7 @@ namespace JK.Payments.Bacis
     /// <summary>
     /// 银行
     /// </summary>
-    public class Bank
+    public class Bank : Entity
     {
         [Required]
         [StringLength(20)]
