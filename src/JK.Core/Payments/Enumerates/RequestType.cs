@@ -2,7 +2,7 @@
 {
     public enum RequestType
     {
-        HttpClient = 0,
-        Redirection = 1
+        WebApi = 0,
+        WebPage = 1
     }
 }

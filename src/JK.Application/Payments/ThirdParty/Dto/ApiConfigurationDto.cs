@@ -1,12 +1,9 @@
-﻿using Abp.Domain.Entities;
+﻿using Abp.Application.Services.Dto;
 using JK.Payments.Enumerates;
-using System;
-namespace JK.Payments.ThirdParty
+
+namespace JK.Payments.ThirdParty.Dto
 {
-    /// <summary>
-    /// API配置
-    /// </summary>
-    public class ApiConfiguration : Entity
+    public class ApiConfigurationDto : EntityDto
     {
         public int CompanyId { get; set; }
 

@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Abp.Domain.Repositories;
 using JK.Payments.Orders.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace JK.Payments.Orders
 {
     public interface IPaymentOrderPolicyService
     {
-        List<PaymentOrderPolicy> GetPolicies(int tenantId, int channelId);
+        Task<List<PaymentOrderPolicy>> GetPoliciesAsync(int tenantId, int channelId);
 
-        bool VerifyPolicy(PaymentOrderPolicy paymentOrderPolicy, CreatePaymentOrderDto input);
+        Task<bool> VerifyPolicyAsync(PaymentOrderPolicy paymentOrderPolicy, CreatePaymentOrderDto input);
     }
     public class PaymentOrderPolicyService : IPaymentOrderPolicyService
     {
@@ -20,19 +22,20 @@ namespace JK.Payments.Orders
         {
             this.policyRepository = policyRepository;
         }
-        public List<PaymentOrderPolicy> GetPolicies(int tenantId, int channelId)
+        public async Task<List<PaymentOrderPolicy>> GetPoliciesAsync(int tenantId, int channelId)
         {
-            var list = policyRepository.GetAll().Where(p => p.TenantId == tenantId && p.IsActive &&
-             p.Company.IsActive &&
-             p.SupportedChannels.Any(sup => sup.ChannelId == channelId))
-               .OrderBy(p => p.Priority).ToList();
+            var list = await policyRepository.GetAll().Where(p => p.TenantId == tenantId && p.IsActive &&
+              p.Company.IsActive &&
+              p.SupportedChannels.Any(sup => sup.ChannelId == channelId))
+               .OrderBy(p => p.Priority).ToListAsync();
             return list;
         }
 
-        public bool VerifyPolicy(PaymentOrderPolicy paymentOrderPolicy, CreatePaymentOrderDto input)
+        public Task<bool> VerifyPolicyAsync(PaymentOrderPolicy paymentOrderPolicy, CreatePaymentOrderDto input)
         {
             if (paymentOrderPolicy == null)
                 throw new ArgumentNullException(nameof(paymentOrderPolicy));
+
             throw new NotImplementedException();
         }
     }
