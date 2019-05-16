@@ -1,14 +1,14 @@
-﻿using JK.Payments.Enumerates;
-using System;
+﻿using Abp.Domain.Entities;
+using JK.Payments.Enumerates;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Payments.ThirdParty
 {
     /// <summary>
-    /// 响应值
+    /// 响应结果代码配置
     /// </summary>
-    public class ResponseValueConfiguration
+    public class ResultCodeConfiguration : Entity
     {
         public int CompanyId { get; set; }
 
@@ -16,9 +16,9 @@ namespace JK.Payments.ThirdParty
         public virtual Company Company { get; set; }
 
         [Required]
-        public string ResponseValue { get; set; }
+        public string ResultCode { get; set; }
 
-        public ResponseValueMean Mean { get; set; }
+        public ResultCodeMean Mean { get; set; }
 
     }
 }

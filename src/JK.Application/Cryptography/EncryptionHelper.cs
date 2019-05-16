@@ -1,12 +1,12 @@
 ﻿using JK.Payments.Enumerates;
-using JK.Payments.TenantConfigs;
+using JK.Payments.TenantConfigs.Dto;
 using System.Text;
 
 namespace JK.Cryptography
 {
     public class EncryptionHelper
     {
-        public static string GetEncryption(EncryptionMethod encryptionMethod, string value, ThirdPartyAccount account, string sign = "")
+        public static string GetEncryption(EncryptionMethod encryptionMethod, string value, ThirdPartyAccountDto account, string sign = "")
         {
             string returnValue = "";
             switch (encryptionMethod)

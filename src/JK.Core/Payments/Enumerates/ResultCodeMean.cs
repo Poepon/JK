@@ -1,6 +1,6 @@
 ﻿namespace JK.Payments.Enumerates
 {
-    public enum ResponseValueMean
+    public enum ResultCodeMean
     {
         Succeed = 0,
         Failed = 1,

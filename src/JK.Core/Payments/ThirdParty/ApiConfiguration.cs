@@ -18,12 +18,18 @@ namespace JK.Payments.ThirdParty
 
         public string Method { get; set; }
 
+        /// <summary>
+        /// 发送给第三方的数据类型
+        /// </summary>
         public string ContentType { get; set; }
 
+        /// <summary>
+        /// 期望第三方返回的数据类型
+        /// </summary>
         public string DataType { get; set; }
 
         public string AcceptCharset { get; set; }
 
-
+        public bool HasResponeParameter { get; set; }
     }
 }

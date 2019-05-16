@@ -2,7 +2,11 @@
 {
     public enum DataTag
     {
-        Normal = 0,
         SystemOrderId = 1,
+        Amount = 2,
+        ResultCode = 3,
+        ResultDesc = 4,
+        PayAppUrl = 5,
+        PayQrCode = 6
     }
 }

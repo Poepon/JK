@@ -21,6 +21,8 @@ namespace JK.Payments.Orders
 {
     public class BuildOrderPostRequestResult
     {
+        public int ApiId { get; set; }
+
         public string Url { get; set; }
 
         public string Method { get; set; }
@@ -33,7 +35,11 @@ namespace JK.Payments.Orders
 
         public string AcceptCharset { get; set; }
 
-        public Dictionary<string, string> Parameters { get; set; }
+        public bool HasResponeParameter { get; set; }
+
+        public Dictionary<string, string> RequestData { get; set; }
+
+        public List<ApiResponeParameter> ApiResponeParameters { get; set; }
     }
     public interface IOrderProcessingService
     {
@@ -44,6 +50,8 @@ namespace JK.Payments.Orders
         Task<ResultDto<PaymentOrderDto>> PlaceOrderAsync(CreatePaymentOrderDto input);
 
         Task<BuildOrderPostRequestResult> BuildOrderPostRequest(PaymentOrderDto paymentOrder);
+
+
     }
 
     public class OrderProcessingService : AbpServiceBase, IOrderProcessingService
@@ -58,7 +66,9 @@ namespace JK.Payments.Orders
         private readonly IRepository<ThirdPartyAccount> accountRepository;
         private readonly IRepository<PaymentOrder, long> paymentOrderRepository;
         private readonly IRepository<ApiConfiguration> apiconfigRepository;
-        private readonly IRepository<ApiParameter> apiParameterRepository;
+        private readonly IRepository<ApiRequestParameter> apiRequestParameterRepository;
+        private readonly IRepository<ApiResponeParameter> apiResponeParameterRepository;
+        private readonly IRepository<ApiCallbackParameter> apiCallbackParameterRepository;
 
         public OrderProcessingService(
             ITenantCache tenantCache,
@@ -71,7 +81,9 @@ namespace JK.Payments.Orders
             IRepository<ThirdPartyAccount> accountRepository,
             IRepository<PaymentOrder, long> paymentOrderRepository,
             IRepository<ApiConfiguration> apiconfigRepository,
-            IRepository<ApiParameter> apiParameterRepository)
+            IRepository<ApiRequestParameter> apiRequestParameterRepository,
+            IRepository<ApiResponeParameter> apiResponeParameterRepository,
+            IRepository<ApiCallbackParameter> apiCallbackParameterRepository)
         {
             this.tenantCache = tenantCache;
             this.paymentOrderPolicyService = paymentOrderPolicyService;
@@ -83,7 +95,9 @@ namespace JK.Payments.Orders
             this.accountRepository = accountRepository;
             this.paymentOrderRepository = paymentOrderRepository;
             this.apiconfigRepository = apiconfigRepository;
-            this.apiParameterRepository = apiParameterRepository;
+            this.apiRequestParameterRepository = apiRequestParameterRepository;
+            this.apiResponeParameterRepository = apiResponeParameterRepository;
+            this.apiCallbackParameterRepository = apiCallbackParameterRepository;
         }
 
         public async Task<ResultDto<PaymentOrderDto>> PlaceOrderAsync(CreatePaymentOrderDto input)
@@ -173,7 +187,6 @@ namespace JK.Payments.Orders
                 ExtData = input.ExtData,
                 Device = input.Device
             };
-            //TODO Order MD5
             paymentOrder.Md5 = paymentOrder.GetMd5();
             paymentOrder.SetNewOrder();
             return paymentOrder;
@@ -193,92 +206,35 @@ namespace JK.Payments.Orders
         {
             return false;
         }
-        /// <summary>
-        /// 动态参数正则表达式
-        /// </summary>
-        private const string ParameterPattern = @"\{\{(?<key>[a-zA-Z0-9@$#&_]{1,20})\}\}";
-        /// <summary>
-        /// 高级动态参数正则表达式（包含JPath，XPath）
-        /// </summary>
-        private const string AdvancedParameterPattern = @"\{\{\{(?<key>[a-zA-Z0-9@$#&_]{1,20})\>(?<path>.*?)\}\}\}";
 
         public async Task<BuildOrderPostRequestResult> BuildOrderPostRequest(PaymentOrderDto paymentOrder)
         {
-            var parameters = new Dictionary<string, string>();
             var apiconfig = await apiconfigRepository.FirstOrDefaultAsync(a => a.CompanyId == paymentOrder.CompanyId && a.ApiMethod == ApiMethod.PlaceOrder);
             var result = new BuildOrderPostRequestResult
             {
-
+                ApiId = apiconfig.Id,
+                Url = apiconfig.Url,
+                AcceptCharset = apiconfig.AcceptCharset,
+                ContentType = apiconfig.ContentType,
+                DataType = apiconfig.DataType,
+                Method = apiconfig.Method,
+                RequestType = apiconfig.RequestType,
+                HasResponeParameter = apiconfig.HasResponeParameter
             };
-            var entities = await apiParameterRepository.GetAll().Where(p => p.ApiId == apiconfig.Id).OrderBy(p => p.OrderNumber).ToListAsync();
+            var apiRequests = await apiRequestParameterRepository.GetAll()
+                .Where(p => p.ApiId == apiconfig.Id)
+                .OrderBy(p => p.OrderNumber).ToListAsync();
+            if (apiconfig.HasResponeParameter)
+            {
+                var apiRespones = await apiResponeParameterRepository.GetAll()
+                       .Where(p => p.ApiId == apiconfig.Id)
+                   .OrderBy(p => p.OrderNumber).ToListAsync();
+                result.ApiResponeParameters = apiRespones;
+            }
+            //TODO PaymentVariable
             var variable = new PaymentVariable(null, null, null, null, null);
-            foreach (var paymentParameter in entities)
-            {
-                string value = paymentParameter.Value;
-                var matches = Regex.Matches(paymentParameter.Value, ParameterPattern);
-                if (matches.Count > 0)
-                {
-                    foreach (Match item in matches)
-                    {
-                        var tempValue = GetVariableValue(variable, parameters, item.Groups["key"].Value, paymentParameter.Format);
-                        value = value.Replace(item.Value, tempValue);
-                    }
-                }
-
-                //判断必填项
-                if (paymentParameter.Required && string.IsNullOrEmpty(value))
-                {
-                    throw new ArgumentNullException($"参数{paymentParameter.Key}的值为空。");
-                }
-                //如果是加密参数
-                if (paymentParameter.Encryption.HasValue)
-                {
-                    //TODO 三个密钥
-                    value = EncryptionHelper.GetEncryption(paymentParameter.Encryption.Value, value, null);
-                }
-                if (paymentParameter.Format.Equals("ToLower", StringComparison.OrdinalIgnoreCase))
-                {
-                    value = value.ToLower();
-                }
-                else if (paymentParameter.Format.Equals("ToUpper", StringComparison.OrdinalIgnoreCase))
-                {
-                    value = value.ToUpper();
-                }
-                parameters.Add(paymentParameter.Key, value);
-            }
-            throw new NotImplementedException();
+            result.RequestData = variable.ProcessingApiRequestParameters(apiRequests);
+            return result;
         }
-        private string GetVariableValue(PaymentVariable variable,
-           Dictionary<string, string> nameValue,
-           string variableName, string format)
-        {
-            //检查全局变量
-            if (PaymentVariable.IsGlobalVariable(variableName))
-            {
-                return variable.GetGlobalVariableValue(variableName, format);
-            }
-            else
-            //检查支付配置变量
-            if (PaymentVariable.IsMerchantConfigVariable(variableName))
-            {
-                return variable.GetMerchantConfigVariableValue(variableName, format);
-            }
-            else
-            //检查订单变量
-            if (PaymentVariable.IsOrderVariable(variableName))
-            {
-                return variable.GetOrderVariableValue(variableName, format);
-            }
-            else if (PaymentVariable.IsParameter(variableName))
-            {
-                return variable.GetParameterValue(nameValue, variableName, format);
-            }
-            else
-            {
-                //常量
-                return variableName;
-            }
-        }
-
     }
 }
