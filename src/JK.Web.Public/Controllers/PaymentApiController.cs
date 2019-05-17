@@ -9,12 +9,14 @@ using JK.Payments.Orders.Dto;
 using JK.Payments.TenantConfigs;
 using JK.Payments.ThirdParty;
 using JK.Web.Public.Dto;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -24,27 +26,23 @@ using System.Xml;
 
 namespace JK.Web.Public.Controllers
 {
-
     [Route("api/pay/[action]")]
     public class PaymentApiController : AbpController
     {
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IRepository<TenantApp> appRepository;
         private readonly IOrderProcessingService orderProcessingService;
-        private readonly IRepository<ApiCallbackParameter> apiCallbackParameterRepository;
         private readonly IRepository<ResultCodeConfiguration> resultCodeRepository;
         public PaymentApiController(
             IHttpClientFactory httpClientFactory,
             IRepository<TenantApp> appRepository,
             IRepository<ResultCodeConfiguration> resultCodeRepository,
-            IOrderProcessingService orderProcessingService,
-            IRepository<ApiCallbackParameter> apiCallbackParameterRepository)
+            IOrderProcessingService orderProcessingService)
         {
             this.httpClientFactory = httpClientFactory;
             this.appRepository = appRepository;
             this.resultCodeRepository = resultCodeRepository;
             this.orderProcessingService = orderProcessingService;
-            this.apiCallbackParameterRepository = apiCallbackParameterRepository;
         }
 
         protected Task<TenantApp> QueryApp(PaymentApiDtoBase input)
@@ -122,7 +120,7 @@ namespace JK.Web.Public.Controllers
                     response.EnsureSuccessStatusCode();
                     if (postdata.HasResponeParameter)
                     {
-                        var data = await ProcessingResponseData(response, postdata.DataType, postdata.ApiResponeParameters);
+                        var data = await ProcessingData(await response.Content.ReadAsStringAsync(), postdata.DataType, postdata.ApiResponeParameters);
                         var resultCode = data[DataTag.ResultCode.ToString()];
                         var resultCodeMean = await resultCodeRepository.FirstOrDefaultAsync(c => c.ResultCode == resultCode && c.CompanyId == paymentOrder.CompanyId);
                         if (resultCodeMean == null)
@@ -174,40 +172,53 @@ namespace JK.Web.Public.Controllers
             };
         }
 
-        private async Task<Dictionary<string, string>> ProcessingResponseData(HttpResponseMessage response, string dataType, List<ApiResponeParameter> responeParameters)
+        private async Task<Dictionary<string, string>> ProcessingData<T>(string dataContent, DataType dataType, List<T> responeParameters) where T : IParameter
         {
             var values = new ConcurrentDictionary<string, string>();
-            var content = await response.Content.ReadAsStringAsync();
-            if (dataType == "json")
+            if (dataType == DataType.Json)
             {
-                var jObject = JObject.Parse(content);
-                Parallel.ForEach(responeParameters, (parameter) =>
-                {
-                    string key = parameter.Key;
-                    string value = jObject.SelectToken(parameter.Value).ToString();
-                    values.TryAdd(key, value);
-                    if (parameter.DataTag.HasValue)
-                        values.TryAdd(parameter.DataTag.ToString(), value);
-                });
+                ProcessingJsonData(responeParameters, values, dataContent);
             }
-            else if (dataType == "xml")
+            else if (dataType == DataType.Xml)
             {
-                var xmlDocument = new XmlDocument();
-                xmlDocument.LoadXml(content);
-                Parallel.ForEach(responeParameters, (parameter) =>
-                {
-                    string key = parameter.Key;
-                    var value = xmlDocument.DocumentElement.SelectSingleNode(parameter.Value).InnerText;
-                    values.TryAdd(key, value);
-                    if (parameter.DataTag.HasValue)
-                    {
-                        values.TryAdd(parameter.DataTag.ToString(), value);
-                    }
-                });
+                ProcessingXmlData(responeParameters, values, dataContent);
+            }
+            else
+            {
+                throw new Exception($"不支持的数据格式。{dataType}");
             }
             return new Dictionary<string, string>(values);
         }
 
+        private static void ProcessingXmlData<T>(List<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IParameter
+        {
+            var xmlDocument = new XmlDocument();
+            xmlDocument.LoadXml(content);
+            parameters.ForEach((parameter) =>
+            {
+                string key = parameter.Key;
+                var value = xmlDocument.DocumentElement.SelectSingleNode(parameter.Expression).InnerText;
+                values.TryAdd(key, value);
+                if (parameter.DataTag.HasValue)
+                {
+                    values.TryAdd(parameter.DataTag.ToString(), value);
+                }
+            });
+        }
+
+        private static void ProcessingJsonData<T>(List<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IParameter
+        {
+            var jObject = JObject.Parse(content);
+            parameters.ForEach((parameter) =>
+            {
+                string key = parameter.Key;
+                string value = jObject.SelectToken(parameter.Expression).ToString();
+                values.TryAdd(key, value);
+                if (parameter.DataTag.HasValue)
+                    values.TryAdd(parameter.DataTag.ToString(), value);
+            });
+
+        }
 
 
         [HttpPost]
@@ -243,11 +254,99 @@ namespace JK.Web.Public.Controllers
         }
 
         [Route("Pay/Callback_{CompanyId}_{ChannelId}_{AccountId}")]
-        public IActionResult Callback(int CompanyId, int ChannelId, int AccountId)
+        public async Task<IActionResult> Callback(int CompanyId, int ChannelId, int AccountId)
         {
             int tenantId = AbpSession.GetTenantId();
             //TODO 获取回调参数
-            
+            IFormCollection form = null;
+            if (Request.HasFormContentType)
+            {
+                form = Request.Form;
+            }
+            string bodyContent = Request.GetBodyContent();
+            IRequestCookieCollection cookies = Request.Cookies;
+            IHeaderDictionary headers = Request.Headers;
+            IQueryCollection query = Request.Query;
+            var data = new Dictionary<string, string>();
+            var parameters = await orderProcessingService.GetOrderCallbackParametersAsync(CompanyId);
+            var dataType = DataType.FormData;
+            var groups = parameters.GroupBy(p => p.Location);
+            List<ApiCallbackParameter> parameterGroup = null;
+            foreach (var g in groups)
+            {
+                switch (g.Key)
+                {
+                    case GetValueLocation.Form:
+                        foreach (var parameter in g)
+                        {
+                            string key = parameter.Key;
+                            if (form.ContainsKey(key))
+                            {
+                                string value = form[key];
+                                data.Add(key, value);
+                                if (parameter.DataTag.HasValue)
+                                {
+                                    data.Add(parameter.DataTag.Value.ToString(), value);
+                                }
+                            }
+                        }
+                        break;
+                    case GetValueLocation.Body:
+                        await ProcessingData(bodyContent, dataType, g.ToList());
+                        break;
+                    case GetValueLocation.Query:
+                        foreach (var parameter in g)
+                        {
+                            string key = parameter.Key;
+                            if (query.ContainsKey(key))
+                            {
+                                string value = query[key];
+                                data.Add(key, value);
+                                if (parameter.DataTag.HasValue)
+                                {
+                                    data.Add(parameter.DataTag.Value.ToString(), value);
+                                }
+                            }
+                        }
+                        break;
+                    case GetValueLocation.Headers:
+                        foreach (var parameter in g)
+                        {
+                            string key = parameter.Key;
+                            if (headers.ContainsKey(key))
+                            {
+                                string value = headers[key];
+                                data.Add(key, value);
+                                if (parameter.DataTag.HasValue)
+                                {
+                                    data.Add(parameter.DataTag.Value.ToString(), value);
+                                }
+                            }
+                        }
+                        break;
+                    case GetValueLocation.Cookies:
+                        foreach (var parameter in g)
+                        {
+                            string key = parameter.Key;
+                            if (cookies.ContainsKey(key))
+                            {
+                                string value = cookies[key];
+                                data.Add(key, value);
+                                if (parameter.DataTag.HasValue)
+                                {
+                                    data.Add(parameter.DataTag.Value.ToString(), value);
+                                }
+                            }
+                        }
+                        break;
+                    case GetValueLocation.Parameter:
+                        parameterGroup = g.ToList();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             return View();
         }
     }

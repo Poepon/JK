@@ -25,7 +25,7 @@ namespace JK.Payments.Orders
 
         public BuiltInParameterType ParameterType { get; set; }
 
-        public string DataType { get; set; }
+        public string DataTypeName { get; set; }
 
         public string Desc { get; set; }
     }

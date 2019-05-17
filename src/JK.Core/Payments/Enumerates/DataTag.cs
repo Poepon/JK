@@ -7,6 +7,7 @@
         ResultCode = 3,
         ResultDesc = 4,
         PayAppUrl = 5,
-        PayQrCode = 6
+        PayQrCode = 6,
+        Sign = 7
     }
 }

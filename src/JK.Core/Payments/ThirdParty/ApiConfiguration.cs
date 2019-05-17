@@ -1,8 +1,10 @@
 ﻿using Abp.Domain.Entities;
 using JK.Payments.Enumerates;
 using System;
+using System.Collections.Generic;
+
 namespace JK.Payments.ThirdParty
-{
+{  
     /// <summary>
     /// API配置
     /// </summary>
@@ -26,10 +28,13 @@ namespace JK.Payments.ThirdParty
         /// <summary>
         /// 期望第三方返回的数据类型
         /// </summary>
-        public string DataType { get; set; }
+        public DataType DataType { get; set; }
 
         public string AcceptCharset { get; set; }
 
         public bool HasResponeParameter { get; set; }
+
+        public virtual ICollection<ApiChannel> SupportedChannels { get; set; }
+
     }
 }

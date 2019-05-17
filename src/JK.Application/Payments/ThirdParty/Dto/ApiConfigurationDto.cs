@@ -17,7 +17,7 @@ namespace JK.Payments.ThirdParty.Dto
 
         public string ContentType { get; set; }
 
-        public string DataType { get; set; }
+        public DataType DataType { get; set; }
 
         public string AcceptCharset { get; set; }
 

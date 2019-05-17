@@ -31,7 +31,7 @@ namespace JK.Payments.Orders
 
         public string ContentType { get; set; }
 
-        public string DataType { get; set; }
+        public DataType DataType { get; set; }
 
         public string AcceptCharset { get; set; }
 
@@ -51,7 +51,7 @@ namespace JK.Payments.Orders
 
         Task<BuildOrderPostRequestResult> BuildOrderPostRequest(PaymentOrderDto paymentOrder);
 
-
+        Task<List<ApiCallbackParameter>> GetOrderCallbackParametersAsync(int companyId);
     }
 
     public class OrderProcessingService : AbpServiceBase, IOrderProcessingService
@@ -209,7 +209,9 @@ namespace JK.Payments.Orders
 
         public async Task<BuildOrderPostRequestResult> BuildOrderPostRequest(PaymentOrderDto paymentOrder)
         {
-            var apiconfig = await apiconfigRepository.FirstOrDefaultAsync(a => a.CompanyId == paymentOrder.CompanyId && a.ApiMethod == ApiMethod.PlaceOrder);
+            var apiconfig = await apiconfigRepository.FirstOrDefaultAsync(a => a.CompanyId == paymentOrder.CompanyId &&
+                a.ApiMethod == ApiMethod.PlaceOrder &&
+                a.SupportedChannels.Any(sc => sc.ChannelId == paymentOrder.ChannelId));
             var result = new BuildOrderPostRequestResult
             {
                 ApiId = apiconfig.Id,
@@ -235,6 +237,12 @@ namespace JK.Payments.Orders
             var variable = new PaymentVariable(null, null, null, null, null);
             result.RequestData = variable.ProcessingApiRequestParameters(apiRequests);
             return result;
+        }
+
+        public async Task<List<ApiCallbackParameter>> GetOrderCallbackParametersAsync(int companyId)
+        {
+            var apiConfig = await apiconfigRepository.FirstOrDefaultAsync(api => api.CompanyId == companyId && api.ApiMethod == ApiMethod.PlaceOrder);
+            return await apiCallbackParameterRepository.GetAll().Where(p => p.ApiId == apiConfig.Id).OrderBy(p => p.OrderNumber).ToListAsync();
         }
     }
 }

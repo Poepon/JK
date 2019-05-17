@@ -3,8 +3,8 @@ using JK.Payments.Enumerates;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Payments.ThirdParty
-{
-    public class ApiCallbackParameter : Entity
+{   
+    public class ApiCallbackParameter : Entity, IParameter
     {
         public int ApiId { get; set; }
 
@@ -13,7 +13,9 @@ namespace JK.Payments.ThirdParty
 
         public string Key { get; set; }
 
-        public string Value { get; set; }
+        public string Expression { get; set; }
+
+        public GetValueLocation Location { get; set; }
 
         public DataTag? DataTag { get; set; }
 
