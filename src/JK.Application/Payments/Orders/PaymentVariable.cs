@@ -56,6 +56,14 @@ namespace JK.Payments.Orders
 
         }
 
+        public void InitValues(Dictionary<string, string> values = null)
+        {
+            if (values == null)
+                Result = new Dictionary<string, string>();
+            else
+                Result = values;
+        }
+
         public PaymentVariable(
             SystemConfigurationDto systemConfiguration,
             CompanyDto company,
@@ -242,13 +250,50 @@ namespace JK.Payments.Orders
         /// </summary>
         private const string AdvancedParameterPattern = @"\{\{\{(?<key>[a-zA-Z0-9@$#&_]{1,20})\>(?<path>.*?)\}\}\}";
 
-        public Dictionary<string,string> ProcessingApiRequestParameters(List<ApiRequestParameter> parameters)
+        public Dictionary<string, string> ProcessingApiRequestParameters(List<ApiRequestParameter> parameters)
         {
-            Result = new Dictionary<string, string>();
             foreach (var parameter in parameters)
             {
                 string value = parameter.Value;
                 var matches = Regex.Matches(parameter.Value, ParameterPattern);
+                if (matches.Count > 0)
+                {
+                    foreach (Match item in matches)
+                    {
+                        var tempValue = GetVariableValue(item.Groups["key"].Value, parameter.Format);
+                        value = value.Replace(item.Value, tempValue);
+                    }
+                }
+
+                //判断必填项
+                if (parameter.Required && string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentNullException($"参数{parameter.Key}的值为空。");
+                }
+                //如果是加密参数
+                if (parameter.Encryption.HasValue)
+                {
+                    value = EncryptionHelper.GetEncryption(parameter.Encryption.Value, value, thirdPartyAccount);
+                }
+                if (parameter.Format.Equals("ToLower", StringComparison.OrdinalIgnoreCase))
+                {
+                    value = value.ToLower();
+                }
+                else if (parameter.Format.Equals("ToUpper", StringComparison.OrdinalIgnoreCase))
+                {
+                    value = value.ToUpper();
+                }
+                Result.Add(parameter.Key, value);
+            }
+            return Result;
+        }
+
+        public Dictionary<string, string> ProcessingApiCallbackParameters(List<ApiCallbackParameter> parameters)
+        {
+            foreach (var parameter in parameters)
+            {
+                string value = parameter.Expression;
+                var matches = Regex.Matches(parameter.Expression, ParameterPattern);
                 if (matches.Count > 0)
                 {
                     foreach (Match item in matches)

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Abp;
 using Abp.AutoMapper;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.MultiTenancy;
 using Abp.Timing;
 using JK.Cryptography;
@@ -52,6 +53,8 @@ namespace JK.Payments.Orders
         Task<BuildOrderPostRequestResult> BuildOrderPostRequest(PaymentOrderDto paymentOrder);
 
         Task<List<ApiCallbackParameter>> GetOrderCallbackParametersAsync(int companyId);
+
+        Task<ResultDto<PaymentStatus>> MarkOrderAsPaid(long orderId);
     }
 
     public class OrderProcessingService : AbpServiceBase, IOrderProcessingService
@@ -235,6 +238,7 @@ namespace JK.Payments.Orders
             }
             //TODO PaymentVariable
             var variable = new PaymentVariable(null, null, null, null, null);
+            variable.InitValues();
             result.RequestData = variable.ProcessingApiRequestParameters(apiRequests);
             return result;
         }
@@ -243,6 +247,30 @@ namespace JK.Payments.Orders
         {
             var apiConfig = await apiconfigRepository.FirstOrDefaultAsync(api => api.CompanyId == companyId && api.ApiMethod == ApiMethod.PlaceOrder);
             return await apiCallbackParameterRepository.GetAll().Where(p => p.ApiId == apiConfig.Id).OrderBy(p => p.OrderNumber).ToListAsync();
+        }
+        [UnitOfWork]
+        public virtual async Task<ResultDto<PaymentStatus>> MarkOrderAsPaid(long orderId)
+        {
+            var paymentOrder = await paymentOrderRepository.GetAsync(orderId);
+            if (paymentOrder == null)
+            {
+                return new ResultDto<PaymentStatus>() { IsSuccess = false, ErrorMessage = "订单不存在" };
+            }
+            if (paymentOrder.PaymentStatus == PaymentStatus.Pending)
+            {
+                paymentOrder.ChangePaymentStatus(PaymentStatus.Paid);
+                await paymentOrderRepository.UpdateAsync(paymentOrder);
+                await CurrentUnitOfWork.SaveChangesAsync();
+                return new ResultDto<PaymentStatus>() { IsSuccess = true, ErrorMessage = "订单已支付", Data = PaymentStatus.Paid };
+            }
+            else if (paymentOrder.PaymentStatus == PaymentStatus.Paid)
+            {
+                return new ResultDto<PaymentStatus>() { IsSuccess = true, ErrorMessage = "订单已支付", Data = PaymentStatus.Paid };
+            }
+            else
+            {
+                return new ResultDto<PaymentStatus>() { IsSuccess = false, ErrorMessage = "订单已取消", Data = PaymentStatus.Cancelled };
+            }
         }
     }
 }

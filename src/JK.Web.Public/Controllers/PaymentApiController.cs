@@ -20,6 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -120,7 +121,8 @@ namespace JK.Web.Public.Controllers
                     response.EnsureSuccessStatusCode();
                     if (postdata.HasResponeParameter)
                     {
-                        var data = await ProcessingData(await response.Content.ReadAsStringAsync(), postdata.DataType, postdata.ApiResponeParameters);
+                        var data = new ConcurrentDictionary<string, string>();
+                        await ProcessingData(data, await response.Content.ReadAsStringAsync(), postdata.DataType, postdata.ApiResponeParameters);
                         var resultCode = data[DataTag.ResultCode.ToString()];
                         var resultCodeMean = await resultCodeRepository.FirstOrDefaultAsync(c => c.ResultCode == resultCode && c.CompanyId == paymentOrder.CompanyId);
                         if (resultCodeMean == null)
@@ -172,51 +174,66 @@ namespace JK.Web.Public.Controllers
             };
         }
 
-        private async Task<Dictionary<string, string>> ProcessingData<T>(string dataContent, DataType dataType, List<T> responeParameters) where T : IParameter
+        private async Task ProcessingData<T>(ConcurrentDictionary<string, string> values, string dataContent, DataType dataType, List<T> responeParameters) where T : IParameter
         {
-            var values = new ConcurrentDictionary<string, string>();
+            var groups = responeParameters.ToLookup(p => p.ExpType);
+
             if (dataType == DataType.Json)
             {
-                ProcessingJsonData(responeParameters, values, dataContent);
+                if (groups.Contains(ExpressionType.JPath))
+                    ProcessingJsonData(groups[ExpressionType.JPath], values, dataContent);
             }
             else if (dataType == DataType.Xml)
             {
-                ProcessingXmlData(responeParameters, values, dataContent);
+                ProcessingXmlData(groups[ExpressionType.XPath], values, dataContent);
             }
             else
             {
                 throw new Exception($"不支持的数据格式。{dataType}");
             }
-            return new Dictionary<string, string>(values);
+            if (groups.Contains(ExpressionType.Regex))
+            {
+                foreach (var item in groups[ExpressionType.Regex])
+                {
+                    var match = Regex.Match(dataContent, item.Expression);
+                    if (match.Success)
+                    {
+                        var key = item.Key;
+                        var value = match.Groups["value"].Value;
+                        values.TryAdd(key, value);
+                    }
+                }
+
+            }
         }
 
-        private static void ProcessingXmlData<T>(List<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IParameter
+        private static void ProcessingXmlData<T>(IEnumerable<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IParameter
         {
             var xmlDocument = new XmlDocument();
             xmlDocument.LoadXml(content);
-            parameters.ForEach((parameter) =>
-            {
-                string key = parameter.Key;
-                var value = xmlDocument.DocumentElement.SelectSingleNode(parameter.Expression).InnerText;
-                values.TryAdd(key, value);
-                if (parameter.DataTag.HasValue)
-                {
-                    values.TryAdd(parameter.DataTag.ToString(), value);
-                }
-            });
+            Parallel.ForEach(parameters, (parameter) =>
+             {
+                 string key = parameter.Key;
+                 var value = xmlDocument.DocumentElement.SelectSingleNode(parameter.Expression).InnerText;
+                 values.TryAdd(key, value);
+                 if (parameter.DataTag.HasValue)
+                 {
+                     values.TryAdd(parameter.DataTag.ToString(), value);
+                 }
+             });
         }
 
-        private static void ProcessingJsonData<T>(List<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IParameter
+        private static void ProcessingJsonData<T>(IEnumerable<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IParameter
         {
             var jObject = JObject.Parse(content);
-            parameters.ForEach((parameter) =>
-            {
-                string key = parameter.Key;
-                string value = jObject.SelectToken(parameter.Expression).ToString();
-                values.TryAdd(key, value);
-                if (parameter.DataTag.HasValue)
-                    values.TryAdd(parameter.DataTag.ToString(), value);
-            });
+            Parallel.ForEach(parameters, (parameter) =>
+             {
+                 string key = parameter.Key;
+                 string value = jObject.SelectToken(parameter.Expression).ToString();
+                 values.TryAdd(key, value);
+                 if (parameter.DataTag.HasValue)
+                     values.TryAdd(parameter.DataTag.ToString(), value);
+             });
 
         }
 
@@ -267,8 +284,9 @@ namespace JK.Web.Public.Controllers
             IRequestCookieCollection cookies = Request.Cookies;
             IHeaderDictionary headers = Request.Headers;
             IQueryCollection query = Request.Query;
-            var data = new Dictionary<string, string>();
+            var data = new ConcurrentDictionary<string, string>();
             var parameters = await orderProcessingService.GetOrderCallbackParametersAsync(CompanyId);
+            //TODO DataType
             var dataType = DataType.FormData;
             var groups = parameters.GroupBy(p => p.Location);
             List<ApiCallbackParameter> parameterGroup = null;
@@ -283,16 +301,16 @@ namespace JK.Web.Public.Controllers
                             if (form.ContainsKey(key))
                             {
                                 string value = form[key];
-                                data.Add(key, value);
+                                data.TryAdd(key, value);
                                 if (parameter.DataTag.HasValue)
                                 {
-                                    data.Add(parameter.DataTag.Value.ToString(), value);
+                                    data.TryAdd(parameter.DataTag.Value.ToString(), value);
                                 }
                             }
                         }
                         break;
                     case GetValueLocation.Body:
-                        await ProcessingData(bodyContent, dataType, g.ToList());
+                        await ProcessingData(data, bodyContent, dataType, g.ToList());
                         break;
                     case GetValueLocation.Query:
                         foreach (var parameter in g)
@@ -301,10 +319,10 @@ namespace JK.Web.Public.Controllers
                             if (query.ContainsKey(key))
                             {
                                 string value = query[key];
-                                data.Add(key, value);
+                                data.TryAdd(key, value);
                                 if (parameter.DataTag.HasValue)
                                 {
-                                    data.Add(parameter.DataTag.Value.ToString(), value);
+                                    data.TryAdd(parameter.DataTag.Value.ToString(), value);
                                 }
                             }
                         }
@@ -316,10 +334,10 @@ namespace JK.Web.Public.Controllers
                             if (headers.ContainsKey(key))
                             {
                                 string value = headers[key];
-                                data.Add(key, value);
+                                data.TryAdd(key, value);
                                 if (parameter.DataTag.HasValue)
                                 {
-                                    data.Add(parameter.DataTag.Value.ToString(), value);
+                                    data.TryAdd(parameter.DataTag.Value.ToString(), value);
                                 }
                             }
                         }
@@ -331,10 +349,10 @@ namespace JK.Web.Public.Controllers
                             if (cookies.ContainsKey(key))
                             {
                                 string value = cookies[key];
-                                data.Add(key, value);
+                                data.TryAdd(key, value);
                                 if (parameter.DataTag.HasValue)
                                 {
-                                    data.Add(parameter.DataTag.Value.ToString(), value);
+                                    data.TryAdd(parameter.DataTag.Value.ToString(), value);
                                 }
                             }
                         }
@@ -346,7 +364,39 @@ namespace JK.Web.Public.Controllers
                         break;
                 }
             }
-
+            if (parameterGroup != null && parameterGroup.Count > 0)
+            {
+                var variable = new PaymentVariable(null, null, null, null);
+                variable.InitValues(new Dictionary<string, string>(data));
+                var values = variable.ProcessingApiCallbackParameters(parameterGroup);
+                foreach (var item in values)
+                {
+                    if (!data.ContainsKey(item.Key))
+                        data.TryAdd(item.Key, item.Value);
+                }
+            }
+            if (data == null || data.Count == 0)
+            {
+                throw new Exception("渠道未开通");
+            }
+            var orderNo = data[DataTag.SystemOrderId.ToString()];
+            var resultCode = data[DataTag.ResultCode.ToString()];
+            var resultCodeMean = await resultCodeRepository.FirstOrDefaultAsync(c => c.ResultCode == resultCode &&
+            c.CompanyId == CompanyId);
+            if (resultCodeMean.Mean == ResultCodeMean.Succeed)
+            {
+                if (data.ContainsKey(DataTag.Sign.ToString()) && data.ContainsKey(DataTag.GenSign.ToString()) && data[DataTag.Sign.ToString()] == data[DataTag.GenSign.ToString()])
+                {
+                    var result = await orderProcessingService.MarkOrderAsPaid(long.Parse(orderNo));
+                    if (result.IsSuccess && result.Data == PaymentStatus.Paid)
+                        return Content("Success");
+                    else return Content("Failed");
+                }
+                else
+                {
+                    throw new Exception("验签失败");
+                }
+            }
             return View();
         }
     }

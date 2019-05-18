@@ -5,14 +5,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Payments.ThirdParty
 {
-    public interface IParameter
-    {
-        string Key { get; set; }
-
-        string Expression { get; set; }
-
-        DataTag? DataTag { get; set; }
-    }
     public class ApiResponeParameter : Entity, IParameter
     {
         public int ApiId { get; set; }
@@ -23,9 +15,13 @@ namespace JK.Payments.ThirdParty
         [Required]
         public string Key { get; set; }
 
+        public ExpressionType ExpType { get; set; }
+
         public string Expression { get; set; }
 
         public DataTag? DataTag { get; set; }
+
+        public GetValueLocation Location { get; set; }
 
         public string Desc { get; set; }
 
