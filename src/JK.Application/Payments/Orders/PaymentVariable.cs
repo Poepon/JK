@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml;
 using Abp.Timing;
 using JK.Cryptography;
+using JK.Payments.Enumerates;
 using JK.Payments.Orders.Dto;
 using JK.Payments.System.Dto;
 using JK.Payments.TenantConfigs.Dto;
 using JK.Payments.ThirdParty;
 using JK.Payments.ThirdParty.Dto;
+using Newtonsoft.Json.Linq;
 
 namespace JK.Payments.Orders
 {
@@ -241,89 +244,108 @@ namespace JK.Payments.Orders
             var fkey = key.Replace(ParameterFlag, "");
             return Result[fkey];
         }
+
         /// <summary>
         /// 动态参数正则表达式
         /// </summary>
-        private const string ParameterPattern = @"\{\{(?<key>[a-zA-Z0-9@$#&_]{1,20})\}\}";
-        /// <summary>
-        /// 高级动态参数正则表达式（包含JPath，XPath）
-        /// </summary>
-        private const string AdvancedParameterPattern = @"\{\{\{(?<key>[a-zA-Z0-9@$#&_]{1,20})\>(?<path>.*?)\}\}\}";
+        private const string ParameterPattern = @"\{\{(?<key>[a-zA-Z0-9@$#&_]{1,20})\>{0,1}(?<path>.*?)\}\}";
 
         public Dictionary<string, string> ProcessingApiRequestParameters(List<ApiRequestParameter> parameters)
         {
             foreach (var parameter in parameters)
             {
-                string value = parameter.Value;
-                var matches = Regex.Matches(parameter.Value, ParameterPattern);
-                if (matches.Count > 0)
-                {
-                    foreach (Match item in matches)
-                    {
-                        var tempValue = GetVariableValue(item.Groups["key"].Value, parameter.Format);
-                        value = value.Replace(item.Value, tempValue);
-                    }
-                }
-
-                //判断必填项
-                if (parameter.Required && string.IsNullOrEmpty(value))
-                {
-                    throw new ArgumentNullException($"参数{parameter.Key}的值为空。");
-                }
-                //如果是加密参数
-                if (parameter.Encryption.HasValue)
-                {
-                    value = EncryptionHelper.GetEncryption(parameter.Encryption.Value, value, thirdPartyAccount);
-                }
-                if (parameter.Format.Equals("ToLower", StringComparison.OrdinalIgnoreCase))
-                {
-                    value = value.ToLower();
-                }
-                else if (parameter.Format.Equals("ToUpper", StringComparison.OrdinalIgnoreCase))
-                {
-                    value = value.ToUpper();
-                }
+                string value = NewMethod(parameter.Key, parameter.Value, parameter.Format, parameter.Required, parameter.Encryption);
                 Result.Add(parameter.Key, value);
             }
             return Result;
+        }
+
+        private string NewMethod(string key, string exp, string format, bool required, EncryptionMethod? encryption)
+        {
+            string value = "";
+            var matches = Regex.Matches(exp, ParameterPattern);
+            if (matches.Count > 0)
+            {
+                foreach (Match item in matches)
+                {
+                    var tempValue = GetVariableValue(item.Groups["key"].Value, format);
+                    if (item.Groups["path"].Success)
+                    {
+                        var path = item.Groups["path"].Value;
+                        if (!string.IsNullOrEmpty(path))
+                        {
+                            if (path.StartsWith("J"))
+                            {
+                                tempValue = GetJPathValue(tempValue, path.Substring(1));
+                            }
+                            else if (path.StartsWith("X"))
+                            {
+                                tempValue = GetXPathValue(tempValue, path.Substring(1));
+                            }
+                            else if (path.StartsWith("R"))
+                            {
+                                tempValue = GetRegexValue(tempValue, path.Substring(1));
+                            }
+                        }
+                    }
+                    value = value.Replace(item.Value, tempValue);
+                }
+            }
+
+            //判断必填项
+            if (required && string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentNullException($"参数{key}的值为空。");
+            }
+            //如果是加密参数
+            if (encryption.HasValue)
+            {
+                value = EncryptionHelper.GetEncryption(encryption.Value, value, thirdPartyAccount);
+            }
+            if (format.Equals("ToLower", StringComparison.OrdinalIgnoreCase))
+            {
+                value = value.ToLower();
+            }
+            else if (format.Equals("ToUpper", StringComparison.OrdinalIgnoreCase))
+            {
+                value = value.ToUpper();
+            }
+
+            return value;
         }
 
         public Dictionary<string, string> ProcessingApiCallbackParameters(List<ApiCallbackParameter> parameters)
         {
             foreach (var parameter in parameters)
             {
-                string value = parameter.Expression;
-                var matches = Regex.Matches(parameter.Expression, ParameterPattern);
-                if (matches.Count > 0)
-                {
-                    foreach (Match item in matches)
-                    {
-                        var tempValue = GetVariableValue(item.Groups["key"].Value, parameter.Format);
-                        value = value.Replace(item.Value, tempValue);
-                    }
-                }
-
-                //判断必填项
-                if (parameter.Required && string.IsNullOrEmpty(value))
-                {
-                    throw new ArgumentNullException($"参数{parameter.Key}的值为空。");
-                }
-                //如果是加密参数
-                if (parameter.Encryption.HasValue)
-                {
-                    value = EncryptionHelper.GetEncryption(parameter.Encryption.Value, value, thirdPartyAccount);
-                }
-                if (parameter.Format.Equals("ToLower", StringComparison.OrdinalIgnoreCase))
-                {
-                    value = value.ToLower();
-                }
-                else if (parameter.Format.Equals("ToUpper", StringComparison.OrdinalIgnoreCase))
-                {
-                    value = value.ToUpper();
-                }
+                string value = NewMethod(parameter.Key, parameter.Expression, parameter.Format, parameter.Required, parameter.Encryption);
                 Result.Add(parameter.Key, value);
             }
             return Result;
+        }
+
+        private string GetJPathValue(string content, string jpath)
+        {
+            var obj = JObject.Parse(content);
+            return obj.SelectToken(jpath).ToString();
+        }
+        private string GetXPathValue(string content, string xpath)
+        {
+            var xmlDocument = new XmlDocument();
+            xmlDocument.LoadXml(content);
+            return xmlDocument.DocumentElement.SelectSingleNode(xpath).InnerText;
+        }
+        private string GetRegexValue(string content, string pattern)
+        {
+            var match = Regex.Match(content, pattern);
+            if (match.Success)
+            {
+                if (match.Groups["value"].Success)
+                {
+                    return match.Groups["value"].Value;
+                }
+            }
+            return null;
         }
 
         private string GetVariableValue(string variableName, string format)

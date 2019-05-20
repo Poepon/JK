@@ -185,7 +185,8 @@ namespace JK.Web.Public.Controllers
             }
             else if (dataType == DataType.Xml)
             {
-                ProcessingXmlData(groups[ExpressionType.XPath], values, dataContent);
+                if (groups.Contains(ExpressionType.XPath))
+                    ProcessingXmlData(groups[ExpressionType.XPath], values, dataContent);
             }
             else
             {
