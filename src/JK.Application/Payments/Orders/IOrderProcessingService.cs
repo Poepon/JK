@@ -38,7 +38,11 @@ namespace JK.Payments.Orders
 
         public bool HasResponeParameter { get; set; }
 
-        public Dictionary<string, string> RequestData { get; set; }
+        public Dictionary<string, string> Content { get; set; }
+
+        public Dictionary<string,string> Headers { get; set; }
+
+        public Dictionary<string, string> Query { get; set; }
 
         public List<ApiResponeParameter> ApiResponeParameters { get; set; }
     }
@@ -238,8 +242,8 @@ namespace JK.Payments.Orders
             }
             //TODO PaymentVariable
             var variable = new PaymentVariable(null, null, null, null, null);
-            variable.InitValues();
-            result.RequestData = variable.ProcessingApiRequestParameters(apiRequests);
+            //TODO 区分Query Content Headers
+            result.Content = variable.ProcessingApiRequestParameters(apiRequests);
             return result;
         }
 

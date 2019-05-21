@@ -56,15 +56,12 @@ namespace JK.Payments.Orders
             ThirdPartyAccountDto thirdPartyAccount) :
             this(systemConfiguration, company, apiConfiguration, thirdPartyAccount, null)
         {
-
+            Result = new Dictionary<string, string>();
         }
 
-        public void InitValues(Dictionary<string, string> values = null)
+        public void InitValues(Dictionary<string, string> values)
         {
-            if (values == null)
-                Result = new Dictionary<string, string>();
-            else
-                Result = values;
+            Result = values ?? throw new NullReferenceException(nameof(values));
         }
 
         public PaymentVariable(
@@ -250,11 +247,11 @@ namespace JK.Payments.Orders
         /// </summary>
         private const string ParameterPattern = @"\{\{(?<key>[a-zA-Z0-9@$#&_]{1,20})\>{0,1}(?<path>.*?)\}\}";
 
-        public Dictionary<string, string> ProcessingApiRequestParameters(List<ApiRequestParameter> parameters)
+        public Dictionary<string, string> ProcessingApiRequestParameters(IEnumerable<ApiRequestParameter> parameters)
         {
             foreach (var parameter in parameters)
             {
-                string value = NewMethod(parameter.Key, parameter.Value, parameter.Format, parameter.Required, parameter.Encryption);
+                string value = NewMethod(parameter.Key, parameter.ValueOrExpression, parameter.Format, parameter.Required, parameter.Encryption);
                 Result.Add(parameter.Key, value);
             }
             return Result;
@@ -262,7 +259,7 @@ namespace JK.Payments.Orders
 
         private string NewMethod(string key, string exp, string format, bool required, EncryptionMethod? encryption)
         {
-            string value = "";
+            string value = exp;
             var matches = Regex.Matches(exp, ParameterPattern);
             if (matches.Count > 0)
             {
@@ -302,19 +299,21 @@ namespace JK.Payments.Orders
             {
                 value = EncryptionHelper.GetEncryption(encryption.Value, value, thirdPartyAccount);
             }
-            if (format.Equals("ToLower", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(format))
             {
-                value = value.ToLower();
+                if (format.Equals("ToLower", StringComparison.OrdinalIgnoreCase))
+                {
+                    value = value.ToLower();
+                }
+                else if (format.Equals("ToUpper", StringComparison.OrdinalIgnoreCase))
+                {
+                    value = value.ToUpper();
+                }
             }
-            else if (format.Equals("ToUpper", StringComparison.OrdinalIgnoreCase))
-            {
-                value = value.ToUpper();
-            }
-
             return value;
         }
 
-        public Dictionary<string, string> ProcessingApiCallbackParameters(List<ApiCallbackParameter> parameters)
+        public Dictionary<string, string> ProcessingApiCallbackParameters(IEnumerable<ApiCallbackParameter> parameters)
         {
             foreach (var parameter in parameters)
             {
@@ -327,7 +326,7 @@ namespace JK.Payments.Orders
         private string GetJPathValue(string content, string jpath)
         {
             var obj = JObject.Parse(content);
-            return obj.SelectToken(jpath).ToString();
+            return obj.SelectToken(jpath)?.ToString();
         }
         private string GetXPathValue(string content, string xpath)
         {

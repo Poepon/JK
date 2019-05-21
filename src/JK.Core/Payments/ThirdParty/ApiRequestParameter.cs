@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Payments.ThirdParty
 {
-    public class ApiRequestParameter : Entity
+    public class ApiRequestParameter : Entity, ISetValueParameter
     {
         public int ApiId { get; set; }
 
@@ -15,12 +15,14 @@ namespace JK.Payments.ThirdParty
         [Required]
         public string Key { get; set; }
 
+        public string ValueOrExpression { get; set; }
+
+        public SetValueLocation Location { get; set; }
+
         /// <summary>
         /// 是否必填
         /// </summary>
         public bool Required { get; set; }
-
-        public string Value { get; set; }
 
         public EncryptionMethod? Encryption { get; set; }
 
@@ -29,5 +31,6 @@ namespace JK.Payments.ThirdParty
         public string Desc { get; set; }
 
         public int OrderNumber { get; set; }
+
     }
 }

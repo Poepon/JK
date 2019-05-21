@@ -6,7 +6,6 @@
         Body = 1,
         Query = 2,
         Headers = 3,
-        Cookies = 4,
-        Parameter = 5
+        Parameter = 4
     }
 }

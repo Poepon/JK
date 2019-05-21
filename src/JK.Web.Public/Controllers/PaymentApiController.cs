@@ -85,7 +85,10 @@ namespace JK.Web.Public.Controllers
         protected async Task<IActionResult> PostOrder(PaymentOrderDto paymentOrder)
         {
             var postdata = await orderProcessingService.BuildOrderPostRequest(paymentOrder);
-
+            if (postdata.Query != null && postdata.Query.Count > 0)
+            {
+                postdata.Url = QueryHelpers.AddQueryString(postdata.Url, postdata.Query);
+            }
             if (postdata.RequestType == RequestType.WebPage)
             {
                 if (postdata.Method == "post")
@@ -94,7 +97,7 @@ namespace JK.Web.Public.Controllers
                 }
                 else
                 {
-                    var httpUrl = QueryHelpers.AddQueryString(postdata.Url, postdata.RequestData);
+                    var httpUrl = QueryHelpers.AddQueryString(postdata.Url, postdata.Query);
                     return Redirect(httpUrl);
                 }
             }
@@ -102,7 +105,7 @@ namespace JK.Web.Public.Controllers
             {
                 if (postdata.Method == "get")
                 {
-                    postdata.Url = QueryHelpers.AddQueryString(postdata.Url, postdata.RequestData);
+                    postdata.Url = QueryHelpers.AddQueryString(postdata.Url, postdata.Query);
                 }
 
                 var httpClient = httpClientFactory.CreateClient();
@@ -112,9 +115,8 @@ namespace JK.Web.Public.Controllers
                     HttpMethod.Get, postdata.Url);
                 if (postdata.Method == "post")
                 {
-                    httpRequestMessage.Content = new FormUrlEncodedContent(postdata.RequestData);
+                    httpRequestMessage.Content = new FormUrlEncodedContent(postdata.Content);
                 }
-
                 var response = await httpClient.SendAsync(httpRequestMessage);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
@@ -174,41 +176,24 @@ namespace JK.Web.Public.Controllers
             };
         }
 
-        private async Task ProcessingData<T>(ConcurrentDictionary<string, string> values, string dataContent, DataType dataType, List<T> responeParameters) where T : IParameter
+        private async Task ProcessingData<T>(ConcurrentDictionary<string, string> values, string dataContent, DataType dataType, IEnumerable<T> responeParameters) where T : IGetValueParameter
         {
-            var groups = responeParameters.ToLookup(p => p.ExpType);
 
             if (dataType == DataType.Json)
             {
-                if (groups.Contains(ExpressionType.JPath))
-                    ProcessingJsonData(groups[ExpressionType.JPath], values, dataContent);
+                ProcessingJsonData(responeParameters, values, dataContent);
             }
             else if (dataType == DataType.Xml)
             {
-                if (groups.Contains(ExpressionType.XPath))
-                    ProcessingXmlData(groups[ExpressionType.XPath], values, dataContent);
+                ProcessingXmlData(responeParameters, values, dataContent);
             }
             else
             {
                 throw new Exception($"不支持的数据格式。{dataType}");
             }
-            if (groups.Contains(ExpressionType.Regex))
-            {
-                foreach (var item in groups[ExpressionType.Regex])
-                {
-                    var match = Regex.Match(dataContent, item.Expression);
-                    if (match.Success)
-                    {
-                        var key = item.Key;
-                        var value = match.Groups["value"].Value;
-                        values.TryAdd(key, value);
-                    }
-                }
-
-            }
         }
 
-        private static void ProcessingXmlData<T>(IEnumerable<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IParameter
+        private static void ProcessingXmlData<T>(IEnumerable<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IGetValueParameter
         {
             var xmlDocument = new XmlDocument();
             xmlDocument.LoadXml(content);
@@ -224,7 +209,7 @@ namespace JK.Web.Public.Controllers
              });
         }
 
-        private static void ProcessingJsonData<T>(IEnumerable<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IParameter
+        private static void ProcessingJsonData<T>(IEnumerable<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IGetValueParameter
         {
             var jObject = JObject.Parse(content);
             Parallel.ForEach(parameters, (parameter) =>
@@ -289,8 +274,8 @@ namespace JK.Web.Public.Controllers
             var parameters = await orderProcessingService.GetOrderCallbackParametersAsync(CompanyId);
             //TODO DataType
             var dataType = DataType.FormData;
-            var groups = parameters.GroupBy(p => p.Location);
-            List<ApiCallbackParameter> parameterGroup = null;
+            var groups = parameters.ToLookup(p => p.Location);
+            IGrouping<GetValueLocation, ApiCallbackParameter> parameterGroup = null;
             foreach (var g in groups)
             {
                 switch (g.Key)
@@ -343,29 +328,29 @@ namespace JK.Web.Public.Controllers
                             }
                         }
                         break;
-                    case GetValueLocation.Cookies:
-                        foreach (var parameter in g)
-                        {
-                            string key = parameter.Key;
-                            if (cookies.ContainsKey(key))
-                            {
-                                string value = cookies[key];
-                                data.TryAdd(key, value);
-                                if (parameter.DataTag.HasValue)
-                                {
-                                    data.TryAdd(parameter.DataTag.Value.ToString(), value);
-                                }
-                            }
-                        }
-                        break;
+                    //case GetValueLocation.Cookies:
+                    //    foreach (var parameter in g)
+                    //    {
+                    //        string key = parameter.Key;
+                    //        if (cookies.ContainsKey(key))
+                    //        {
+                    //            string value = cookies[key];
+                    //            data.TryAdd(key, value);
+                    //            if (parameter.DataTag.HasValue)
+                    //            {
+                    //                data.TryAdd(parameter.DataTag.Value.ToString(), value);
+                    //            }
+                    //        }
+                    //    }
+                    //    break;
                     case GetValueLocation.Parameter:
-                        parameterGroup = g.ToList();
+                        parameterGroup = g;
                         break;
                     default:
                         break;
                 }
             }
-            if (parameterGroup != null && parameterGroup.Count > 0)
+            if (parameterGroup != null && parameterGroup.Count() > 0)
             {
                 var variable = new PaymentVariable(null, null, null, null);
                 variable.InitValues(new Dictionary<string, string>(data));
