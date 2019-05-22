@@ -1,5 +1,6 @@
 ﻿using Abp.Domain.Entities.Auditing;
 using Abp.Timing;
+using JK.MultiTenancy;
 using JK.Payments.Bacis;
 using JK.Payments.Enumerates;
 using JK.Payments.Evens;
@@ -19,6 +20,9 @@ namespace JK.Payments.Orders
 
         public int TenantId { get; set; }
 
+        [ForeignKey(nameof(TenantId))]
+        public virtual Tenant Tenant { get; set; }
+
         public int CompanyId { get; set; }
 
         [ForeignKey(nameof(CompanyId))]
@@ -35,17 +39,17 @@ namespace JK.Payments.Orders
         public virtual ThirdPartyAccount Account { get; set; }
 
         public int? BankId { get; set; }
-        
+
         /// <summary>
         /// 外部订单号
         /// </summary>
-        [StringLength(50)]
+        [StringLength(32)]
         public string ExternalOrderId { get; set; }
 
         /// <summary>
         /// 第三方订单号
         /// </summary>
-        [StringLength(100)]
+        [StringLength(32)]
         public string ThirdPartyOrderId { get; set; }
 
         /// <summary>
@@ -89,20 +93,22 @@ namespace JK.Payments.Orders
         public DeviceType Device { get; set; }
 
         [Required]
+        [StringLength(32)]
         public string Md5 { get; set; }
 
         /// <summary>
         /// 同步回调
         /// </summary>
-        [StringLength(2000)]
+        [StringLength(256)]
         public string SyncCallback { get; set; }
 
         /// <summary>
         /// 异步回调
         /// </summary>
-        [StringLength(2000)]
+        [StringLength(256)]
         public string AsyncCallback { get; set; }
 
+        [StringLength(500)]
         public string ExtData { get; set; }
 
         public void SetNewOrder()

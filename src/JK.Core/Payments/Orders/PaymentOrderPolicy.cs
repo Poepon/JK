@@ -1,5 +1,6 @@
 ﻿using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
+using JK.MultiTenancy;
 using JK.Payments.Bacis;
 using JK.Payments.TenantConfigs;
 using JK.Payments.ThirdParty;
@@ -17,6 +18,11 @@ namespace JK.Payments.Orders
     {
         public int TenantId { get; set; }
 
+        [ForeignKey(nameof(TenantId))]
+        public virtual Tenant Tenant { get; set; }
+
+        [Required]
+        [StringLength(32)]
         public string PolicyName { get; set; }
 
         public int CompanyId { get; set; }
@@ -63,6 +69,8 @@ namespace JK.Payments.Orders
 
         public int? ParentId { get; set; }
 
+        [Required]
+        [StringLength(50)]
         public string RuleSystemName { get; set; }
 
         public RuleGroupInteractionType? InteractionType { get; set; }
@@ -78,7 +86,7 @@ namespace JK.Payments.Orders
         /// <summary>
         /// Maximum length of the <see cref="Value"/> property.
         /// </summary>
-        public const int MaxValueLength = 2000;
+        public const int MaxValueLength = 1000;
 
         public int TenantId { get; set; }
 

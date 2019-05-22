@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Abp;
+﻿using Abp;
 using Abp.AutoMapper;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.MultiTenancy;
 using Abp.Timing;
-using JK.Cryptography;
 using JK.Dto;
 using JK.Payments.Bacis;
 using JK.Payments.Enumerates;
@@ -17,6 +11,10 @@ using JK.Payments.Orders.Dto;
 using JK.Payments.TenantConfigs;
 using JK.Payments.ThirdParty;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace JK.Payments.Orders
 {
@@ -40,7 +38,7 @@ namespace JK.Payments.Orders
 
         public Dictionary<string, string> Content { get; set; }
 
-        public Dictionary<string,string> Headers { get; set; }
+        public Dictionary<string, string> Headers { get; set; }
 
         public Dictionary<string, string> Query { get; set; }
 
@@ -243,7 +241,19 @@ namespace JK.Payments.Orders
             //TODO PaymentVariable
             var variable = new PaymentVariable(null, null, null, null, null);
             //TODO 区分Query Content Headers
-            result.Content = variable.ProcessingApiRequestParameters(apiRequests);
+            var values = variable.ProcessingApiRequestParameters(apiRequests);
+            if (values.ContainsKey(SetValueLocation.Query))
+            {
+                result.Query = values[SetValueLocation.Query];
+            }
+            if (values.ContainsKey(SetValueLocation.Headers))
+            {
+                result.Headers = values[SetValueLocation.Headers];
+            }
+            if (values.ContainsKey(SetValueLocation.Content))
+            {
+                result.Content = values[SetValueLocation.Content];
+            }
             return result;
         }
 

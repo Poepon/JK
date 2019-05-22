@@ -1,5 +1,6 @@
 ﻿using Abp.AspNetCore.Mvc.Controllers;
 using Abp.Domain.Repositories;
+using Abp.Json;
 using Abp.Runtime.Session;
 using JK.Cryptography;
 using JK.Payments;
@@ -91,31 +92,30 @@ namespace JK.Web.Public.Controllers
             }
             if (postdata.RequestType == RequestType.WebPage)
             {
-                if (postdata.Method == "post")
+                if (postdata.Method.Equals("post", StringComparison.OrdinalIgnoreCase))
                 {
                     return View(postdata);
                 }
                 else
                 {
-                    var httpUrl = QueryHelpers.AddQueryString(postdata.Url, postdata.Query);
-                    return Redirect(httpUrl);
+                    return Redirect(postdata.Url);
                 }
             }
             else
             {
-                if (postdata.Method == "get")
-                {
-                    postdata.Url = QueryHelpers.AddQueryString(postdata.Url, postdata.Query);
-                }
-
                 var httpClient = httpClientFactory.CreateClient();
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage(
-                  postdata.Method == "post" ?
+                  postdata.Method .Equals("post", StringComparison.OrdinalIgnoreCase) ?
                     HttpMethod.Post :
                     HttpMethod.Get, postdata.Url);
-                if (postdata.Method == "post")
+                if (postdata.Method.Equals("post", StringComparison.OrdinalIgnoreCase))
                 {
-                    httpRequestMessage.Content = new FormUrlEncodedContent(postdata.Content);
+                    if (postdata.ContentType == "application/json")
+                        httpRequestMessage.Content = new StringContent(postdata.Content.ToJsonString());
+                    else if (postdata.ContentType == "text/xml")
+                        httpRequestMessage.Content = new StringContent(postdata.Content.ToXmlString());
+                    else
+                        httpRequestMessage.Content = new FormUrlEncodedContent(postdata.Content);
                 }
                 var response = await httpClient.SendAsync(httpRequestMessage);
                 if (response.StatusCode == HttpStatusCode.OK)

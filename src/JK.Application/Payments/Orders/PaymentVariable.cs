@@ -7,7 +7,7 @@ using Abp.Timing;
 using JK.Cryptography;
 using JK.Payments.Enumerates;
 using JK.Payments.Orders.Dto;
-using JK.Payments.System.Dto;
+using JK.Payments.TenantConfigs;
 using JK.Payments.TenantConfigs.Dto;
 using JK.Payments.ThirdParty;
 using JK.Payments.ThirdParty.Dto;
@@ -44,17 +44,17 @@ namespace JK.Payments.Orders
         private readonly PaymentOrderDto paymentOrder;
         private readonly ThirdPartyAccountDto thirdPartyAccount;
         private readonly ApiConfigurationDto apiConfiguration;
+        private readonly TenantApp tenantApp;
         private readonly CompanyDto company;
-        private readonly SystemConfigurationDto systemConfiguration;
 
         public Dictionary<string, string> Result { get; private set; }
 
         public PaymentVariable(
-            SystemConfigurationDto systemConfiguration,
+            TenantApp tenantApp,
             CompanyDto company,
             ApiConfigurationDto apiConfiguration,
             ThirdPartyAccountDto thirdPartyAccount) :
-            this(systemConfiguration, company, apiConfiguration, thirdPartyAccount, null)
+            this(tenantApp, company, apiConfiguration, thirdPartyAccount, null)
         {
             Result = new Dictionary<string, string>();
         }
@@ -65,7 +65,7 @@ namespace JK.Payments.Orders
         }
 
         public PaymentVariable(
-            SystemConfigurationDto systemConfiguration,
+            TenantApp tenantApp,
             CompanyDto company,
             ApiConfigurationDto apiConfiguration,
             ThirdPartyAccountDto thirdPartyAccount,
@@ -74,8 +74,8 @@ namespace JK.Payments.Orders
             this.paymentOrder = paymentOrder;
             this.thirdPartyAccount = thirdPartyAccount;
             this.apiConfiguration = apiConfiguration;
+            this.tenantApp = tenantApp;
             this.company = company;
-            this.systemConfiguration = systemConfiguration;
         }
 
         private bool IsGlobalVariable(string key)
@@ -111,11 +111,15 @@ namespace JK.Payments.Orders
                         result = Clock.Now.ToString(format);
                     }
                     break;
-                case "@HttpsDomain":
-                    result = systemConfiguration.HttpsCallbackUrl;
-                    break;
-                case "@HttpDomain":
-                    result = systemConfiguration.HttpCallbackUrl;
+                case "@CallbackDomain":
+                    if (tenantApp.UseSSL)
+                    {
+                        result = $"https://{tenantApp.CallbackDomain}";
+                    }
+                    else
+                    {
+                        result = $"http://{tenantApp.CallbackDomain}";
+                    }
                     break;
                 default:
                     break;
@@ -247,14 +251,35 @@ namespace JK.Payments.Orders
         /// </summary>
         private const string ParameterPattern = @"\{\{(?<key>[a-zA-Z0-9@$#&_]{1,20})\>{0,1}(?<path>.*?)\}\}";
 
-        public Dictionary<string, string> ProcessingApiRequestParameters(IEnumerable<ApiRequestParameter> parameters)
+        public Dictionary<SetValueLocation, Dictionary<string, string>> ProcessingApiRequestParameters(IEnumerable<ApiRequestParameter> parameters)
         {
+            var values = new Dictionary<SetValueLocation, Dictionary<string, string>>();
+            var queryItem = new Dictionary<string, string>();
+            var headersItem = new Dictionary<string, string>();
+            var contentItem = new Dictionary<string, string>();
             foreach (var parameter in parameters)
             {
                 string value = NewMethod(parameter.Key, parameter.ValueOrExpression, parameter.Format, parameter.Required, parameter.Encryption);
                 Result.Add(parameter.Key, value);
+                switch (parameter.Location)
+                {
+                    case SetValueLocation.Content:
+                        contentItem.Add(parameter.Key, value);
+                        break;
+                    case SetValueLocation.Query:
+                        queryItem.Add(parameter.Key, value);
+                        break;
+                    case SetValueLocation.Headers:
+                        headersItem.Add(parameter.Key, value);
+                        break;
+                    default:
+                        break;
+                }
             }
-            return Result;
+            values.Add(SetValueLocation.Query, queryItem);
+            values.Add(SetValueLocation.Query, headersItem);
+            values.Add(SetValueLocation.Query, contentItem);
+            return values;
         }
 
         private string NewMethod(string key, string exp, string format, bool required, EncryptionMethod? encryption)

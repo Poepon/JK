@@ -6,6 +6,7 @@ namespace JK.MultiTenancy
 {
     public class Tenant : AbpTenant<User>
     {
+        
         public Tenant()
         {
         }

@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace JK.Payments.TenantConfigs.Dto
-{
+{  
     public class ThirdPartyAccountDto : FullAuditedEntityDto
     {
         public int TenantId { get; set; }

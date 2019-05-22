@@ -2,9 +2,8 @@
 {
     public enum SetValueLocation
     {
-        Form = 0,
-        Body = 1,
-        Query = 2,
-        Headers = 3
+        Content = 0,
+        Query = 1,
+        Headers = 2
     }
 }

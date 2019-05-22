@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Payments.ThirdParty
-{
+{   
     public class ApiRequestParameter : Entity, ISetValueParameter
     {
         public int ApiId { get; set; }
