@@ -7,6 +7,10 @@ using JK.Storage;
 using JK.Chat;
 using JK.Customers;
 using JK.Alliance;
+using JK.Payments.Orders;
+using JK.Payments.Bacis;
+using JK.Payments.TenantConfigs;
+using JK.Payments.ThirdParty;
 
 namespace JK.EntityFrameworkCore
 {
@@ -64,6 +68,36 @@ namespace JK.EntityFrameworkCore
 
         public virtual DbSet<TenantDomain> TenantDomains { get; set; }
 
+        #endregion
+
+        #region Payments
+
+        public virtual DbSet<PaymentOrder> PaymentOrders { get; set; }
+        public virtual DbSet<Bank> Banks { get; set; }
+        public virtual DbSet<Channel> Channels { get; set; }
+        public virtual DbSet<PaymentOrderPolicy> PaymentOrderPolicies { get; set; }
+        public virtual DbSet<PaymentOrderPolicyRule> PaymentOrderPolicyRules { get; set; }
+        public virtual DbSet<PaymentOrderPolicyRuleValue> PaymentOrderPolicyRuleValues { get; set; }
+
+        public virtual DbSet<TenantPaymentApp> TenantPaymentApps { get; set; }
+        public virtual DbSet<TenantLimitPolicy> TenantLimitPolicies { get; set; }
+        public virtual DbSet<TenantLimitPolicyRule> TenantLimitPolicyRules { get; set; }
+        public virtual DbSet<TenantLimitPolicyRuleValue> TenantLimitPolicyRuleValues { get; set; }
+        public virtual DbSet<ThirdPartyAccount> ThirdPartyAccounts { get; set; }
+
+        public virtual DbSet<ApiCallbackParameter> ApiCallbackParameters { get; set; }
+        public virtual DbSet<ApiChannel> ApiChannels { get; set; }
+        public virtual DbSet<ApiConfiguration> ApiConfigurations { get; set; }
+        public virtual DbSet<ApiRequestParameter> ApiRequestParameters { get; set; }
+        public virtual DbSet<ApiResponeParameter> ApiResponeParameters { get; set; }
+        public virtual DbSet<BankOverride> BankOverrides { get; set; }
+        public virtual DbSet<ChannelOverride> ChannelOverrides { get; set; }
+        public virtual DbSet<Company> Companies { get; set; }
+        public virtual DbSet<CompanyChannel> CompanyChannels { get; set; }
+        public virtual DbSet<ResultCodeConfiguration> ResultCodeConfigurations { get; set; }
+        public virtual DbSet<ThirdPartyLimitPolicy> ThirdPartyLimitPolicies { get; set; }
+        public virtual DbSet<ThirdPartyLimitPolicyRule> ThirdPartyLimitPolicyRules { get; set; }
+        public virtual DbSet<ThirdPartyLimitPolicyRuleValue> ThirdPartyLimitPolicyRuleValues { get; set; }
         #endregion
 
         public JKDbContext(DbContextOptions<JKDbContext> options)

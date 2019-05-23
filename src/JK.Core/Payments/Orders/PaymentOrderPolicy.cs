@@ -2,6 +2,7 @@
 using Abp.Domain.Entities.Auditing;
 using JK.MultiTenancy;
 using JK.Payments.Bacis;
+using JK.Payments.Enumerates;
 using JK.Payments.TenantConfigs;
 using JK.Payments.ThirdParty;
 using System;
@@ -77,7 +78,7 @@ namespace JK.Payments.Orders
 
         public bool IsGroup { get; set; }
 
-        [ForeignKey("ParentId")]
+        [ForeignKey(nameof(ParentId))]
         public virtual ICollection<PaymentOrderPolicyRule> ChildPolicyRules { get; set; }
     }
 
@@ -102,19 +103,4 @@ namespace JK.Payments.Orders
         public string Value { get; set; }
     }
 
-    /// <summary>
-    /// 交互条件
-    /// </summary>
-    public enum RuleGroupInteractionType
-    {
-        /// <summary>
-        /// 必须满足集合内的所有要求
-        /// </summary>
-        And = 0,
-
-        /// <summary>
-        /// 必须满足集合内至少一个要求
-        /// </summary>
-        Or = 2,
-    }
 }

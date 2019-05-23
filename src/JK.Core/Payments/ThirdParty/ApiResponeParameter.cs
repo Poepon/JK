@@ -13,15 +13,18 @@ namespace JK.Payments.ThirdParty
         public virtual ApiConfiguration Api { get; set; }
 
         [Required]
+        [StringLength(32)]
         public string Key { get; set; }
 
         [Required]
+        [StringLength(500)]
         public string Expression { get; set; }
 
         public DataTag? DataTag { get; set; }
 
         public GetValueLocation Location { get; set; }
 
+        [StringLength(32)]
         public string Desc { get; set; }
 
         public int OrderNumber { get; set; }

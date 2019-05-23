@@ -16,6 +16,7 @@ namespace JK.Payments.ThirdParty
         public virtual Company Company { get; set; }
 
         [Required]
+        [StringLength(16)]
         public string ResultCode { get; set; }
 
         public ResultCodeMean Mean { get; set; }

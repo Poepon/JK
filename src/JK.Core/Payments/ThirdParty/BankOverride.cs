@@ -19,7 +19,7 @@ namespace JK.Payments.ThirdParty
         public virtual Bank Bank { get; set; }
 
         [Required]
-        [StringLength(20)]
+        [StringLength(16)]
         public string OverrideCode { get; set; }
     }
 }

@@ -19,7 +19,7 @@ namespace JK.Payments.ThirdParty
         public virtual Company Company { get; set; }
 
         [Required]
-        [StringLength(20)]
+        [StringLength(16)]
         public string OverrideCode { get; set; }
 
         public decimal? OverrideFeeRate { get; set; }

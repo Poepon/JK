@@ -10,7 +10,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Payments.TenantConfigs
 {
-    public class TenantApp : Entity
+    public class TenantPaymentApp : Entity
     {
         public int TenantId { get; set; }
 
@@ -50,7 +50,7 @@ namespace JK.Payments.TenantConfigs
         public int TenantAppId { get; set; }
 
         [ForeignKey(nameof(TenantAppId))]
-        public virtual TenantApp App { get; set; }
+        public virtual TenantPaymentApp App { get; set; }
 
         public int CompanyId { get; set; }
 
@@ -63,7 +63,7 @@ namespace JK.Payments.TenantConfigs
         public int TenantAppId { get; set; }
 
         [ForeignKey(nameof(TenantAppId))]
-        public virtual TenantApp App { get; set; }
+        public virtual TenantPaymentApp App { get; set; }
 
         public int ChannelId { get; set; }
 

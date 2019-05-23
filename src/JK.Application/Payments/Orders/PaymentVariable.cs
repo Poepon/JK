@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Abp.Timing;
@@ -139,13 +140,11 @@ namespace JK.Payments.Orders
                 case "#MerchantKey":
                     result = thirdPartyAccount.MerchantKey;
                     break;
-                case "#PrivateKey":
-                    result = thirdPartyAccount.PrivateKey;
-                    break;
-                case "#PublicKey":
-                    result = thirdPartyAccount.PublicKey;
-                    break;
                 default:
+                    if (thirdPartyAccount.Attributes.ContainsKey(key))
+                    {
+                        result = thirdPartyAccount.Attributes[key];
+                    }
                     break;
             }
 
@@ -259,7 +258,7 @@ namespace JK.Payments.Orders
             var contentItem = new Dictionary<string, string>();
             foreach (var parameter in parameters)
             {
-                string value = NewMethod(parameter.Key, parameter.ValueOrExpression, parameter.Format, parameter.Required, parameter.Encryption);
+                string value = NewMethod(parameter.Key, parameter.ValueOrExpression, parameter.Format, parameter.Required, parameter.Encryption, parameter.EncryptionParameters);
                 Result.Add(parameter.Key, value);
                 switch (parameter.Location)
                 {
@@ -282,7 +281,7 @@ namespace JK.Payments.Orders
             return values;
         }
 
-        private string NewMethod(string key, string exp, string format, bool required, EncryptionMethod? encryption)
+        private string NewMethod(string key, string exp, string format, bool required, EncryptionMethod? encryption, string encryptionParameters)
         {
             string value = exp;
             var matches = Regex.Matches(exp, ParameterPattern);
@@ -322,7 +321,25 @@ namespace JK.Payments.Orders
             //如果是加密参数
             if (encryption.HasValue)
             {
-                value = EncryptionHelper.GetEncryption(encryption.Value, value, thirdPartyAccount);
+                // encryptionParameters
+                var parameters = new List<string> { value };
+                var epMatches = Regex.Matches(encryptionParameters, ParameterPattern);
+                if (epMatches.Count > 0)
+                {
+                    var tempParameterValue = "";
+                    foreach (Match item in epMatches)
+                    {
+                        var tempValue = GetVariableValue(item.Groups["key"].Value, null);
+                        tempParameterValue = encryptionParameters.Replace(item.Value, tempValue);
+                    }
+                    var ParameterValues = tempParameterValue.Split(",", StringSplitOptions.RemoveEmptyEntries);
+                    if (ParameterValues != null && ParameterValues.Length > 0)
+                    {
+                        parameters.AddRange(ParameterValues);
+                    }
+                }
+                var ciphertext = (string)typeof(SecurityHelper).InvokeMember(encryption.Value.ToString(), BindingFlags.InvokeMethod, null, null, parameters.ToArray());
+                value = ciphertext;
             }
             if (!string.IsNullOrEmpty(format))
             {
@@ -342,7 +359,7 @@ namespace JK.Payments.Orders
         {
             foreach (var parameter in parameters)
             {
-                string value = NewMethod(parameter.Key, parameter.Expression, parameter.Format, parameter.Required, parameter.Encryption);
+                string value = NewMethod(parameter.Key, parameter.Expression, parameter.Format, parameter.Required, parameter.Encryption, parameter.EncryptionParameters);
                 Result.Add(parameter.Key, value);
             }
             return Result;

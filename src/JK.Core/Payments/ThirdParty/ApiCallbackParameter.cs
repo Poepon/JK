@@ -12,9 +12,11 @@ namespace JK.Payments.ThirdParty
         [ForeignKey(nameof(ApiId))]
         public virtual ApiConfiguration Api { get; set; }
 
+        [StringLength(32)]
         [Required]
         public string Key { get; set; }
 
+        [StringLength(500)]
         [Required]
         public string Expression { get; set; }
 
@@ -24,10 +26,15 @@ namespace JK.Payments.ThirdParty
 
         public DataTag? DataTag { get; set; }
 
+        [StringLength(32)]
         public string Format { get; set; }
 
         public EncryptionMethod? Encryption { get; set; }
 
+        [StringLength(100)]
+        public string EncryptionParameters { get; set; }
+
+        [StringLength(32)]
         public string Desc { get; set; }
 
         public int OrderNumber { get; set; }

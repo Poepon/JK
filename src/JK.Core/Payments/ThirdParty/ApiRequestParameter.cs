@@ -13,8 +13,11 @@ namespace JK.Payments.ThirdParty
         public virtual ApiConfiguration Api { get; set; }
 
         [Required]
+        [StringLength(32)]
         public string Key { get; set; }
 
+        [Required]
+        [StringLength(500)]
         public string ValueOrExpression { get; set; }
 
         public SetValueLocation Location { get; set; }
@@ -26,8 +29,13 @@ namespace JK.Payments.ThirdParty
 
         public EncryptionMethod? Encryption { get; set; }
 
+        [StringLength(100)]
+        public string EncryptionParameters { get; set; }
+
+        [StringLength(32)]
         public string Format { get; set; }
 
+        [StringLength(32)]
         public string Desc { get; set; }
 
         public int OrderNumber { get; set; }
