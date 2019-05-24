@@ -1,13 +1,13 @@
-﻿using Abp.Configuration;
+﻿using System;
+using System.Collections.Generic;
+using Abp.Configuration;
 using Abp.Domain.Uow;
 using JK.Customers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
 
-namespace JK.Web.Public.Identity
+namespace JK.Identity
 {
     public class CustomerManager : JKUserManager<Customer, CustomerLogin, CustomerClaim, CustomerToken>
     {

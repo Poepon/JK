@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Xml;
-using Abp.Timing;
+﻿using Abp.Timing;
 using JK.Cryptography;
 using JK.Payments.Enumerates;
+using JK.Payments.Integration;
+using JK.Payments.Integration.Dto;
 using JK.Payments.Orders.Dto;
 using JK.Payments.TenantConfigs;
 using JK.Payments.TenantConfigs.Dto;
-using JK.Payments.ThirdParty;
-using JK.Payments.ThirdParty.Dto;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace JK.Payments.Orders
 {
@@ -39,23 +38,23 @@ namespace JK.Payments.Orders
     public class PaymentVariable
     {
         public const string GlobalFlag = "@";
-        public const string MerchantConfigFlag = "#";
+        public const string CompanyAccountFlag = "#";
         public const string OrderFlag = "$";
         public const string ParameterFlag = "&";
         private readonly PaymentOrderDto paymentOrder;
-        private readonly ThirdPartyAccountDto thirdPartyAccount;
+        private readonly CompanyAccountDto companyAccount;
         private readonly ApiConfigurationDto apiConfiguration;
-        private readonly TenantApp tenantApp;
+        private readonly TenantPaymentApp tenantPaymentApp;
         private readonly CompanyDto company;
 
         public Dictionary<string, string> Result { get; private set; }
 
         public PaymentVariable(
-            TenantApp tenantApp,
+            TenantPaymentApp tenantPaymentApp,
             CompanyDto company,
             ApiConfigurationDto apiConfiguration,
-            ThirdPartyAccountDto thirdPartyAccount) :
-            this(tenantApp, company, apiConfiguration, thirdPartyAccount, null)
+            CompanyAccountDto companyAccount) :
+            this(tenantPaymentApp, company, apiConfiguration, companyAccount, null)
         {
             Result = new Dictionary<string, string>();
         }
@@ -66,16 +65,16 @@ namespace JK.Payments.Orders
         }
 
         public PaymentVariable(
-            TenantApp tenantApp,
+            TenantPaymentApp tenantPaymentApp,
             CompanyDto company,
             ApiConfigurationDto apiConfiguration,
-            ThirdPartyAccountDto thirdPartyAccount,
+            CompanyAccountDto companyAccount,
             PaymentOrderDto paymentOrder)
         {
             this.paymentOrder = paymentOrder;
-            this.thirdPartyAccount = thirdPartyAccount;
+            this.companyAccount = companyAccount;
             this.apiConfiguration = apiConfiguration;
-            this.tenantApp = tenantApp;
+            this.tenantPaymentApp = tenantPaymentApp;
             this.company = company;
         }
 
@@ -83,9 +82,9 @@ namespace JK.Payments.Orders
         {
             return key.Contains(GlobalFlag);
         }
-        private bool IsMerchantConfigVariable(string key)
+        private bool IsCompanyAccountVariable(string key)
         {
-            return key.Contains(MerchantConfigFlag);
+            return key.Contains(CompanyAccountFlag);
         }
         private bool IsOrderVariable(string key)
         {
@@ -113,13 +112,13 @@ namespace JK.Payments.Orders
                     }
                     break;
                 case "@CallbackDomain":
-                    if (tenantApp.UseSSL)
+                    if (tenantPaymentApp.UseSSL)
                     {
-                        result = $"https://{tenantApp.CallbackDomain}";
+                        result = $"https://{tenantPaymentApp.CallbackDomain}";
                     }
                     else
                     {
-                        result = $"http://{tenantApp.CallbackDomain}";
+                        result = $"http://{tenantPaymentApp.CallbackDomain}";
                     }
                     break;
                 default:
@@ -129,21 +128,21 @@ namespace JK.Payments.Orders
             return result;
         }
 
-        private string GetMerchantConfigVariableValue(string key, string format)
+        private string GetCompanyAccountVariableValue(string key, string format)
         {
             string result = "";
             switch (key)
             {
                 case "#MerchantId":
-                    result = thirdPartyAccount.MerchantId;
+                    result = companyAccount.MerchantId;
                     break;
                 case "#MerchantKey":
-                    result = thirdPartyAccount.MerchantKey;
+                    result = companyAccount.MerchantKey;
                     break;
                 default:
-                    if (thirdPartyAccount.Attributes.ContainsKey(key))
+                    if (companyAccount.Attributes.ContainsKey(key))
                     {
-                        result = thirdPartyAccount.Attributes[key];
+                        result = companyAccount.Attributes[key];
                     }
                     break;
             }
@@ -398,9 +397,9 @@ namespace JK.Payments.Orders
             }
             else
             //检查支付配置变量
-            if (IsMerchantConfigVariable(variableName))
+            if (IsCompanyAccountVariable(variableName))
             {
-                return GetMerchantConfigVariableValue(variableName, format);
+                return GetCompanyAccountVariableValue(variableName, format);
             }
             else
             //检查订单变量

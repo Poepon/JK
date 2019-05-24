@@ -1,13 +1,11 @@
 ﻿using Abp.Dependency;
-using Abp.Extensions;
-using JK.Customers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace JK.Web.Public.Identity
+namespace JK.Identity
 {
     public class JKSignInManager<TUser> : SignInManager<TUser>, ITransientDependency where TUser : class
     {

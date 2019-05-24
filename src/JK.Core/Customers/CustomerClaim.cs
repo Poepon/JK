@@ -1,6 +1,7 @@
 ﻿using Abp.Authorization.Users;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
+using JK.Front;
 
 namespace JK.Customers
 {

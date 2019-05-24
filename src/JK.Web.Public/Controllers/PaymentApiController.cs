@@ -5,10 +5,10 @@ using Abp.Runtime.Session;
 using JK.Cryptography;
 using JK.Payments;
 using JK.Payments.Enumerates;
+using JK.Payments.Integration;
 using JK.Payments.Orders;
 using JK.Payments.Orders.Dto;
 using JK.Payments.TenantConfigs;
-using JK.Payments.ThirdParty;
 using JK.Web.Public.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +17,9 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -32,12 +29,12 @@ namespace JK.Web.Public.Controllers
     public class PaymentApiController : AbpController
     {
         private readonly IHttpClientFactory httpClientFactory;
-        private readonly IRepository<TenantApp> appRepository;
+        private readonly IRepository<TenantPaymentApp> appRepository;
         private readonly IOrderProcessingService orderProcessingService;
         private readonly IRepository<ResultCodeConfiguration> resultCodeRepository;
         public PaymentApiController(
             IHttpClientFactory httpClientFactory,
-            IRepository<TenantApp> appRepository,
+            IRepository<TenantPaymentApp> appRepository,
             IRepository<ResultCodeConfiguration> resultCodeRepository,
             IOrderProcessingService orderProcessingService)
         {
@@ -47,7 +44,7 @@ namespace JK.Web.Public.Controllers
             this.orderProcessingService = orderProcessingService;
         }
 
-        protected Task<TenantApp> QueryApp(PaymentApiDtoBase input)
+        protected Task<TenantPaymentApp> QueryApp(PaymentApiDtoBase input)
         {
             return appRepository.FirstOrDefaultAsync(a => a.AppId == input.AppId);
         }
@@ -60,7 +57,7 @@ namespace JK.Web.Public.Controllers
         /// <returns></returns>
         protected bool VerifySign(string sign, string signContent, string key)
         {
-            return sign == JKMd5.GetMd5(signContent + key);
+            return sign == SecurityHelper.MD5(signContent, key);
         }
 
         [HttpPost]
@@ -105,7 +102,7 @@ namespace JK.Web.Public.Controllers
             {
                 var httpClient = httpClientFactory.CreateClient();
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage(
-                  postdata.Method .Equals("post", StringComparison.OrdinalIgnoreCase) ?
+                  postdata.Method.Equals("post", StringComparison.OrdinalIgnoreCase) ?
                     HttpMethod.Post :
                     HttpMethod.Get, postdata.Url);
                 if (postdata.Method.Equals("post", StringComparison.OrdinalIgnoreCase))
@@ -159,11 +156,12 @@ namespace JK.Web.Public.Controllers
             }
         }
 
-        private CreatePaymentOrderDto BuildOrder(PlaceOrderDto input, TenantApp app)
+        private CreatePaymentOrderDto BuildOrder(PlaceOrderDto input, TenantPaymentApp app)
         {
             return new CreatePaymentOrderDto
             {
                 TenantId = app.TenantId,
+                AppId = app.Id,
                 ChannelCode = input.ChannelCode,
                 Amount = input.Amount,
                 BankCode = input.BankCode,

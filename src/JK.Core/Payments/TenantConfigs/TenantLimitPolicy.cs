@@ -1,6 +1,5 @@
 ﻿using Abp.Domain.Entities;
 using JK.MultiTenancy;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,6 +8,7 @@ namespace JK.Payments.TenantConfigs
     /// <summary>
     /// 租户限制策略
     /// </summary>
+    [Table("TenantLimitPolicies")]
     public class TenantLimitPolicy : Entity
     {
         public int TenantId { get; set; }
@@ -25,27 +25,5 @@ namespace JK.Payments.TenantConfigs
 
         public bool IsActive { get; set; }
     }
-
-    public class TenantLimitPolicyRule : Entity
-    {
-        public int TenantId { get; set; }
-
-        public int PolicyId { get; set; }
-
-        [ForeignKey(nameof(PolicyId))]
-        public virtual TenantLimitPolicy Policy { get; set; }
-    }
-
-    public class TenantLimitPolicyRuleValue : Entity
-    {
-        public int TenantId { get; set; }
-
-        public int RuleId { get; set; }
-
-        [StringLength(1000)]
-        public string Value { get; set; }
-
-        [ForeignKey(nameof(RuleId))]
-        public virtual TenantLimitPolicyRule Rule { get; set; }
-    }
+    
 }

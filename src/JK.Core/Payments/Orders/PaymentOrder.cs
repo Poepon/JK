@@ -1,42 +1,28 @@
 ﻿using Abp.Domain.Entities.Auditing;
 using Abp.Timing;
-using JK.MultiTenancy;
-using JK.Payments.Bacis;
 using JK.Payments.Enumerates;
 using JK.Payments.Evens;
-using JK.Payments.TenantConfigs;
-using JK.Payments.ThirdParty;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Payments.Orders
 {
-
-    public class PaymentOrder : FullAuditedAggregateRoot<long>
+    [Table("PaymentOrders")]
+    public class PaymentOrder : AuditedAggregateRoot<long>
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public override long Id { get; set; }
 
         public int TenantId { get; set; }
-
-        [ForeignKey(nameof(TenantId))]
-        public virtual Tenant Tenant { get; set; }
-
+        
         public int CompanyId { get; set; }
-
-        [ForeignKey(nameof(CompanyId))]
-        public virtual Company Company { get; set; }
-
+        
         public int ChannelId { get; set; }
-
-        [ForeignKey(nameof(ChannelId))]
-        public virtual Channel Channel { get; set; }
-
+        
         public int AccountId { get; set; }
 
-        [ForeignKey(nameof(AccountId))]
-        public virtual ThirdPartyAccount Account { get; set; }
+        public int AppId { get; set; }
 
         public int? BankId { get; set; }
 

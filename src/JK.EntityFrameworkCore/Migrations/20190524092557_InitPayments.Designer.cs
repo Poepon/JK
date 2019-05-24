@@ -4,14 +4,16 @@ using JK.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace JK.Migrations
 {
     [DbContext(typeof(JKDbContext))]
-    partial class JKDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190524092557_InitPayments")]
+    partial class InitPayments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1968,8 +1970,6 @@ namespace JK.Migrations
 
                     b.Property<long>("Amount");
 
-                    b.Property<int>("AppId");
-
                     b.Property<string>("AsyncCallback")
                         .HasMaxLength(256);
 
@@ -1991,6 +1991,10 @@ namespace JK.Migrations
 
                     b.Property<long?>("CreatorUserId");
 
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
                     b.Property<int>("Device");
 
                     b.Property<DateTime>("Expire");
@@ -2002,6 +2006,8 @@ namespace JK.Migrations
                         .HasMaxLength(32);
 
                     b.Property<long>("Fee");
+
+                    b.Property<bool>("IsDeleted");
 
                     b.Property<DateTime?>("LastModificationTime");
 

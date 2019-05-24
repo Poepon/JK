@@ -5,7 +5,7 @@ using Abp.Domain.Uow;
 using JK.Alliance;
 using Microsoft.AspNetCore.Identity;
 
-namespace JK.Web.Public.Identity
+namespace JK.Identity
 {
     public class AgentLogInManager : JKLogInManager<Agent, AgentLogin, AgentClaim, AgentToken, AgentLoginAttempt>
     {

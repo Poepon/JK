@@ -9,8 +9,8 @@ using JK.Customers;
 using JK.Alliance;
 using JK.Payments.Orders;
 using JK.Payments.Bacis;
+using JK.Payments.Integration;
 using JK.Payments.TenantConfigs;
-using JK.Payments.ThirdParty;
 
 namespace JK.EntityFrameworkCore
 {
@@ -72,18 +72,20 @@ namespace JK.EntityFrameworkCore
 
         #region Payments
 
-        public virtual DbSet<PaymentOrder> PaymentOrders { get; set; }
         public virtual DbSet<Bank> Banks { get; set; }
         public virtual DbSet<Channel> Channels { get; set; }
+
+        public virtual DbSet<PaymentOrder> PaymentOrders { get; set; }
         public virtual DbSet<PaymentOrderPolicy> PaymentOrderPolicies { get; set; }
         public virtual DbSet<PaymentOrderPolicyRule> PaymentOrderPolicyRules { get; set; }
         public virtual DbSet<PaymentOrderPolicyRuleValue> PaymentOrderPolicyRuleValues { get; set; }
+        public virtual DbSet<PaymentOrderPolicyChannel> PaymentOrderPolicyChannels { get; set; }
 
         public virtual DbSet<TenantPaymentApp> TenantPaymentApps { get; set; }
         public virtual DbSet<TenantLimitPolicy> TenantLimitPolicies { get; set; }
         public virtual DbSet<TenantLimitPolicyRule> TenantLimitPolicyRules { get; set; }
         public virtual DbSet<TenantLimitPolicyRuleValue> TenantLimitPolicyRuleValues { get; set; }
-        public virtual DbSet<ThirdPartyAccount> ThirdPartyAccounts { get; set; }
+        public virtual DbSet<CompanyAccount> CompanyAccounts { get; set; }
 
         public virtual DbSet<ApiCallbackParameter> ApiCallbackParameters { get; set; }
         public virtual DbSet<ApiChannel> ApiChannels { get; set; }
@@ -95,9 +97,12 @@ namespace JK.EntityFrameworkCore
         public virtual DbSet<Company> Companies { get; set; }
         public virtual DbSet<CompanyChannel> CompanyChannels { get; set; }
         public virtual DbSet<ResultCodeConfiguration> ResultCodeConfigurations { get; set; }
-        public virtual DbSet<ThirdPartyLimitPolicy> ThirdPartyLimitPolicies { get; set; }
-        public virtual DbSet<ThirdPartyLimitPolicyRule> ThirdPartyLimitPolicyRules { get; set; }
-        public virtual DbSet<ThirdPartyLimitPolicyRuleValue> ThirdPartyLimitPolicyRuleValues { get; set; }
+        public virtual DbSet<CompanyLimitPolicy> CompanyLimitPolicies { get; set; }
+        public virtual DbSet<CompanyLimitPolicyRule> CompanyLimitPolicyRules { get; set; }
+        public virtual DbSet<CompanyLimitPolicyRuleValue> CompanyLimitPolicyRuleValues { get; set; }
+
+        public virtual DbSet<TenantPaymentAppChannel> TenantPaymentAppChannels { get; set; }
+        public virtual DbSet<TenantPaymentAppCompany> TenantPaymentAppCompanies { get; set; }
         #endregion
 
         public JKDbContext(DbContextOptions<JKDbContext> options)
@@ -111,6 +116,73 @@ namespace JK.EntityFrameworkCore
             modelBuilder.Entity<UserChatMessageLog>().HasIndex(log => new { log.SessionId, log.UserId });
             modelBuilder.Entity<ChatSessionMember>().HasIndex(member => member.SessionId);
             modelBuilder.Entity<ChatMessage>().HasIndex(msg => msg.SessionId);
+
+
+            modelBuilder.Entity<ApiChannel>()
+                .HasKey(t => new { t.ApiId, t.ChannelId });
+
+            modelBuilder.Entity<ApiChannel>()
+                .HasOne(pt => pt.Api)
+                .WithMany(p => p.SupportedChannels)
+                .HasForeignKey(pt => pt.ApiId);
+
+            modelBuilder.Entity<ApiChannel>()
+                .HasOne(pt => pt.Channel)
+                .WithMany(t => t.ApiChannels)
+                .HasForeignKey(pt => pt.ChannelId);
+
+            modelBuilder.Entity<CompanyChannel>()
+                .HasKey(t => new { t.CompanyId, t.ChannelId });
+
+            modelBuilder.Entity<CompanyChannel>()
+                .HasOne(pt => pt.Company)
+                .WithMany(p => p.SupportedChannels)
+                .HasForeignKey(pt => pt.CompanyId);
+
+            modelBuilder.Entity<CompanyChannel>()
+                .HasOne(pt => pt.Channel)
+                .WithMany(t => t.CompanyChannels)
+                .HasForeignKey(pt => pt.ChannelId);
+
+
+            modelBuilder.Entity<PaymentOrderPolicyChannel>()
+                .HasKey(t => new { t.PolicyId, t.ChannelId });
+
+            modelBuilder.Entity<PaymentOrderPolicyChannel>()
+                .HasOne(pt => pt.PaymentOrderPolicy)
+                .WithMany(p => p.SupportedChannels)
+                .HasForeignKey(pt => pt.PolicyId);
+
+            modelBuilder.Entity<PaymentOrderPolicyChannel>()
+                .HasOne(pt => pt.Channel)
+                .WithMany(t => t.PaymentOrderPolicyChannels)
+                .HasForeignKey(pt => pt.ChannelId);
+         
+            modelBuilder.Entity<TenantPaymentAppChannel>()
+                .HasKey(t => new { t.AppId, t.ChannelId });
+
+            modelBuilder.Entity<TenantPaymentAppChannel>()
+                .HasOne(pt => pt.App)
+                .WithMany(p => p.SupportedChannels)
+                .HasForeignKey(pt => pt.AppId);
+
+            modelBuilder.Entity<TenantPaymentAppChannel>()
+                .HasOne(pt => pt.Channel)
+                .WithMany(t => t.AppChannels)
+                .HasForeignKey(pt => pt.ChannelId);
+
+            modelBuilder.Entity<TenantPaymentAppCompany>()
+                .HasKey(t => new { t.AppId, t.CompanyId });
+
+            modelBuilder.Entity<TenantPaymentAppCompany>()
+                .HasOne(pt => pt.App)
+                .WithMany(p => p.SupportedCompanies)
+                .HasForeignKey(pt => pt.AppId);
+
+            modelBuilder.Entity<TenantPaymentAppCompany>()
+                .HasOne(pt => pt.Company)
+                .WithMany(t => t.SupportedApps)
+                .HasForeignKey(pt => pt.CompanyId);
         }
     }
 }

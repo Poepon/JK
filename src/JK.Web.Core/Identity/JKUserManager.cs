@@ -1,4 +1,9 @@
-﻿using Abp;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Abp;
 using Abp.Configuration;
 using Abp.Configuration.Startup;
 using Abp.Domain.Services;
@@ -10,17 +15,13 @@ using Abp.Runtime.Session;
 using Abp.UI;
 using Abp.Zero;
 using Abp.Zero.Configuration;
+using JK.Front;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace JK.Web.Public.Identity
+namespace JK.Identity
 {
     public class JKUserManager<TUser, TUserLogin, TUserClaim, TUserToken> :
         UserManager<TUser>, IDomainService

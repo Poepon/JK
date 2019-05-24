@@ -2,10 +2,10 @@
 using Abp.Auditing;
 using JK.Controllers;
 using JK.MultiTenancy;
-using JK.Web.Models.Logs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
+using JK.Web.Models.LoginLogs;
 
 namespace JK.Web.Controllers
 {

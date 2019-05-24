@@ -9,12 +9,12 @@ using JK.Payments.Bacis;
 using JK.Payments.Enumerates;
 using JK.Payments.Orders.Dto;
 using JK.Payments.TenantConfigs;
-using JK.Payments.ThirdParty;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JK.Payments.Integration;
 
 namespace JK.Payments.Orders
 {
@@ -68,7 +68,7 @@ namespace JK.Payments.Orders
         private readonly IRepository<Channel> channelRepository;
         private readonly IRepository<Bank> bankRepository;
         private readonly IRepository<ChannelOverride> channelOverrideRepository;
-        private readonly IRepository<ThirdPartyAccount> accountRepository;
+        private readonly IRepository<CompanyAccount> accountRepository;
         private readonly IRepository<PaymentOrder, long> paymentOrderRepository;
         private readonly IRepository<ApiConfiguration> apiconfigRepository;
         private readonly IRepository<ApiRequestParameter> apiRequestParameterRepository;
@@ -83,7 +83,7 @@ namespace JK.Payments.Orders
             IRepository<Channel> channelRepository,
             IRepository<ChannelOverride> channelOverrideRepository,
             IRepository<Bank> bankRepository,
-            IRepository<ThirdPartyAccount> accountRepository,
+            IRepository<CompanyAccount> accountRepository,
             IRepository<PaymentOrder, long> paymentOrderRepository,
             IRepository<ApiConfiguration> apiconfigRepository,
             IRepository<ApiRequestParameter> apiRequestParameterRepository,
@@ -176,6 +176,7 @@ namespace JK.Payments.Orders
             var paymentOrder = new PaymentOrder()
             {
                 TenantId = input.TenantId,
+                AppId = input.AppId,
                 Amount = input.Amount,
                 Fee = Convert.ToInt32(input.Amount * (feeRate / 100)),
                 CompanyId = verifiedPaymentOrder.CompanyId,
@@ -197,7 +198,7 @@ namespace JK.Payments.Orders
             return paymentOrder;
         }
 
-        private decimal GetFeeRate(Company company, ChannelOverride channelOverride, ThirdPartyAccount account)
+        private decimal GetFeeRate(Company company, ChannelOverride channelOverride, CompanyAccount account)
         {
             if (account.OverrideFeeRate.HasValue)
                 return account.OverrideFeeRate.GetValueOrDefault();
@@ -269,6 +270,10 @@ namespace JK.Payments.Orders
             if (paymentOrder == null)
             {
                 return new ResultDto<PaymentStatus>() { IsSuccess = false, ErrorMessage = "订单不存在" };
+            }
+            if (!paymentOrder.VerifyMd5())
+            {
+                return new ResultDto<PaymentStatus>() { IsSuccess = false, ErrorMessage = "订单数据已更改" };
             }
             if (paymentOrder.PaymentStatus == PaymentStatus.Pending)
             {

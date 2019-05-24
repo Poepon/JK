@@ -1,14 +1,15 @@
-﻿using Abp.Domain.Entities;
-using JK.Payments.Enumerates;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Abp.Domain.Entities;
+using JK.Payments.Enumerates;
 
-namespace JK.Payments.ThirdParty
-{  
+namespace JK.Payments.Integration
+{
     /// <summary>
     /// API配置
     /// </summary>
+    [Table("ApiConfigurations")]
     public class ApiConfiguration : Entity
     {
         public int CompanyId { get; set; }

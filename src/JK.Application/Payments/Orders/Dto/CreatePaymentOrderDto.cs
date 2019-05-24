@@ -9,6 +9,8 @@ namespace JK.Payments.Orders.Dto
     {
         public int TenantId { get; set; }
 
+        public int AppId { get; set; }
+
         public long Amount { get; set; }
 
         [Required]

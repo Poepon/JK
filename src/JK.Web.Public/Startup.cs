@@ -2,8 +2,8 @@
 using Abp.Castle.Logging.Log4Net;
 using Castle.Facilities.Logging;
 using JK.Customers;
+using JK.Identity;
 using JK.MultiThemes;
-using JK.Web.Public.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -40,7 +40,7 @@ namespace JK.Web.Public
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            IdentityRegistrar.RegisterCustomer(services);
+            CustomerIdentityRegistrar.Register(services);
 
             // Configure Abp and Dependency Injection
             return services.AddAbp<JKWebPublicModule>(

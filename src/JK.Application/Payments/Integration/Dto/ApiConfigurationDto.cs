@@ -1,7 +1,7 @@
 ﻿using Abp.Application.Services.Dto;
 using JK.Payments.Enumerates;
 
-namespace JK.Payments.ThirdParty.Dto
+namespace JK.Payments.Integration.Dto
 {
     public class ApiConfigurationDto : EntityDto
     {

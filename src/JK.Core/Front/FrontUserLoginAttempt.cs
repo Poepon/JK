@@ -1,12 +1,12 @@
-﻿using Abp.Authorization;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using Abp.Authorization;
 using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
 using Abp.MultiTenancy;
 using Abp.Timing;
-using System;
-using System.ComponentModel.DataAnnotations;
 
-namespace JK
+namespace JK.Front
 {
     public abstract class FrontUserLoginAttempt : Entity<long>, IHasCreationTime, IMustHaveTenant
     {

@@ -1,10 +1,11 @@
-﻿using Abp.Domain.Entities;
-using JK.Payments.Enumerates;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Abp.Domain.Entities;
+using JK.Payments.Enumerates;
 
-namespace JK.Payments.ThirdParty
+namespace JK.Payments.Integration
 {   
+    [Table("ApiRequestParameters")]
     public class ApiRequestParameter : Entity, ISetValueParameter
     {
         public int ApiId { get; set; }

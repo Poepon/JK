@@ -1,8 +1,8 @@
 ﻿using System.Security.Claims;
 using Abp.Authorization;
-using JK.Customers;
+using JK.Front;
 
-namespace JK.Web.Public.Identity
+namespace JK.Identity
 {
     public class JKLoginResult<TUser, TUserLogin, TUserClaim, TUserToken>
              where TUser : FrontUserBase<TUserLogin, TUserClaim, TUserToken>

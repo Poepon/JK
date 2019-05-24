@@ -3,7 +3,7 @@ using Abp.Timing;
 using JK.Logs.Dto;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace JK.Web.Models.Logs
+namespace JK.Web.Models.LoginLogs
 {
     public class LoginLogViewModel : GetUserLoginAttemptsInput
     {

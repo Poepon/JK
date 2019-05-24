@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using JK.Front;
 
 namespace JK.Alliance
 {

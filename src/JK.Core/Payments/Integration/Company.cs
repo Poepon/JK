@@ -1,14 +1,16 @@
-﻿using Abp.Domain.Entities;
-using JK.Payments.Enumerates;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Abp.Domain.Entities;
+using JK.Payments.Enumerates;
+using JK.Payments.TenantConfigs;
 
-namespace JK.Payments.ThirdParty
+namespace JK.Payments.Integration
 {
     /// <summary>
     /// 支付公司
     /// </summary>
+    [Table("Companies")]
     public class Company : Entity
     {
         [Required]
@@ -29,5 +31,8 @@ namespace JK.Payments.ThirdParty
         public long? MaxOrderAmount { get; set; }
 
         public virtual ICollection<CompanyChannel> SupportedChannels { get; set; }
+
+        public virtual ICollection<TenantPaymentAppCompany> SupportedApps { get; set; }
+        
     }
 }

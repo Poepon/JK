@@ -1,6 +1,6 @@
 ﻿using JK.Payments.Enumerates;
 
-namespace JK.Payments.ThirdParty
+namespace JK.Payments.Integration
 {
     public interface ISetValueParameter
     {

@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Threading.Tasks;
-namespace JK.Web.Public.Identity
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+
+namespace JK.Identity
 {
     public class JKUserClaimsPrincipalFactory<TUser> : UserClaimsPrincipalFactory<TUser> where TUser : class
     {

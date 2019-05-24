@@ -3,7 +3,7 @@ using Abp.Domain.Uow;
 using Abp.Linq;
 using JK.Customers;
 
-namespace JK.Web.Public.Identity
+namespace JK.Identity
 {
     public class CustomerStore : JKUserStore<Customer, CustomerLogin, CustomerClaim, CustomerToken>
     {

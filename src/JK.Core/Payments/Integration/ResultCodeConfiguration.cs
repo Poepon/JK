@@ -1,13 +1,14 @@
-﻿using Abp.Domain.Entities;
-using JK.Payments.Enumerates;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Abp.Domain.Entities;
+using JK.Payments.Enumerates;
 
-namespace JK.Payments.ThirdParty
+namespace JK.Payments.Integration
 {
     /// <summary>
     /// 响应结果代码配置
     /// </summary>
+    [Table("ResultCodeConfigurations")]
     public class ResultCodeConfiguration : Entity
     {
         public int CompanyId { get; set; }

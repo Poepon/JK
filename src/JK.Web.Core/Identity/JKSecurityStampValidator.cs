@@ -1,9 +1,8 @@
-﻿using JK.Customers;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
-namespace JK.Web.Public.Identity
+namespace JK.Identity
 {
     public class JKSecurityStampValidator<TUser> : SecurityStampValidator<TUser> where TUser : class
     {

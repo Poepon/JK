@@ -1,11 +1,11 @@
-﻿using Abp.Domain.Entities;
-using JK.Payments.Bacis;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Abp.Domain.Entities;
+using JK.Payments.Bacis;
 
-namespace JK.Payments.ThirdParty
+namespace JK.Payments.Integration
 {
+    [Table("ChannelOverrides")]
     public class ChannelOverride : Entity
     {
         public int ChannelId { get; set; }

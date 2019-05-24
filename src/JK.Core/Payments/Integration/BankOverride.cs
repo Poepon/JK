@@ -1,11 +1,11 @@
-﻿using Abp.Domain.Entities;
-using JK.Payments.Bacis;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Abp.Domain.Entities;
+using JK.Payments.Bacis;
 
-namespace JK.Payments.ThirdParty
+namespace JK.Payments.Integration
 {
+    [Table("BankOverrides")]
     public class BankOverride : Entity
     {
         public int CompanyId { get; set; }

@@ -6,9 +6,9 @@ using System.Text;
 
 namespace JK.Payments.TenantConfigs.Dto
 {
-    public class ThirdPartyAccountDto : FullAuditedEntityDto
+    public class CompanyAccountDto : FullAuditedEntityDto
     {
-        public ThirdPartyAccountDto()
+        public CompanyAccountDto()
         {
             Attributes = new Dictionary<string, string>();
         }

@@ -1,12 +1,18 @@
 ﻿using Abp.Domain.Entities;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using JK.Payments.Integration;
+using JK.Payments.Orders;
+using JK.Payments.TenantConfigs;
 
 namespace JK.Payments.Bacis
 {
     /// <summary>
     /// 支付通道
     /// </summary>
+    [Table("Channels")]
     public class Channel : Entity
     {
         [Required]
@@ -26,5 +32,13 @@ namespace JK.Payments.Bacis
         public bool RequiredBank { get; set; }
 
         public bool IsActive { get; set; }
+
+        public virtual ICollection<ApiChannel> ApiChannels { get; set; }
+        public virtual ICollection<CompanyChannel> CompanyChannels { get; set; }
+        public virtual ICollection<PaymentOrderPolicyChannel> PaymentOrderPolicyChannels { get; set; }
+
+        public virtual ICollection<TenantPaymentAppChannel> AppChannels { get; set; }
+        public virtual ICollection<TenantPaymentAppCompany> AppCompanies { get; set; }
+        
     }
 }

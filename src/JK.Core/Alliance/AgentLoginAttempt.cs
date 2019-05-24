@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using JK.Front;
 
 namespace JK.Alliance
 {

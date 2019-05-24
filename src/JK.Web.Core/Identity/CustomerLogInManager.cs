@@ -5,7 +5,7 @@ using Abp.Domain.Uow;
 using JK.Customers;
 using Microsoft.AspNetCore.Identity;
 
-namespace JK.Web.Public.Identity
+namespace JK.Identity
 {
     public class CustomerLogInManager : JKLogInManager<Customer, CustomerLogin, CustomerClaim, CustomerToken, CustomerLoginAttempt>
     {

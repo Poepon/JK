@@ -1,15 +1,16 @@
 ﻿using Abp.Domain.Entities.Auditing;
-using JK.Payments.ThirdParty;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using JK.Payments.Integration;
 
 namespace JK.Payments.TenantConfigs
 {
     /// <summary>
     /// 第三方帐户配置
     /// </summary>
-    public class ThirdPartyAccount : FullAuditedEntity
+    [Table("CompanyAccounts")]
+    public class CompanyAccount : FullAuditedEntity
     {
         public int TenantId { get; set; }
 

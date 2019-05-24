@@ -3,11 +3,11 @@ using JK.Customers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace JK.Web.Public.Identity
+namespace JK.Identity
 {
-    public static class IdentityRegistrar
+    public static class AgentIdentityRegistrar
     {
-        public static void RegisterAgent(IServiceCollection services)
+        public static void Register(IServiceCollection services)
          {
             services.AddLogging();
 
@@ -33,6 +33,7 @@ namespace JK.Web.Public.Identity
             .AddIdentityCookies();
 
         }
+
         public static void RegisterCustomer (IServiceCollection services)
         {
             services.AddLogging();
@@ -59,6 +60,34 @@ namespace JK.Web.Public.Identity
             .AddIdentityCookies();
 
         }
+    }
+    public static class CustomerIdentityRegistrar
+    {
+        public static void Register(IServiceCollection services)
+        {
+            services.AddLogging();
 
+            services.AddIdentityCore<Customer>()
+           .AddUserManager<CustomerManager>()
+           .AddSignInManager<JKSignInManager<Customer>>()
+           .AddUserStore<CustomerStore>()
+           .AddClaimsPrincipalFactory<JKUserClaimsPrincipalFactory<Customer>>()
+           .AddDefaultTokenProviders();
+
+            services.AddScoped<UserClaimsPrincipalFactory<Customer>, JKUserClaimsPrincipalFactory<Customer>>();
+            services.AddScoped<CustomerLogInManager>();
+
+            services.AddScoped<CustomerStore>();
+            services.AddScoped<ISecurityStampValidator, JKSecurityStampValidator<Customer>>();
+            services.AddScoped<JKSecurityStampValidator<Customer>>();
+
+            services.AddAuthentication(o =>
+            {
+                o.DefaultScheme = IdentityConstants.ApplicationScheme;
+                o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            })
+            .AddIdentityCookies();
+
+        }
     }
 }

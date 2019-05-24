@@ -1,10 +1,10 @@
-﻿using Abp;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using Abp;
 using Abp.Domain.Entities;
 using JetBrains.Annotations;
-using System;
-using System.ComponentModel.DataAnnotations;
 
-namespace JK
+namespace JK.Front
 {
     public abstract class FrontUserToken : Entity<long>
     {

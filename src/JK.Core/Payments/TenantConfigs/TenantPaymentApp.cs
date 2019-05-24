@@ -1,8 +1,6 @@
 ﻿using Abp.Domain.Entities;
 using JK.MultiTenancy;
-using JK.Payments.Bacis;
 using JK.Payments.Enumerates;
-using JK.Payments.ThirdParty;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,6 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Payments.TenantConfigs
 {
+    [Table("TenantPaymentApps")]
     public class TenantPaymentApp : Entity
     {
         public int TenantId { get; set; }
@@ -41,33 +40,8 @@ namespace JK.Payments.TenantConfigs
         public bool UseSSL { get; set; }
 
 
-        public virtual ICollection<TenantAppChannel> SupportedChannels { get; set; }
+        public virtual ICollection<TenantPaymentAppChannel> SupportedChannels { get; set; }
 
-        public virtual ICollection<TenantAppCompany> SupportedCompanies { get; set; }
-    }
-    public class TenantAppCompany
-    {
-        public int TenantAppId { get; set; }
-
-        [ForeignKey(nameof(TenantAppId))]
-        public virtual TenantPaymentApp App { get; set; }
-
-        public int CompanyId { get; set; }
-
-        [ForeignKey(nameof(CompanyId))]
-        public virtual Company Company { get; set; }
-    }
-
-    public class TenantAppChannel
-    {
-        public int TenantAppId { get; set; }
-
-        [ForeignKey(nameof(TenantAppId))]
-        public virtual TenantPaymentApp App { get; set; }
-
-        public int ChannelId { get; set; }
-
-        [ForeignKey(nameof(ChannelId))]
-        public virtual Channel Channel { get; set; }
+        public virtual ICollection<TenantPaymentAppCompany> SupportedCompanies { get; set; }
     }
 }

@@ -1,8 +1,9 @@
-﻿using JK.Payments.Bacis;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using JK.Payments.Bacis;
 
-namespace JK.Payments.ThirdParty
+namespace JK.Payments.Integration
 {
+    [Table("CompanyChannel")]
     public class CompanyChannel
     {
         public int CompanyId { get; set; }

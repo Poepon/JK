@@ -7,14 +7,14 @@ using Abp.MultiTenancy;
 using Abp.Runtime.Session;
 using Abp.Web.Models;
 using JK.Customers;
-using JK.Web.Public.Identity;
 using JK.Web.Public.Models.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using CustomerLoginResult = JK.Web.Public.Identity.JKLoginResult<JK.Customers.Customer, JK.Customers.CustomerLogin, JK.Customers.CustomerClaim, JK.Customers.CustomerToken>;
+using JK.Identity;
+using CustomerLoginResult = JK.Identity.JKLoginResult<JK.Customers.Customer, JK.Customers.CustomerLogin, JK.Customers.CustomerClaim, JK.Customers.CustomerToken>;
 
 namespace JK.Web.Public.Controllers
 {

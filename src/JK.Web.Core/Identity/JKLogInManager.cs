@@ -11,9 +11,10 @@ using Abp.Domain.Uow;
 using Abp.Extensions;
 using Abp.IdentityFramework;
 using Abp.Zero.Configuration;
+using JK.Front;
 using Microsoft.AspNetCore.Identity;
 
-namespace JK.Web.Public.Identity
+namespace JK.Identity
 {
     public class JKLogInManager<TUser, TUserLogin, TUserClaim, TUserToken,TUserLoginAttempt> : ITransientDependency
         where TUser : FrontUserBase<TUserLogin, TUserClaim, TUserToken>

@@ -7,7 +7,13 @@ namespace JK.Payments.Orders
         public static string GetMd5(this PaymentOrder paymentOrder)
         {
             string value = $"{paymentOrder.TenantId}.{paymentOrder.CompanyId}.{paymentOrder.ChannelId}.{paymentOrder.AccountId}.{paymentOrder.ExternalOrderId}.{paymentOrder.Amount}";
-            return JKMd5.GetMd5(value);
+            return SecurityHelper.MD5(value, "");
+        }
+
+        public static bool VerifyMd5(this PaymentOrder paymentOrder)
+        {
+            string value = $"{paymentOrder.TenantId}.{paymentOrder.CompanyId}.{paymentOrder.ChannelId}.{paymentOrder.AccountId}.{paymentOrder.ExternalOrderId}.{paymentOrder.Amount}";
+            return SecurityHelper.MD5(value, "") == paymentOrder.Md5;
         }
     }
 }

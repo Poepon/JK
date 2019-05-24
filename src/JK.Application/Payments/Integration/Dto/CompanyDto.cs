@@ -1,12 +1,9 @@
-﻿using Abp.Application.Services.Dto;
+﻿using System.ComponentModel.DataAnnotations;
+using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using JK.Payments.Enumerates;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
 
-namespace JK.Payments.ThirdParty.Dto
+namespace JK.Payments.Integration.Dto
 {
     [AutoMap(typeof(Company))]
     public class CompanyDto : EntityDto

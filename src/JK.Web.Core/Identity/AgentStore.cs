@@ -3,7 +3,7 @@ using Abp.Domain.Uow;
 using Abp.Linq;
 using JK.Alliance;
 
-namespace JK.Web.Public.Identity
+namespace JK.Identity
 {
     public class AgentStore : JKUserStore<Agent, AgentLogin, AgentClaim, AgentToken>
     {

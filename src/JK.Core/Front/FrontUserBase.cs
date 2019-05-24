@@ -1,10 +1,10 @@
-﻿using Abp.Domain.Entities;
-using Abp.Domain.Entities.Auditing;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Abp.Domain.Entities;
+using Abp.Domain.Entities.Auditing;
 
-namespace JK
+namespace JK.Front
 {
     public abstract class FrontUserBase<TUserLogin, TUserClaim,TUserToken>
         : FullAuditedEntity<long>, IMustHaveTenant, IPassivable
