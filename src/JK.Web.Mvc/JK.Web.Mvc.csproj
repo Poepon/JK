@@ -6,7 +6,7 @@
     <AssemblyName>JK.Web.Mvc</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>JK.Web.Mvc</PackageId>
-    <UserSecretsId>AbpCompanyName-JK-56C2EF2F-ABD6-4EFC-AAF2-2E81C34E8FB1</UserSecretsId>
+    <UserSecretsId>JK-56C2EF2F-ABD6-4EFC-AAF2-2E81C34E8FB1</UserSecretsId>
     <RootNamespace>JK.Web</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
@@ -50,9 +50,9 @@
   <ItemGroup>
     <PackageReference Include="Castle.LoggingFacility.MsLogging" Version="3.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Abp.HangFire" Version="4.5.0" />
-    <PackageReference Include="Abp.RedisCache" Version="4.5.0" />
-    <PackageReference Include="Abp.Castle.Log4Net" Version="4.5.0" />
+    <PackageReference Include="Abp.HangFire" Version="4.6.0" />
+    <PackageReference Include="Abp.RedisCache" Version="4.6.0" />
+    <PackageReference Include="Abp.Castle.Log4Net" Version="4.6.0" />
     <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.0.165" />
     <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.0.165" />
   </ItemGroup>
