@@ -76,7 +76,7 @@ namespace JK.Payments.Orders
         [StringLength(64)]
         public string CreateIp { get; set; }
 
-        public DeviceType Device { get; set; }
+        public PaymentMode PaymentMode { get; set; }
 
         [Required]
         [StringLength(32)]

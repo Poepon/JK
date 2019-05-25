@@ -24,7 +24,7 @@ namespace JK.Payments.Orders.Dto
         [StringLength(64)]
         public string CreateIp { get; set; }
 
-        public DeviceType Device { get; set; }
+        public PaymentMode PaymentMode { get; set; }
 
         /// <summary>
         /// 同步回调

@@ -27,8 +27,8 @@ namespace JK.Payments.TenantConfigs
         [Required]
         [StringLength(32)]
         public string Key { get; set; }
-
-        public DeviceType Device { get; set; }
+        
+        public PaymentMode PaymentMode { get; set; }
 
         /// <summary>
         /// 回调域名
