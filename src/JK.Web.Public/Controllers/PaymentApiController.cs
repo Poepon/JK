@@ -166,7 +166,7 @@ namespace JK.Web.Public.Controllers
                 Amount = input.Amount,
                 BankCode = input.BankCode,
                 CreateIp = HttpContext.Connection.RemoteIpAddress.ToString(),
-                Device = app.Device,
+                PaymentMode = app.PaymentMode,
                 ExternalOrderId = input.ExternalOrderId,
                 SyncCallback = input.SyncCallback,
                 AsyncCallback = input.AsyncCallback,

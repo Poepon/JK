@@ -191,7 +191,7 @@ namespace JK.Payments.Orders
                 CallbackStatus = CallbackStatus.Pending,
                 Expire = Clock.Now.AddHours(2),
                 ExtData = input.ExtData,
-                Device = input.Device
+                PaymentMode = input.PaymentMode
             };
             paymentOrder.Md5 = paymentOrder.GetMd5();
             paymentOrder.SetNewOrder();
