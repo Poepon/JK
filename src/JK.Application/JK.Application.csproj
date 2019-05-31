@@ -11,12 +11,20 @@
     <RootNamespace>JK</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Abp.RedisCache" Version="4.6.0" />
+    <PackageReference Include="MessagePack" Version="1.7.3.7" />
+    <PackageReference Include="protobuf-net" Version="2.4.0" />
     <PackageReference Include="EPPlus.Core" Version="1.5.4" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\extension\Abp.RabbitMQ\Abp.RabbitMQ.csproj" />
     <ProjectReference Include="..\JK.Core\JK.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Payments\Orders\OrderIdGenerator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Redis\" />
+    <Folder Include="RabbitMQ\" />
   </ItemGroup>
 </Project>
