@@ -1,8 +1,8 @@
 ﻿namespace Volo.Abp.RabbitMQ
 {
-    public class ConsumerConfiguration
+    public class QOSConfiguration
     {
-        public ConsumerConfiguration(ushort defaultPrefetchCount, bool global = false)
+        public QOSConfiguration(ushort defaultPrefetchCount, bool global = false)
         {
             PrefetchCount = defaultPrefetchCount;
             Global = global;

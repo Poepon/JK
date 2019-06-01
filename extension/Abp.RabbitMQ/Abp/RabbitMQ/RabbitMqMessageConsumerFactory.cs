@@ -16,7 +16,7 @@ namespace Volo.Abp.RabbitMQ
         public IRabbitMqMessageConsumer Create(
             ExchangeDeclareConfiguration exchange,
             QueueDeclareConfiguration queue,
-            ConsumerConfiguration consumerConfiguration,
+            QOSConfiguration consumerConfiguration,
             string connectionName = null)
         {
             var consumer = ServiceScope.ServiceProvider.GetRequiredService<RabbitMqMessageConsumer>();

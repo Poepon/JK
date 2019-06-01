@@ -17,6 +17,7 @@ using JK.Chat.Distributed;
 using Abp.RealTime;
 using JK.Chat;
 using JK.MultiTenancy;
+using Abp.Redis;
 
 namespace JK
 {
@@ -59,6 +60,9 @@ namespace JK
                 });
             }
 
+            var abpRedisOptions = IocManager.Resolve<AbpRedisOptions>();
+            abpRedisOptions.ConnectionString = _appConfiguration["RedisCache:ConnectionString"];
+            abpRedisOptions.DatabaseId = _appConfiguration.GetValue<int>("RedisCache:DatabaseId");
 
             ConfigureTokenAuth();
 
@@ -84,7 +88,7 @@ namespace JK
 
         public override void PostInitialize()
         {
-           Configuration.ReplaceService<IOnlineClientManager<ChatChannel>,ChatDistributedOnlineClientManager>();
+            Configuration.ReplaceService<IOnlineClientManager<ChatChannel>, ChatDistributedOnlineClientManager>();
         }
     }
 }

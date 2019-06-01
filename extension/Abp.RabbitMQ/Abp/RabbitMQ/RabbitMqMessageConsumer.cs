@@ -24,7 +24,7 @@ namespace Volo.Abp.RabbitMQ
 
         protected QueueDeclareConfiguration Queue { get; private set; }
 
-        protected ConsumerConfiguration ConsumerConfiguration { get; private set; }
+        protected QOSConfiguration ConsumerConfiguration { get; private set; }
 
         protected string ConnectionName { get; private set; }
 
@@ -55,7 +55,7 @@ namespace Volo.Abp.RabbitMQ
         public void Initialize(
             [NotNull] ExchangeDeclareConfiguration exchange,
             [NotNull] QueueDeclareConfiguration queue,
-            [NotNull]ConsumerConfiguration consumerConfiguration,
+            [NotNull]QOSConfiguration consumerConfiguration,
             string connectionName = null)
         {
             Exchange = Check.NotNull(exchange, nameof(exchange));

@@ -3,7 +3,7 @@ using RabbitMQ.Client;
 using System.Threading.Tasks;
 using Volo.Abp.RabbitMQ;
 
-namespace Abp.RabbitMQ
+namespace Abp.RabbitMQ.AutoSubscribe
 {
     public abstract class RabbitMQProducer<T> : IRabbitMQProducer<T>
     {

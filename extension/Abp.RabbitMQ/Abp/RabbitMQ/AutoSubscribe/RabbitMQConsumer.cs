@@ -4,7 +4,7 @@ using RabbitMQ.Client.Events;
 using System.Threading.Tasks;
 using Volo.Abp.RabbitMQ;
 
-namespace Abp.RabbitMQ
+namespace Abp.RabbitMQ.AutoSubscribe
 {
     public abstract class RabbitMQConsumer<T> : IRabbitMQConsumer<T>
     {
@@ -66,7 +66,7 @@ namespace Abp.RabbitMQ
         {
             var eventName = ea.RoutingKey;
 
-            var eventData = Serializer.Deserialize(typeof(T), ea.Body);
+            var eventData = Serializer.Deserialize(typeof(T),ea.Body);
 
             await ConsumeAsync((T)eventData);
         }
