@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Abp.RabbitMQ
 {
-    public interface IProducer<T>
+    public interface IRabbitMQProducer<T>
     {
         Task PublishAsync(T message);
 

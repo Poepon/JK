@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Abp.Dependency;
 
-namespace Abp.Redis.Events
+namespace Abp.Redis
 {
     public interface IRedisProducer<T> : ITransientDependency
     {

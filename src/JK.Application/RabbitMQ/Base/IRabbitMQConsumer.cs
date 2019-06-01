@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Abp.RabbitMQ
 {
-    public interface IConsumer<T>
+    public interface IRabbitMQConsumer<T>
     {
         void Initialize();
 

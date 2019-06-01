@@ -3,7 +3,7 @@ using Abp.Runtime.Caching.Redis;
 using StackExchange.Redis;
 using System.Threading.Tasks;
 
-namespace Abp.Redis.Events
+namespace Abp.Redis
 {
     public class RedisProducer<T> : IRedisProducer<T>
     {

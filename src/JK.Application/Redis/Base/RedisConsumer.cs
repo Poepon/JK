@@ -4,17 +4,17 @@ using StackExchange.Redis;
 using System;
 using System.Threading.Tasks;
 
-namespace Abp.Redis.Events
+namespace Abp.Redis
 {
 
-    public abstract class BaseRedisConsumer<T> : IRedisConsumer<T>
+    public abstract class RedisConsumer<T> : IRedisConsumer<T>
     {
         private readonly IAbpRedisCacheDatabaseProvider _databaseProvider;
         private readonly IConnectionMultiplexer _conn;
 
         protected string ChannelName { get; }
 
-        public BaseRedisConsumer(IAbpRedisCacheDatabaseProvider databaseProvider)
+        public RedisConsumer(IAbpRedisCacheDatabaseProvider databaseProvider)
         {
             _databaseProvider = databaseProvider;
             _conn = _databaseProvider.GetDatabase().Multiplexer;

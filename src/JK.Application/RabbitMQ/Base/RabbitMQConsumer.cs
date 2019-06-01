@@ -5,7 +5,7 @@ using Volo.Abp.RabbitMQ;
 
 namespace Abp.RabbitMQ
 {
-    public abstract class BaseConsumer<T> : IConsumer<T>
+    public abstract class RabbitMQConsumer<T> : IRabbitMQConsumer<T>
     {
         protected IRabbitMqSerializer Serializer { get; }
 
@@ -28,7 +28,7 @@ namespace Abp.RabbitMQ
         protected string QueueName { get; }
         protected abstract string ConnectionName { get; }
 
-        public BaseConsumer(
+        public RabbitMQConsumer(
           IRabbitMqSerializer serializer,
           IRabbitMqMessageConsumerFactory messageConsumerFactory)
         {

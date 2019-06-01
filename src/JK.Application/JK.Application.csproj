@@ -23,8 +23,4 @@
   <ItemGroup>
     <Compile Remove="Payments\Orders\OrderIdGenerator.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Redis\" />
-    <Folder Include="RabbitMQ\" />
-  </ItemGroup>
 </Project>

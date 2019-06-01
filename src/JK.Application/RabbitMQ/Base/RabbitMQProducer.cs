@@ -4,9 +4,9 @@ using Volo.Abp.RabbitMQ;
 
 namespace Abp.RabbitMQ
 {
-    public abstract class Producer<T> : IProducer<T>
+    public abstract class RabbitMQProducer<T> : IRabbitMQProducer<T>
     {
-        public Producer(IConnectionPool connectionPool, IRabbitMqSerializer serializer)
+        public RabbitMQProducer(IConnectionPool connectionPool, IRabbitMqSerializer serializer)
         {
             ConnectionPool = connectionPool;
             Serializer = serializer;
