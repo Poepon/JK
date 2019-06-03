@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Abp.Modules;
+﻿using Abp.Modules;
 using Abp.Reflection.Extensions;
 using JK.Configuration;
-using Abp.Timing;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Volo.Abp.RabbitMQ;
 
 namespace JK.Web.Startup
 {
-    [DependsOn(typeof(JKWebCoreModule))]
+    [DependsOn(typeof(JKWebCoreModule), typeof(AbpRabbitMqModule))]
     public class JKWebMvcModule : AbpModule
     {
         private readonly IHostingEnvironment _env;
@@ -28,5 +28,6 @@ namespace JK.Web.Startup
         {
             IocManager.RegisterAssemblyByConvention(typeof(JKWebMvcModule).GetAssembly());
         }
+
     }
 }

@@ -5,46 +5,41 @@ using Volo.Abp.RabbitMQ;
 
 namespace Abp.RabbitMQ.AutoSubscribe
 {
-    public abstract class RabbitMQProducer<T> : IRabbitMQProducer<T>
+    public class RabbitMQProducer : IRabbitMQProducer
     {
         public RabbitMQProducer(IConnectionPool connectionPool, IObjectSerializer serializer)
         {
             ConnectionPool = connectionPool;
             Serializer = serializer;
-            var type = typeof(T);
-            ExchangeName = type.FullName;
         }
         protected IConnectionPool ConnectionPool { get; }
         protected IObjectSerializer Serializer { get; }
-        protected abstract string ConnectionName { get; }
-        protected string ExchangeName { get; }
-        protected virtual string ExchangeType { get; } = "direct";
+        protected string ConnectionName { get; }
 
-        public async Task PublishAsync(T message)
+        public async Task PublishAsync<T>(ExchangeDeclareConfiguration exchange, string routingKey, T message)
         {
-            await PublishAsync(message, false);
+            await PublishAsync(exchange, routingKey, message, false);
         }
 
-        public Task<bool> PublishAsync(T message, bool waitForConfirms)
+        public Task<bool> PublishAsync<T>(ExchangeDeclareConfiguration exchange, string routingKey, T message, bool waitForConfirms)
         {
             bool result = !waitForConfirms;
-            var eventName = (typeof(T).FullName);
             var body = Serializer.Serialize(message);
 
             using (var channel = ConnectionPool.Get(ConnectionName).CreateModel())
             {
                 channel.ExchangeDeclare(
-                    ExchangeName,
-                    ExchangeType,
-                    durable: true
+                    exchange.ExchangeName,
+                    exchange.Type,
+                    durable: exchange.Durable
                 );
 
                 var properties = channel.CreateBasicProperties();
                 properties.DeliveryMode = RabbitMqConsts.DeliveryModes.Persistent;
 
                 channel.BasicPublish(
-                   exchange: ExchangeName,
-                    routingKey: eventName,
+                   exchange: exchange.ExchangeName,
+                    routingKey: routingKey,
                     mandatory: true,
                     basicProperties: properties,
                     body: body

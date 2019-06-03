@@ -4,7 +4,6 @@ using Abp.Redis;
 using Abp.Reflection.Extensions;
 using JK.Authorization;
 using JK.Payments.Orders;
-using JK.Redis.Test;
 
 namespace JK
 {
@@ -21,9 +20,6 @@ namespace JK
         public override void PostInitialize()
         {
             IocManager.Resolve<IIdGenerator>().Init(0, 0);
-            var pub = IocManager.Resolve<IRedisProducer>();
-            //pub.PublishAsync("Test1", "hi").Wait();
-            pub.PublishAsync("Test2", new Message() { Text = "test" }).Wait();
         }
         public override void Initialize()
         {

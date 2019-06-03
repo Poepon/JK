@@ -1,4 +1,5 @@
 ﻿using Abp.Dependency;
+using System;
 using System.Threading.Tasks;
 using Volo.Abp.RabbitMQ;
 
@@ -8,15 +9,19 @@ namespace Abp.RabbitMQ.AutoSubscribe
     {
 
     }
-    public interface IRabbitMQConsumer<T> : IRabbitMQConsumer
+    public interface IRabbitMQConsumer<T> : IRabbitMQConsumer, ISingletonDependency
     {
-        void Initialize();
-
         ExchangeDeclareConfiguration GetExchangeDeclare();
 
         QueueDeclareConfiguration GetQueueDeclare();
 
         QOSConfiguration GetQOSConfiguration();
+
+        string GetConnectionName();
+
+        string GetRoutingKey();
+
+        Type GetMessageType();
 
         Task ConsumeAsync(T message);
     }

@@ -1,6 +1,7 @@
 ﻿using Abp.AspNetCore;
 using Abp.Castle.Logging.Log4Net;
 using Abp.Extensions;
+using Abp.RabbitMQ;
 using Castle.Facilities.Logging;
 using Exceptionless;
 using JK.Authentication.JwtBearer;
@@ -43,6 +44,8 @@ namespace JK.Web.Startup
                 }, "JKProtection-Keys");
 
             services.AddMiniProfiler().AddEntityFramework();
+
+            services.AddRabbitMQ(_appConfiguration);
 
             // MVC
             services.AddMvc(
