@@ -1,5 +1,6 @@
 ﻿using Abp.Modules;
 using Abp.Reflection.Extensions;
+using JK.Authorization;
 using JK.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +23,7 @@ namespace JK.Web.Startup
         public override void PreInitialize()
         {
             Configuration.Navigation.Providers.Add<AppXmlNavigationProvider>();
+            Configuration.Authorization.Providers.Add<AppXmlAuthorizationProvider>();
         }
 
         public override void Initialize()

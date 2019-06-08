@@ -16,7 +16,6 @@
     <RootNamespace>JK</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\zero\Abp.ZeroCore\Abp.ZeroCore.csproj" />
     <ProjectReference Include="..\JK.Application\JK.Application.csproj" />
     <ProjectReference Include="..\JK.EntityFrameworkCore\JK.EntityFrameworkCore.csproj" />
   </ItemGroup>

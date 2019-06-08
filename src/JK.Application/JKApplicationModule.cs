@@ -1,22 +1,15 @@
 ﻿using Abp.AutoMapper;
 using Abp.Modules;
-using Abp.Redis;
 using Abp.Reflection.Extensions;
-using JK.Authorization;
 using JK.Payments.Orders;
 
 namespace JK
 {
     [DependsOn(
         typeof(JKCoreModule),
-        typeof(AbpAutoMapperModule),
-        typeof(AbpRedisAutoSubscribeModule))]
+        typeof(AbpAutoMapperModule))]
     public class JKApplicationModule : AbpModule
     {
-        public override void PreInitialize()
-        {
-            Configuration.Authorization.Providers.Add<AppXmlAuthorizationProvider>();
-        }
         public override void PostInitialize()
         {
             IocManager.Resolve<IIdGenerator>().Init(0, 0);
