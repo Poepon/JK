@@ -11,7 +11,6 @@ using JK.Payments.Orders;
 using JK.Payments.Bacis;
 using JK.Payments.Integration;
 using JK.Payments.TenantConfigs;
-using JK.Books;
 
 namespace JK.EntityFrameworkCore
 {
@@ -104,26 +103,6 @@ namespace JK.EntityFrameworkCore
 
         public virtual DbSet<TenantPaymentAppChannel> TenantPaymentAppChannels { get; set; }
         public virtual DbSet<TenantPaymentAppCompany> TenantPaymentAppCompanies { get; set; }
-        #endregion
-
-        #region Books
-
-        public virtual DbSet<Author> Authors { get; set; }
-
-        public virtual DbSet<Book> Books { get; set; }
-
-        public virtual DbSet<BookLink> BookLinks { get; set; }
-
-        public virtual DbSet<BookVolume> BookVolumes { get; set; }
-
-        public virtual DbSet<BookChapter> BookChapters { get; set; }
-
-        public virtual DbSet<BookShelf> BookShelves { get; set; }
-
-        public virtual DbSet<BookType> BookTypes { get; set; }
-
-        public virtual DbSet<NotFoundBook> NotFoundBooks { get; set; }
-        
         #endregion
 
         public JKDbContext(DbContextOptions<JKDbContext> options)
