@@ -249,7 +249,7 @@ namespace JK.Payments.Orders
         /// </summary>
         private const string ParameterPattern = @"\{\{(?<key>[a-zA-Z0-9@$#&_]{1,20})\>{0,1}(?<path>.*?)\}\}";
 
-        public Dictionary<SetValueLocation, Dictionary<string, string>> ProcessingApiRequestParameters(IEnumerable<ApiRequestParameter> parameters)
+        public Dictionary<SetValueLocation, Dictionary<string, string>> ProcessingApiRequestParameters(IEnumerable<ApiParameter> parameters)
         {
             var values = new Dictionary<SetValueLocation, Dictionary<string, string>>();
             var queryItem = new Dictionary<string, string>();
@@ -259,7 +259,7 @@ namespace JK.Payments.Orders
             {
                 string value = NewMethod(parameter.Key, parameter.ValueOrExpression, parameter.Format, parameter.Required, parameter.Encryption, parameter.EncryptionParameters);
                 Result.Add(parameter.Key, value);
-                switch (parameter.Location)
+                switch (parameter.SetLocation)
                 {
                     case SetValueLocation.Content:
                         contentItem.Add(parameter.Key, value);
@@ -354,11 +354,11 @@ namespace JK.Payments.Orders
             return value;
         }
 
-        public Dictionary<string, string> ProcessingApiCallbackParameters(IEnumerable<ApiCallbackParameter> parameters)
+        public Dictionary<string, string> ProcessingApiCallbackParameters(IEnumerable<ApiParameter> parameters)
         {
             foreach (var parameter in parameters)
             {
-                string value = NewMethod(parameter.Key, parameter.Expression, parameter.Format, parameter.Required, parameter.Encryption, parameter.EncryptionParameters);
+                string value = NewMethod(parameter.Key, parameter.ValueOrExpression, parameter.Format, parameter.Required, parameter.Encryption, parameter.EncryptionParameters);
                 Result.Add(parameter.Key, value);
             }
             return Result;

@@ -174,7 +174,7 @@ namespace JK.Web.Public.Controllers
             };
         }
 
-        private async Task ProcessingData<T>(ConcurrentDictionary<string, string> values, string dataContent, DataType dataType, IEnumerable<T> responeParameters) where T : IGetValueParameter
+        private async Task ProcessingData<T>(ConcurrentDictionary<string, string> values, string dataContent, DataType dataType, IEnumerable<T> responeParameters) where T : IValueParameter
         {
 
             if (dataType == DataType.Json)
@@ -191,14 +191,14 @@ namespace JK.Web.Public.Controllers
             }
         }
 
-        private static void ProcessingXmlData<T>(IEnumerable<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IGetValueParameter
+        private static void ProcessingXmlData<T>(IEnumerable<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IValueParameter
         {
             var xmlDocument = new XmlDocument();
             xmlDocument.LoadXml(content);
             Parallel.ForEach(parameters, (parameter) =>
              {
                  string key = parameter.Key;
-                 var value = xmlDocument.DocumentElement.SelectSingleNode(parameter.Expression).InnerText;
+                 var value = xmlDocument.DocumentElement.SelectSingleNode(parameter.ValueOrExpression).InnerText;
                  values.TryAdd(key, value);
                  if (parameter.DataTag.HasValue)
                  {
@@ -207,13 +207,13 @@ namespace JK.Web.Public.Controllers
              });
         }
 
-        private static void ProcessingJsonData<T>(IEnumerable<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IGetValueParameter
+        private static void ProcessingJsonData<T>(IEnumerable<T> parameters, ConcurrentDictionary<string, string> values, string content) where T : IValueParameter
         {
             var jObject = JObject.Parse(content);
             Parallel.ForEach(parameters, (parameter) =>
              {
                  string key = parameter.Key;
-                 string value = jObject.SelectToken(parameter.Expression).ToString();
+                 string value = jObject.SelectToken(parameter.ValueOrExpression).ToString();
                  values.TryAdd(key, value);
                  if (parameter.DataTag.HasValue)
                      values.TryAdd(parameter.DataTag.ToString(), value);
@@ -272,8 +272,8 @@ namespace JK.Web.Public.Controllers
             var parameters = await orderProcessingService.GetOrderCallbackParametersAsync(CompanyId);
             //TODO DataType
             var dataType = DataType.FormData;
-            var groups = parameters.ToLookup(p => p.Location);
-            IGrouping<GetValueLocation, ApiCallbackParameter> parameterGroup = null;
+            var groups = parameters.ToLookup(p => p.GetLocation);
+            IGrouping<GetValueLocation?, ApiParameter> parameterGroup = null;
             foreach (var g in groups)
             {
                 switch (g.Key)

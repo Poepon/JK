@@ -42,7 +42,7 @@ namespace JK.Payments.Orders
 
         public Dictionary<string, string> Query { get; set; }
 
-        public List<ApiResponeParameter> ApiResponeParameters { get; set; }
+        public List<ApiParameter> ApiResponeParameters { get; set; }
     }
     public interface IOrderProcessingService
     {
@@ -54,7 +54,7 @@ namespace JK.Payments.Orders
 
         Task<BuildOrderPostRequestResult> BuildOrderPostRequest(PaymentOrderDto paymentOrder);
 
-        Task<List<ApiCallbackParameter>> GetOrderCallbackParametersAsync(int companyId);
+        Task<List<ApiParameter>> GetOrderCallbackParametersAsync(int companyId);
 
         Task<ResultDto<PaymentStatus>> MarkOrderAsPaid(long orderId);
     }
@@ -71,9 +71,7 @@ namespace JK.Payments.Orders
         private readonly IRepository<CompanyAccount> accountRepository;
         private readonly IRepository<PaymentOrder, long> paymentOrderRepository;
         private readonly IRepository<ApiConfiguration> apiconfigRepository;
-        private readonly IRepository<ApiRequestParameter> apiRequestParameterRepository;
-        private readonly IRepository<ApiResponeParameter> apiResponeParameterRepository;
-        private readonly IRepository<ApiCallbackParameter> apiCallbackParameterRepository;
+        private readonly IRepository<ApiParameter> apiParameterRepository;
 
         public OrderProcessingService(
             ITenantCache tenantCache,
@@ -86,9 +84,7 @@ namespace JK.Payments.Orders
             IRepository<CompanyAccount> accountRepository,
             IRepository<PaymentOrder, long> paymentOrderRepository,
             IRepository<ApiConfiguration> apiconfigRepository,
-            IRepository<ApiRequestParameter> apiRequestParameterRepository,
-            IRepository<ApiResponeParameter> apiResponeParameterRepository,
-            IRepository<ApiCallbackParameter> apiCallbackParameterRepository)
+            IRepository<ApiParameter> apiParameterRepository)
         {
             this.tenantCache = tenantCache;
             this.paymentOrderPolicyService = paymentOrderPolicyService;
@@ -100,9 +96,7 @@ namespace JK.Payments.Orders
             this.accountRepository = accountRepository;
             this.paymentOrderRepository = paymentOrderRepository;
             this.apiconfigRepository = apiconfigRepository;
-            this.apiRequestParameterRepository = apiRequestParameterRepository;
-            this.apiResponeParameterRepository = apiResponeParameterRepository;
-            this.apiCallbackParameterRepository = apiCallbackParameterRepository;
+            this.apiParameterRepository = apiParameterRepository;
         }
 
         public async Task<ResultDto<PaymentOrderDto>> PlaceOrderAsync(CreatePaymentOrderDto input)
@@ -229,13 +223,13 @@ namespace JK.Payments.Orders
                 RequestType = apiconfig.RequestType,
                 HasResponeParameter = apiconfig.HasResponeParameter
             };
-            var apiRequests = await apiRequestParameterRepository.GetAll()
-                .Where(p => p.ApiId == apiconfig.Id)
+            var apiRequests = await apiParameterRepository.GetAll()
+                .Where(p => p.CompanyId == paymentOrder.CompanyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Request)
                 .OrderBy(p => p.OrderNumber).ToListAsync();
             if (apiconfig.HasResponeParameter)
             {
-                var apiRespones = await apiResponeParameterRepository.GetAll()
-                       .Where(p => p.ApiId == apiconfig.Id)
+                var apiRespones = await apiParameterRepository.GetAll()
+                       .Where(p => p.CompanyId == paymentOrder.CompanyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Respone)
                    .OrderBy(p => p.OrderNumber).ToListAsync();
                 result.ApiResponeParameters = apiRespones;
             }
@@ -258,10 +252,14 @@ namespace JK.Payments.Orders
             return result;
         }
 
-        public async Task<List<ApiCallbackParameter>> GetOrderCallbackParametersAsync(int companyId)
+        public async Task<List<ApiParameter>> GetOrderCallbackParametersAsync(int companyId)
         {
-            var apiConfig = await apiconfigRepository.FirstOrDefaultAsync(api => api.CompanyId == companyId && api.ApiMethod == ApiMethod.PlaceOrder);
-            return await apiCallbackParameterRepository.GetAll().Where(p => p.ApiId == apiConfig.Id).OrderBy(p => p.OrderNumber).ToListAsync();
+            return await apiParameterRepository.GetAll()
+                .Where(p => p.CompanyId == companyId &&
+                            p.ApiMethod == ApiMethod.PlaceOrder &&
+                            p.ParameterType == ParameterType.Callback)
+                .OrderBy(p => p.OrderNumber)
+                .ToListAsync();
         }
         [UnitOfWork]
         public virtual async Task<ResultDto<PaymentStatus>> MarkOrderAsPaid(long orderId)

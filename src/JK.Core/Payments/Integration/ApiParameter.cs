@@ -4,14 +4,15 @@ using Abp.Domain.Entities;
 using JK.Payments.Enumerates;
 
 namespace JK.Payments.Integration
-{   
-    [Table("ApiCallbackParameters")]
-    public class ApiCallbackParameter : Entity, IGetValueParameter
+{
+  
+    [Table("ApiParameters")]
+    public class ApiParameter : Entity, IValueParameter
     {
-        public int ApiId { get; set; }
 
-        [ForeignKey(nameof(ApiId))]
-        public virtual ApiConfiguration Api { get; set; }
+        public int CompanyId { get; set; }
+
+        public ApiMethod ApiMethod { get; set; }
 
         [StringLength(32)]
         [Required]
@@ -19,16 +20,20 @@ namespace JK.Payments.Integration
 
         [StringLength(500)]
         [Required]
-        public string Expression { get; set; }
+        public string ValueOrExpression { get; set; }
 
         public bool Required { get; set; }
 
-        public GetValueLocation Location { get; set; }
+        public ParameterType ParameterType { get; set; }
 
         public DataTag? DataTag { get; set; }
 
         [StringLength(32)]
         public string Format { get; set; }
+
+        public GetValueLocation? GetLocation { get; set; }
+
+        public SetValueLocation? SetLocation { get; set; }
 
         public EncryptionMethod? Encryption { get; set; }
 
@@ -39,7 +44,5 @@ namespace JK.Payments.Integration
         public string Desc { get; set; }
 
         public int OrderNumber { get; set; }
-
-      
     }
 }
