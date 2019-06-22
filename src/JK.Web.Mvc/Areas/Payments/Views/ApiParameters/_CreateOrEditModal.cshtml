@@ -1,0 +1,163 @@
+﻿@{
+    Layout = null;
+}
+@model JK.Web.Areas.Payments.Models.ApiParameters.EditApiParametersViewModel
+@using JK.Web.Models.Common.Modals
+@using JK.UI
+@await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml", new ModalHeaderViewModel(Model.IsEditMode ? "编辑参数" : "新建参数"))
+<div class="modal-body">
+    <form name="InformationsForm" role="form" novalidate class="form-validation">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <ul class="nav nav-tabs tab-nav-right" role="tablist">
+            <li role="presentation" class="active"><a href="#edit-parameter-details" data-toggle="tab">参数信息</a></li>
+            <li role="presentation"><a href="#edit-parameter-methods" data-toggle="tab">@L("PaymentMethods")</a></li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane animated fadeIn active" id="edit-parameter-details">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="input-group form-float">
+                            <span class="input-group-addon">@L("PaymentPlatforms")</span>
+                            <select asp-items="Model.Companies" asp-for="CompanyId" class="form-control" data-live-search="true" required>
+                                <option value="">请选择对接公司</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="col-sm-12">
+                        <div class="input-group form-float">
+                            <span class="input-group-addon">键</span>
+                            <div class="form-line">
+                                <input type="text" asp-for="Key" required class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="input-group form-float">
+                            <span class="input-group-addon">值</span>
+                            <div class="form-line">
+                                <input type="text" asp-for="ValueOrExpression" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="input-group form-float">
+                            <span class="input-group-addon">描述</span>
+                            <div class="form-line">
+                                <input type="text" asp-for="Desc" required class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="input-group form-float">
+                            <span class="input-group-addon">格式</span>
+                            <div class="form-line">
+                                <input type="text" asp-for="Format" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="input-group form-float">
+                            <input id="Required" type="checkbox" name="Required" value="true" @(Model.Required ? "checked" : "") class="form-control" />
+                            <label for="Required" class="form-label">必需的</label>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="input-group form-float">
+                            <span class="input-group-addon">接口方法</span>
+                            <select asp-items="Model.ApiMethod.ToSelectListItems(this.LocalizationManager)" asp-for="ApiMethod" class="form-control" required>
+                                <option value="">请选择接口方法</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group form-float">
+                            <span class="input-group-addon">取值位置</span>
+                            <select asp-items="Model.GetLocation.ToSelectListItems()" name="GetLocation" class="form-control" required>
+                                <option value="">请选择参数取值赋值位置</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group form-float">
+                            <span class="input-group-addon">赋值位置</span>
+                            <select asp-items="Model.SetLocation.ToSelectListItems()" name="GetLocation" class="form-control" required>
+                                <option value="">请选择参数取值赋值位置</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group form-float">
+                            <span class="input-group-addon">参数类型</span>
+                            <select asp-items="Model.ParameterType.ToSelectListItems(this.LocalizationManager)" name="ParameterType" class="form-control" required>
+                                <option value="">请选择参数类型</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group form-float">
+                            <label class="input-group-addon">特殊字段标记</label>
+                            <select asp-for="DataTag" asp-items="Model.DataTag.GetValueOrDefault().ToSelectListItems(this.LocalizationManager)" class="form-control" required>
+                                <option value="">请选择字段标记</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="input-group form-float">
+                            <span class="input-group-addon">加/解密方式</span>
+                            <select asp-items="Model.Encryption.ToSelectListItems()" asp-for="Encryption" class="form-control" required>
+                                <option value="">请选择加密方式</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="input-group form-float">
+                            <span class="input-group-addon">排序值</span>
+                            <div class="form-line">
+                                <input type="number" asp-for="OrderNumber" required class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <label>同步回调参数值：</label>
+                        <code>
+                            {{@@HttpsDomain}}/Payment/ReturnBack_{{$PaymentPlatformId}}_{{$PaymentMethodId}}_{{#MerchantConfigId}}
+
+                        </code>
+                    </div>
+                    <div class="input-group">
+                        <label>异步回调参数值：</label>
+                        <code>
+                            {{@@HttpsDomain}}/Payment/Callback_{{$PaymentPlatformId}}_{{$PaymentMethodId}}_{{#MerchantConfigId}}
+                        </code>
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane animated fadeIn" id="edit-parameter-methods">
+                <div class="row">
+                    <div class="col-sm-12" id="paymentMethodContainer">
+                        @if (Model.Channels != null)
+                        {
+                            foreach (var channel in Model.Channels)
+                            {
+                                <div class="col-sm-6">
+                                    <input type="checkbox" name="paymentMethod" value="@channel.Value" title="@channel.Text" class="filled-in" id="@string.Format("paymentMethod{0}",channel.Value)" @(channel.Selected ? "checked" : "") />
+                                    <label for="@string.Format("paymentMethod{0}",channel.Value)" title="@channel.Text">@channel.Text</label>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </form>
+</div>
+@await Html.PartialAsync("~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml")

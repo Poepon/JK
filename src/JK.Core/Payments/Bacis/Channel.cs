@@ -34,11 +34,16 @@ namespace JK.Payments.Bacis
         public bool IsActive { get; set; }
 
         public virtual ICollection<ApiChannel> ApiChannels { get; set; }
+
         public virtual ICollection<CompanyChannel> CompanyChannels { get; set; }
+
         public virtual ICollection<PaymentOrderPolicyChannel> PaymentOrderPolicyChannels { get; set; }
 
         public virtual ICollection<TenantPaymentAppChannel> AppChannels { get; set; }
+
         public virtual ICollection<TenantPaymentAppCompany> AppCompanies { get; set; }
-        
+
+        public virtual ICollection<ParameterChannel> ParameterChannels { get; set; }
+
     }
 }

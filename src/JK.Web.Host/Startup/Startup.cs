@@ -14,7 +14,7 @@ using Abp.Castle.Logging.Log4Net;
 using Abp.Extensions;
 using JK.Configuration;
 using JK.Identity;
-
+using JK.Abp.RabbitMQ;
 
 namespace JK.Web.Host.Startup
 {
@@ -31,6 +31,7 @@ namespace JK.Web.Host.Startup
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            services.AddRabbitMQ(_appConfiguration);
             // MVC
             services.AddMvc(
                 options => options.Filters.Add(new CorsAuthorizationFilterFactory(_defaultCorsPolicyName))

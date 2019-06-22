@@ -269,7 +269,7 @@ namespace JK.Web.Public.Controllers
             IHeaderDictionary headers = Request.Headers;
             IQueryCollection query = Request.Query;
             var data = new ConcurrentDictionary<string, string>();
-            var parameters = await orderProcessingService.GetOrderCallbackParametersAsync(CompanyId);
+            var parameters = await orderProcessingService.GetOrderCallbackParametersAsync(CompanyId, ChannelId);
             //TODO DataType
             var dataType = DataType.FormData;
             var groups = parameters.ToLookup(p => p.GetLocation);

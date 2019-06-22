@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Domain.Entities;
 using JK.Payments.Enumerates;
 
 namespace JK.Payments.Integration
 {
-  
     [Table("ApiParameters")]
     public class ApiParameter : Entity, IValueParameter
     {
@@ -44,5 +44,7 @@ namespace JK.Payments.Integration
         public string Desc { get; set; }
 
         public int OrderNumber { get; set; }
+
+        public virtual ICollection<ParameterChannel> SupportedChannels { get; set; }
     }
 }

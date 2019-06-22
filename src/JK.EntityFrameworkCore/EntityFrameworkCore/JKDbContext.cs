@@ -129,6 +129,19 @@ namespace JK.EntityFrameworkCore
                 .WithMany(t => t.ApiChannels)
                 .HasForeignKey(pt => pt.ChannelId);
 
+            modelBuilder.Entity<ParameterChannel>()
+                .HasKey(t => new { t.ParameterId, t.ChannelId });
+
+            modelBuilder.Entity<ParameterChannel>()
+                .HasOne(pt => pt.Parameter)
+                .WithMany(p => p.SupportedChannels)
+                .HasForeignKey(pt => pt.ParameterId);
+
+            modelBuilder.Entity<ParameterChannel>()
+                .HasOne(pt => pt.Channel)
+                .WithMany(t => t.ParameterChannels)
+                .HasForeignKey(pt => pt.ChannelId);
+
             modelBuilder.Entity<CompanyChannel>()
                 .HasKey(t => new { t.CompanyId, t.ChannelId });
 

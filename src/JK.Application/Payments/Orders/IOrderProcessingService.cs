@@ -54,7 +54,7 @@ namespace JK.Payments.Orders
 
         Task<BuildOrderPostRequestResult> BuildOrderPostRequest(PaymentOrderDto paymentOrder);
 
-        Task<List<ApiParameter>> GetOrderCallbackParametersAsync(int companyId);
+        Task<List<ApiParameter>> GetOrderCallbackParametersAsync(int companyId,int channelId);
 
         Task<ResultDto<PaymentStatus>> MarkOrderAsPaid(long orderId);
     }
@@ -224,12 +224,14 @@ namespace JK.Payments.Orders
                 HasResponeParameter = apiconfig.HasResponeParameter
             };
             var apiRequests = await apiParameterRepository.GetAll()
-                .Where(p => p.CompanyId == paymentOrder.CompanyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Request)
+                .Where(p => p.CompanyId == paymentOrder.CompanyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Request &&
+                            p.SupportedChannels.Any(c => c.ChannelId == paymentOrder.ChannelId))
                 .OrderBy(p => p.OrderNumber).ToListAsync();
             if (apiconfig.HasResponeParameter)
             {
                 var apiRespones = await apiParameterRepository.GetAll()
-                       .Where(p => p.CompanyId == paymentOrder.CompanyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Respone)
+                       .Where(p => p.CompanyId == paymentOrder.CompanyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Respone &&
+                                   p.SupportedChannels.Any(c => c.ChannelId == paymentOrder.ChannelId))
                    .OrderBy(p => p.OrderNumber).ToListAsync();
                 result.ApiResponeParameters = apiRespones;
             }
@@ -252,12 +254,11 @@ namespace JK.Payments.Orders
             return result;
         }
 
-        public async Task<List<ApiParameter>> GetOrderCallbackParametersAsync(int companyId)
+        public async Task<List<ApiParameter>> GetOrderCallbackParametersAsync(int companyId,int channelId)
         {
             return await apiParameterRepository.GetAll()
-                .Where(p => p.CompanyId == companyId &&
-                            p.ApiMethod == ApiMethod.PlaceOrder &&
-                            p.ParameterType == ParameterType.Callback)
+                .Where(p => p.CompanyId == companyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Callback &&
+                            p.SupportedChannels.Any(c => c.ChannelId == channelId))
                 .OrderBy(p => p.OrderNumber)
                 .ToListAsync();
         }

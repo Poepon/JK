@@ -59,7 +59,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Payments\Data\" />
-    <Folder Include="Areas\Payments\Models\" />
-    <Folder Include="Areas\Payments\Views\" />
   </ItemGroup>
 </Project>
