@@ -20,8 +20,8 @@
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0006" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\extension\Abp.RabbitMQ\Abp.RabbitMQ.csproj" />
-    <ProjectReference Include="..\..\extension\Abp.Redis.AutoSubscribe\Abp.Redis.AutoSubscribe.csproj" />
+    <ProjectReference Include="..\..\extension\JK.Abp.RabbitMQ\JK.Abp.RabbitMQ.csproj" />
+    <ProjectReference Include="..\..\extension\JK.Abp.Redis\JK.Abp.Redis.csproj" />
     <ProjectReference Include="..\JK.Core\JK.Core.csproj" />
   </ItemGroup>
   <ItemGroup>

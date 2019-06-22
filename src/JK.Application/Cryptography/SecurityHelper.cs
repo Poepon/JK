@@ -1,6 +1,4 @@
-﻿using JK.Payments.Enumerates;
-using JK.Payments.TenantConfigs.Dto;
-using System;
+﻿using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;

@@ -17,7 +17,7 @@ using JK.Chat.Distributed;
 using Abp.RealTime;
 using JK.Chat;
 using JK.MultiTenancy;
-using Abp.Redis;
+using JK.Abp.Redis;
 
 namespace JK
 {
