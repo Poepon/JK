@@ -121,7 +121,7 @@ namespace JK.Web.Public.Controllers
                     if (postdata.HasResponeParameter)
                     {
                         var data = new ConcurrentDictionary<string, string>();
-                        await ProcessingData(data, await response.Content.ReadAsStringAsync(), postdata.DataType, postdata.ApiResponeParameters);
+                        ProcessingData(data, await response.Content.ReadAsStringAsync(), postdata.DataType, postdata.ApiResponeParameters);
                         var resultCode = data[DataTag.ResultCode.ToString()];
                         var resultCodeMean = await resultCodeRepository.FirstOrDefaultAsync(c => c.ResultCode == resultCode && c.CompanyId == paymentOrder.CompanyId);
                         if (resultCodeMean == null)
@@ -174,7 +174,7 @@ namespace JK.Web.Public.Controllers
             };
         }
 
-        private async Task ProcessingData<T>(ConcurrentDictionary<string, string> values, string dataContent, DataType dataType, IEnumerable<T> responeParameters) where T : IValueParameter
+        private void ProcessingData<T>(ConcurrentDictionary<string, string> values, string dataContent, DataType dataType, IEnumerable<T> responeParameters) where T : IValueParameter
         {
 
             if (dataType == DataType.Json)
@@ -294,7 +294,7 @@ namespace JK.Web.Public.Controllers
                         }
                         break;
                     case GetValueLocation.Body:
-                        await ProcessingData(data, bodyContent, dataType, g.ToList());
+                        ProcessingData(data, bodyContent, dataType, g.ToList());
                         break;
                     case GetValueLocation.Query:
                         foreach (var parameter in g)

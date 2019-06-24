@@ -46,6 +46,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Abp.Redis", "extension\J
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Abp.Serialization.Abstractions", "extension\JK.Abp.Serialization.Abstractions\JK.Abp.Serialization.Abstractions.csproj", "{6E5BBFBF-4B41-4025-BD69-02E6C2B0D6CD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JK.Application.Contract", "src\JK.Application.Contract\JK.Application.Contract.csproj", "{28B10740-204B-4E88-9FEB-2547C37BAA17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -116,6 +118,10 @@ Global
 		{6E5BBFBF-4B41-4025-BD69-02E6C2B0D6CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E5BBFBF-4B41-4025-BD69-02E6C2B0D6CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E5BBFBF-4B41-4025-BD69-02E6C2B0D6CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28B10740-204B-4E88-9FEB-2547C37BAA17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28B10740-204B-4E88-9FEB-2547C37BAA17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28B10740-204B-4E88-9FEB-2547C37BAA17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28B10740-204B-4E88-9FEB-2547C37BAA17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -137,6 +143,7 @@ Global
 		{0DB1BA64-DC58-453F-8BAD-A21D358B4B19} = {A09E5FEA-F460-4B3F-919E-485D5A6A34B5}
 		{68645A58-2DC3-48E2-A70C-3C9ED319EE7A} = {A09E5FEA-F460-4B3F-919E-485D5A6A34B5}
 		{6E5BBFBF-4B41-4025-BD69-02E6C2B0D6CD} = {A09E5FEA-F460-4B3F-919E-485D5A6A34B5}
+		{28B10740-204B-4E88-9FEB-2547C37BAA17} = {AFAA0841-BD93-466F-B8F4-FB4EEC86F1FC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {810793D3-755F-4D97-9CA4-2F96D2723FEC}

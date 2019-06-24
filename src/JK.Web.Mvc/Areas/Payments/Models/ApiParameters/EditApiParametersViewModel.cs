@@ -5,6 +5,7 @@ using JK.Payments.Integration.Dto;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.Linq;
+using JK.Payments.Integration.Dto.ApiParameters;
 
 namespace JK.Web.Areas.Payments.Models.ApiParameters
 {
@@ -19,10 +20,10 @@ namespace JK.Web.Areas.Payments.Models.ApiParameters
 
         public bool IsEditMode
         {
-            get { return Id.HasValue; }
+            get { return Id > 0; }
         }
 
-        public EditApiParametersViewModel(ApiParameterDto input, IReadOnlyList<CompanyDto> companies, IReadOnlyList<ChannelDto> channels)
+        public EditApiParametersViewModel(ApiParameterEditDto input, IReadOnlyList<CompanyDto> companies, IReadOnlyList<ChannelDto> channels)
         {
             input.MapTo(this);
             Companies = companies.Select(x => new SelectListItem(x.Name, x.Id.ToString(), this.CompanyId == x.Id)).ToList();

@@ -1,4 +1,8 @@
-﻿using Abp;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Abp;
 using Abp.AutoMapper;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
@@ -7,58 +11,13 @@ using Abp.Timing;
 using JK.Dto;
 using JK.Payments.Bacis;
 using JK.Payments.Enumerates;
+using JK.Payments.Integration;
 using JK.Payments.Orders.Dto;
 using JK.Payments.TenantConfigs;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using JK.Payments.Integration;
 
 namespace JK.Payments.Orders
 {
-    public class BuildOrderPostRequestResult
-    {
-        public int ApiId { get; set; }
-
-        public string Url { get; set; }
-
-        public string Method { get; set; }
-
-        public RequestType RequestType { get; set; }
-
-        public string ContentType { get; set; }
-
-        public DataType DataType { get; set; }
-
-        public string AcceptCharset { get; set; }
-
-        public bool HasResponeParameter { get; set; }
-
-        public Dictionary<string, string> Content { get; set; }
-
-        public Dictionary<string, string> Headers { get; set; }
-
-        public Dictionary<string, string> Query { get; set; }
-
-        public List<ApiParameter> ApiResponeParameters { get; set; }
-    }
-    public interface IOrderProcessingService
-    {
-
-        /// <summary>
-        /// 提交一个支付请求
-        /// </summary>
-        Task<ResultDto<PaymentOrderDto>> PlaceOrderAsync(CreatePaymentOrderDto input);
-
-        Task<BuildOrderPostRequestResult> BuildOrderPostRequest(PaymentOrderDto paymentOrder);
-
-        Task<List<ApiParameter>> GetOrderCallbackParametersAsync(int companyId,int channelId);
-
-        Task<ResultDto<PaymentStatus>> MarkOrderAsPaid(long orderId);
-    }
-
     public class OrderProcessingService : AbpServiceBase, IOrderProcessingService
     {
         private readonly ITenantCache tenantCache;
@@ -210,8 +169,8 @@ namespace JK.Payments.Orders
         public async Task<BuildOrderPostRequestResult> BuildOrderPostRequest(PaymentOrderDto paymentOrder)
         {
             var apiconfig = await apiconfigRepository.FirstOrDefaultAsync(a => a.CompanyId == paymentOrder.CompanyId &&
-                a.ApiMethod == ApiMethod.PlaceOrder &&
-                a.SupportedChannels.Any(sc => sc.ChannelId == paymentOrder.ChannelId));
+                                                                               a.ApiMethod == ApiMethod.PlaceOrder &&
+                                                                               a.SupportedChannels.Any(sc => sc.ChannelId == paymentOrder.ChannelId));
             var result = new BuildOrderPostRequestResult
             {
                 ApiId = apiconfig.Id,
@@ -230,9 +189,9 @@ namespace JK.Payments.Orders
             if (apiconfig.HasResponeParameter)
             {
                 var apiRespones = await apiParameterRepository.GetAll()
-                       .Where(p => p.CompanyId == paymentOrder.CompanyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Respone &&
-                                   p.SupportedChannels.Any(c => c.ChannelId == paymentOrder.ChannelId))
-                   .OrderBy(p => p.OrderNumber).ToListAsync();
+                    .Where(p => p.CompanyId == paymentOrder.CompanyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Respone &&
+                                p.SupportedChannels.Any(c => c.ChannelId == paymentOrder.ChannelId))
+                    .OrderBy(p => p.OrderNumber).ToListAsync();
                 result.ApiResponeParameters = apiRespones;
             }
             //TODO PaymentVariable

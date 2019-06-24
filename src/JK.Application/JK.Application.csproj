@@ -22,9 +22,13 @@
   <ItemGroup>
     <ProjectReference Include="..\..\extension\JK.Abp.RabbitMQ\JK.Abp.RabbitMQ.csproj" />
     <ProjectReference Include="..\..\extension\JK.Abp.Redis\JK.Abp.Redis.csproj" />
+    <ProjectReference Include="..\JK.Application.Contract\JK.Application.Contract.csproj" />
     <ProjectReference Include="..\JK.Core\JK.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Payments\Orders\OrderIdGenerator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Payments\TenantConfigs\" />
   </ItemGroup>
 </Project>
