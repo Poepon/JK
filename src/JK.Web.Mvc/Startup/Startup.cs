@@ -1,9 +1,9 @@
 ﻿using Abp.AspNetCore;
 using Abp.Castle.Logging.Log4Net;
 using Abp.Extensions;
-using Abp.RabbitMQ;
 using Castle.Facilities.Logging;
 using Exceptionless;
+using JK.Abp.RabbitMQ;
 using JK.Authentication.JwtBearer;
 using JK.Chat;
 using JK.Chat.WebSocketPackage;

@@ -1,10 +1,10 @@
 ﻿using Abp.Modules;
 using Abp.Reflection.Extensions;
+using JK.Abp.RabbitMQ;
 using JK.Authorization;
 using JK.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Volo.Abp.RabbitMQ;
 
 namespace JK.Web.Startup
 {

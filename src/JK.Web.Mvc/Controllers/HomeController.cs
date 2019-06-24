@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Abp.AspNetCore.Mvc.Authorization;
+﻿using Abp.AspNetCore.Mvc.Authorization;
+using JK.Abp.RabbitMQ;
+using JK.Abp.RabbitMQ.AutoSubscribe;
 using JK.Controllers;
-using Abp.RabbitMQ.AutoSubscribe;
+using Microsoft.AspNetCore.Mvc;
 using System;
 
 namespace JK.Web.Controllers
@@ -27,7 +28,7 @@ namespace JK.Web.Controllers
 
         public ActionResult TestRabbit()
         {
-            var task = rabbitMQProducer.PublishAsync(new Volo.Abp.RabbitMQ.ExchangeDeclareConfiguration(typeof(string).FullName, "direct", false, true), "#", "hi");
+            var task = rabbitMQProducer.PublishAsync(new ExchangeDeclareConfiguration(typeof(string).FullName, "direct", false, true), "#", "hi");
             task.Wait();
             Console.WriteLine(2);
             return RedirectToAction("Index");
