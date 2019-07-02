@@ -2,22 +2,23 @@
 using System.Reflection;
 using Abp.Dependency;
 using Abp.Reflection;
+using Abp.Runtime.Caching.Redis;
 using JK.Abp.Serialization;
 
-namespace JK.Abp.Redis.AutoSubscribe
+namespace JK.Abp.RedisCache.Events.AutoSubscribe
 {
     public class AutoRedisConsumer : ISingletonDependency
     {
         private readonly ITypeFinder typeFinder;
         private readonly IIocResolver iocResolver;
         private readonly IObjectSerializer objectSerializer;
-        private readonly IAbpRedisDatabaseProvider databaseProvider;
+        private readonly IAbpRedisCacheDatabaseProvider databaseProvider;
 
         public AutoRedisConsumer(
             ITypeFinder typeFinder,
             IIocResolver iocResolver,
             IObjectSerializer objectSerializer,
-            IAbpRedisDatabaseProvider databaseProvider)
+            IAbpRedisCacheDatabaseProvider databaseProvider)
         {
             this.typeFinder = typeFinder;
             this.iocResolver = iocResolver;

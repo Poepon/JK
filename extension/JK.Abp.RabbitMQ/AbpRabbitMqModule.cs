@@ -6,7 +6,7 @@ using JK.Abp.Serialization;
 
 namespace JK.Abp.RabbitMQ
 {
-    [DependsOn(typeof(AbpKernelModule), typeof(AbpSerializationModule))]
+    [DependsOn(typeof(AbpSerializationModule))]
     public class AbpRabbitMqModule : AbpModule
     {
         public override void PreInitialize()

@@ -28,7 +28,7 @@ namespace JK.Abp.RabbitMQ.AutoSubscribe
 
         public void Subscribe()
         {
-            var consumers = typeFinder.Find(t => t.IsClass && typeof(IRabbitMQConsumer).IsAssignableFrom(t));
+            var consumers = typeFinder.Find(t => t.IsClass && !t.IsAbstract && typeof(IRabbitMQConsumer).IsAssignableFrom(t));
             foreach (var item in consumers)
             {
                 var obj = iocResolver.Resolve(item);

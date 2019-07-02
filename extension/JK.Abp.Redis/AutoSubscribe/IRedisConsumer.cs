@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Abp.Dependency;
 
-namespace JK.Abp.Redis.AutoSubscribe
+namespace JK.Abp.RedisCache.Events.AutoSubscribe
 {   
     public interface IRedisConsumer
     {

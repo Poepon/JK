@@ -1,14 +1,15 @@
-﻿using JK.Abp.Serialization;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Abp.Runtime.Caching.Redis;
+using JK.Abp.Serialization;
 
-namespace JK.Abp.Redis.AutoSubscribe
+namespace JK.Abp.RedisCache.Events.AutoSubscribe
 {
     public class RedisProducer : IRedisProducer
     {
-        private readonly IAbpRedisDatabaseProvider databaseProvider;
+        private readonly IAbpRedisCacheDatabaseProvider databaseProvider;
         private readonly IObjectSerializer objectSerializer;
 
-        public RedisProducer(IAbpRedisDatabaseProvider databaseProvider,
+        public RedisProducer(IAbpRedisCacheDatabaseProvider databaseProvider,
             IObjectSerializer objectSerializer)
         {
             this.objectSerializer = objectSerializer;
