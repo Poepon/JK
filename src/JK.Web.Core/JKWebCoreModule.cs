@@ -1,23 +1,23 @@
-﻿using System;
-using System.Text;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using Abp.AspNetCore;
+﻿using Abp.AspNetCore;
 using Abp.AspNetCore.Configuration;
 using Abp.Configuration.Startup;
 using Abp.Modules;
+using Abp.RealTime;
 using Abp.Reflection.Extensions;
+using Abp.Runtime.Caching.Redis;
 using Abp.Zero.Configuration;
+using JK.Abp.RedisCache.Events;
 using JK.Authentication.JwtBearer;
+using JK.Chat;
+using JK.Chat.Distributed;
 using JK.Configuration;
 using JK.EntityFrameworkCore;
-using Abp.Runtime.Caching.Redis;
-using JK.Chat.Distributed;
-using Abp.RealTime;
-using JK.Chat;
 using JK.MultiTenancy;
-using JK.Abp.Redis;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Text;
 
 namespace JK
 {
@@ -25,7 +25,8 @@ namespace JK
          typeof(JKApplicationModule),
          typeof(JKEntityFrameworkModule),
          typeof(AbpAspNetCoreModule),
-         typeof(AbpRedisCacheModule)
+         typeof(AbpRedisCacheModule),
+         typeof(AbpRedisCacheEventsModule)
      )]
     public class JKWebCoreModule : AbpModule
     {
@@ -59,10 +60,6 @@ namespace JK
                     options.DatabaseId = _appConfiguration.GetValue<int>("RedisCache:DatabaseId");
                 });
             }
-
-            var abpRedisOptions = IocManager.Resolve<AbpRedisOptions>();
-            abpRedisOptions.ConnectionString = _appConfiguration["RedisCache:ConnectionString"];
-            abpRedisOptions.DatabaseId = _appConfiguration.GetValue<int>("RedisCache:DatabaseId");
 
             ConfigureTokenAuth();
 

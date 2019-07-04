@@ -23,9 +23,11 @@ namespace JK.Payments.Orders
         private readonly ITenantCache tenantCache;
         private readonly IPaymentOrderPolicyService paymentOrderPolicyService;
         private readonly IIdGenerator idGenerator;
+        private readonly IRepository<PaymentApp> appRepository;
         private readonly IRepository<Company> companyRepository;
         private readonly IRepository<Channel> channelRepository;
         private readonly IRepository<Bank> bankRepository;
+        private readonly IRepository<BankOverride> bankOverrideRepository;
         private readonly IRepository<ChannelOverride> channelOverrideRepository;
         private readonly IRepository<CompanyAccount> accountRepository;
         private readonly IRepository<PaymentOrder, long> paymentOrderRepository;
@@ -37,9 +39,11 @@ namespace JK.Payments.Orders
             IPaymentOrderPolicyService paymentOrderPolicyService,
             IIdGenerator idGenerator,
             IRepository<Company> companyRepository,
+            IRepository<PaymentApp> appRepository,
             IRepository<Channel> channelRepository,
             IRepository<ChannelOverride> channelOverrideRepository,
             IRepository<Bank> bankRepository,
+            IRepository<BankOverride> bankOverrideRepository,
             IRepository<CompanyAccount> accountRepository,
             IRepository<PaymentOrder, long> paymentOrderRepository,
             IRepository<ApiConfiguration> apiconfigRepository,
@@ -49,9 +53,11 @@ namespace JK.Payments.Orders
             this.paymentOrderPolicyService = paymentOrderPolicyService;
             this.idGenerator = idGenerator;
             this.companyRepository = companyRepository;
+            this.appRepository = appRepository;
             this.channelRepository = channelRepository;
             this.channelOverrideRepository = channelOverrideRepository;
             this.bankRepository = bankRepository;
+            this.bankOverrideRepository = bankOverrideRepository;
             this.accountRepository = accountRepository;
             this.paymentOrderRepository = paymentOrderRepository;
             this.apiconfigRepository = apiconfigRepository;
@@ -64,21 +70,35 @@ namespace JK.Payments.Orders
 
             if (!string.IsNullOrEmpty(input.ExternalOrderId))
             {
-                var isDuplicate = CheckDuplicateOrders(input.TenantId, input.ExternalOrderId);
+                var isDuplicate = await paymentOrderRepository.GetAll().AnyAsync(o =>
+                     o.TenantId == input.TenantId && o.ExternalOrderId == input.ExternalOrderId);
                 if (isDuplicate)
                 {
-                    return new ResultDto<PaymentOrderDto> { IsSuccess = false, ErrorMessage = "商户订单号重复！" };
+                    return new ResultDto<PaymentOrderDto> { IsSuccess = false, ErrorMessage = "商户订单号重复" };
                 }
             }
             //支付通道
             var channel = await channelRepository.FirstOrDefaultAsync(c => c.ChannelCode == input.ChannelCode);
+            if (channel == null)
+            {
+                return new ResultDto<PaymentOrderDto>() { IsSuccess = false, ErrorMessage = "支付通道编码错误" };
+            }
             int channelId = channel.Id;
             //银行
             int? bankId = null;
+            List<int> excludedBankCompanies = null;
             if (channel.RequiredBank)
             {
                 var bank = await bankRepository.FirstOrDefaultAsync(b => b.BankCode == input.BankCode);
-                bankId = bank.Id;
+                if (bank != null)
+                {
+                    bankId = bank.Id;
+                    excludedBankCompanies = await bankOverrideRepository.GetAll().Where(bo => bo.BankId == bank.Id && bo.OverrideIsActive == false).Select(bo => bo.CompanyId).ToListAsync();
+                }
+                else
+                {
+                    return new ResultDto<PaymentOrderDto>() { IsSuccess = false, ErrorMessage = "银行编码错误" };
+                }
             }
             //TODO 支付订单策略
 
@@ -86,19 +106,24 @@ namespace JK.Payments.Orders
 
             if (policies == null)
             {
-                return new ResultDto<PaymentOrderDto> { IsSuccess = false, ErrorMessage = "没有匹配的支付接口！" };
+                return new ResultDto<PaymentOrderDto> { IsSuccess = false, ErrorMessage = "没有匹配的支付接口" };
             }
 
             var verifiedPaymentOrder = new VerifiedPaymentOrderDto()
             {
                 PaymentOrder = input
             };
-
+            bool isUnsupportedBank = false;
             //订单提交策略验证
             foreach (var item in policies)
             {
                 if (await paymentOrderPolicyService.VerifyPolicyAsync(item, input))
                 {
+                    if (excludedBankCompanies != null && excludedBankCompanies.Contains(item.CompanyId))
+                    {
+                        isUnsupportedBank = true;
+                        continue;
+                    }
                     verifiedPaymentOrder.Success = true;
                     verifiedPaymentOrder.CompanyId = item.CompanyId;
                     verifiedPaymentOrder.AccountId = item.AccountId;
@@ -108,10 +133,26 @@ namespace JK.Payments.Orders
                 }
             }
 
+            if (verifiedPaymentOrder.CompanyId == 0)
+            {
+                if (isUnsupportedBank)
+                {
+                    return new ResultDto<PaymentOrderDto>() { IsSuccess = false, ErrorMessage = "不支持该银行" };
+                }
+                else
+                {
+                    return new ResultDto<PaymentOrderDto>() { IsSuccess = false, ErrorMessage = "没有可用的第三方平台" };
+                }
+            }
+
+            if (verifiedPaymentOrder.AccountId == 0)
+            {
+                return new ResultDto<PaymentOrderDto>() { IsSuccess = false, ErrorMessage = "没有可用的第三方账号" };
+            }
             var company = await companyRepository.GetAsync(verifiedPaymentOrder.CompanyId);
             var account = await accountRepository.GetAsync(verifiedPaymentOrder.AccountId);
             var channelOverride = await channelOverrideRepository.FirstOrDefaultAsync(co => co.CompanyId == company.Id && co.ChannelId == channelId);
-            var paymentOrder = BuildPaymentOrder(verifiedPaymentOrder, GetFeeRate(company, channelOverride, account));
+            var paymentOrder = BuildPaymentOrder(verifiedPaymentOrder, GetFeeRate(company, channelOverride, account), input.TransparentKey);
             await paymentOrderRepository.InsertAsync(paymentOrder);
             await CurrentUnitOfWork.SaveChangesAsync();
 
@@ -123,7 +164,7 @@ namespace JK.Payments.Orders
             };
         }
 
-        private PaymentOrder BuildPaymentOrder(VerifiedPaymentOrderDto verifiedPaymentOrder, decimal feeRate)
+        private PaymentOrder BuildPaymentOrder(VerifiedPaymentOrderDto verifiedPaymentOrder, decimal feeRate, string key)
         {
             var input = verifiedPaymentOrder.PaymentOrder;
             var paymentOrder = new PaymentOrder()
@@ -144,9 +185,9 @@ namespace JK.Payments.Orders
                 CallbackStatus = CallbackStatus.Pending,
                 Expire = Clock.Now.AddHours(2),
                 ExtData = input.ExtData,
-                PaymentMode = input.PaymentMode
+                DeviceType = input.DeviceType
             };
-            paymentOrder.Md5 = paymentOrder.GetMd5();
+            paymentOrder.Md5 = paymentOrder.GetMd5(key);
             paymentOrder.SetNewOrder();
             return paymentOrder;
         }
@@ -159,11 +200,6 @@ namespace JK.Payments.Orders
                 return channelOverride.OverrideFeeRate.GetValueOrDefault();
             else
                 return company.DefaultFeeRate.GetValueOrDefault();
-        }
-
-        private bool CheckDuplicateOrders(int tenant, string orderId)
-        {
-            return false;
         }
 
         public async Task<BuildOrderPostRequestResult> BuildOrderPostRequest(PaymentOrderDto paymentOrder)
@@ -213,7 +249,7 @@ namespace JK.Payments.Orders
             return result;
         }
 
-        public async Task<List<ApiParameter>> GetOrderCallbackParametersAsync(int companyId,int channelId)
+        public async Task<List<ApiParameter>> GetOrderCallbackParametersAsync(int companyId, int channelId)
         {
             return await apiParameterRepository.GetAll()
                 .Where(p => p.CompanyId == companyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Callback &&
@@ -229,9 +265,11 @@ namespace JK.Payments.Orders
             {
                 return new ResultDto<PaymentStatus>() { IsSuccess = false, ErrorMessage = "订单不存在" };
             }
-            if (!paymentOrder.VerifyMd5())
+
+            var app = appRepository.Get(paymentOrder.AppId);
+            if (!paymentOrder.VerifyMd5(app.TransparentKey))
             {
-                return new ResultDto<PaymentStatus>() { IsSuccess = false, ErrorMessage = "订单数据已更改" };
+                return new ResultDto<PaymentStatus>() { IsSuccess = false, ErrorMessage = "订单数据被不法修改" };
             }
             if (paymentOrder.PaymentStatus == PaymentStatus.Pending)
             {

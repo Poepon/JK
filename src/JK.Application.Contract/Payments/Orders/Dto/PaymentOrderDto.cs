@@ -64,7 +64,7 @@ namespace JK.Payments.Orders.Dto
 
         public string CreateIp { get; set; }
 
-        public PaymentMode PaymentMode { get; set; }
+        public DeviceType DeviceType { get; set; }
 
         public string Md5 { get; set; }
 

@@ -32,7 +32,7 @@ namespace JK.Payments.Integration
 
         public virtual ICollection<CompanyChannel> SupportedChannels { get; set; }
 
-        public virtual ICollection<TenantPaymentAppCompany> SupportedApps { get; set; }
+        public virtual ICollection<PaymentAppCompany> SupportedApps { get; set; }
         
     }
 }

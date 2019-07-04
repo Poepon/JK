@@ -1,6 +1,6 @@
-﻿using System;
-using Abp.Authorization.Users;
+﻿using Abp.Authorization.Users;
 using Abp.Extensions;
+using System;
 
 namespace JK.Authorization.Users
 {
@@ -13,6 +13,7 @@ namespace JK.Authorization.Users
             return Guid.NewGuid().ToString("N").Truncate(16);
         }
 
+
         public static User CreateTenantAdminUser(int tenantId, string username)
         {
             var user = new User
@@ -20,7 +21,8 @@ namespace JK.Authorization.Users
                 TenantId = tenantId,
                 UserName = AdminUserName,
                 Name = AdminUserName,
-                Surname = AdminUserName
+                Surname = AdminUserName,
+                EmailAddress = username
             };
 
             user.SetNormalizedNames();

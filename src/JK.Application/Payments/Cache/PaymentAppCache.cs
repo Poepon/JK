@@ -2,7 +2,7 @@
 
 namespace JK.Payments.Cache
 {
-    public interface ITenantPaymentAppCache : ITransientDependency
+    public class PaymentAppCache : IPaymentAppCache
     {
 
     }

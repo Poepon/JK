@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using JK.Payments.Integration;
+using JK.MultiTenancy;
 
 namespace JK.Payments.TenantConfigs
 {
@@ -14,6 +15,8 @@ namespace JK.Payments.TenantConfigs
     {
         public int TenantId { get; set; }
 
+        [ForeignKey(nameof(TenantId))]
+        public virtual Tenant Tenant { get; set; }
         /// <summary>
         /// 名称
         /// </summary>

@@ -9,10 +9,12 @@ namespace JK.Payments.Integration
     {
         public int CompanyId { get; set; }
 
+        [ForeignKey(nameof(CompanyId))]
+        public virtual Company Company { get; set; }
+
         [Required]
         [StringLength(32)]
         public string PolicyName { get; set; }
-
 
         public int Priority { get; set; }
 

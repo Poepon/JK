@@ -73,6 +73,7 @@ namespace JK.EntityFrameworkCore.Seed.Host
                 var user = new User
                 {
                     TenantId = null,
+                    EmailAddress = "admin",
                     UserName = AbpUserBase.AdminUserName,
                     Name = "admin",
                     Surname = "admin",

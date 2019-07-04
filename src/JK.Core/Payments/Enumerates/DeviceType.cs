@@ -2,10 +2,11 @@
 {
     public enum DeviceType
     {
-        Web = 0,
-        Wap = 1,
-        iOS = 2,
-        Android = 3,
-        Other = 4
+        Web = 1,
+        Wap = 2,
+        iOS = 3,
+        Android = 4,
+        Desktop = 5,
+        Other = 6
     }
 }

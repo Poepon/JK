@@ -42,7 +42,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Abp.RabbitMQ", "extension\JK.Abp.RabbitMQ\JK.Abp.RabbitMQ.csproj", "{0DB1BA64-DC58-453F-8BAD-A21D358B4B19}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Abp.Redis", "extension\JK.Abp.Redis\JK.Abp.Redis.csproj", "{68645A58-2DC3-48E2-A70C-3C9ED319EE7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Abp.RedisCache.Events", "extension\JK.Abp.RedisCache.Events\JK.Abp.RedisCache.Events.csproj", "{68645A58-2DC3-48E2-A70C-3C9ED319EE7A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Abp.Serialization.Abstractions", "extension\JK.Abp.Serialization.Abstractions\JK.Abp.Serialization.Abstractions.csproj", "{6E5BBFBF-4B41-4025-BD69-02E6C2B0D6CD}"
 EndProject
@@ -50,9 +50,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Application.Contract", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Abp.AspNetCoreRateLimit", "extension\JK.Abp.AspNetCoreRateLimit\JK.Abp.AspNetCoreRateLimit.csproj", "{4CE0F458-D75F-4594-B2A9-36DA0D7DFC33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JK.Abp.RedisCache.Sentinel", "extension\JK.Abp.RedisCache.Sentinel\JK.Abp.RedisCache.Sentinel.csproj", "{7BECC57B-526F-4A35-B50B-AE74A1311B95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Abp.RedisCache.Sentinel", "extension\JK.Abp.RedisCache.Sentinel\JK.Abp.RedisCache.Sentinel.csproj", "{7BECC57B-526F-4A35-B50B-AE74A1311B95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JK.Abp.Serialization.MessagePack", "extension\JK.Abp.Serialization.MessagePack\JK.Abp.Serialization.MessagePack.csproj", "{0ED7833A-B2A0-4946-88E4-50908CEB6E25}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JK.Abp.Serialization.MessagePack", "extension\JK.Abp.Serialization.MessagePack\JK.Abp.Serialization.MessagePack.csproj", "{0ED7833A-B2A0-4946-88E4-50908CEB6E25}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

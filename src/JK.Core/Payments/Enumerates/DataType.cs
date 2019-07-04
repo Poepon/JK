@@ -2,8 +2,9 @@
 {
     public enum DataType
     {
-        Json = 0,
-        Xml = 1,
-        FormData = 2
+        Json = 1,
+        Xml = 2,
+        FormData = 3,
+        Text = 4
     }
 }

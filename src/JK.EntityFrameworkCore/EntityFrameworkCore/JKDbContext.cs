@@ -81,7 +81,7 @@ namespace JK.EntityFrameworkCore
         public virtual DbSet<PaymentOrderPolicyRuleValue> PaymentOrderPolicyRuleValues { get; set; }
         public virtual DbSet<PaymentOrderPolicyChannel> PaymentOrderPolicyChannels { get; set; }
 
-        public virtual DbSet<TenantPaymentApp> TenantPaymentApps { get; set; }
+        public virtual DbSet<PaymentApp> PaymentApps { get; set; }
         public virtual DbSet<TenantLimitPolicy> TenantLimitPolicies { get; set; }
         public virtual DbSet<TenantLimitPolicyRule> TenantLimitPolicyRules { get; set; }
         public virtual DbSet<TenantLimitPolicyRuleValue> TenantLimitPolicyRuleValues { get; set; }
@@ -99,8 +99,8 @@ namespace JK.EntityFrameworkCore
         public virtual DbSet<CompanyLimitPolicyRule> CompanyLimitPolicyRules { get; set; }
         public virtual DbSet<CompanyLimitPolicyRuleValue> CompanyLimitPolicyRuleValues { get; set; }
 
-        public virtual DbSet<TenantPaymentAppChannel> TenantPaymentAppChannels { get; set; }
-        public virtual DbSet<TenantPaymentAppCompany> TenantPaymentAppCompanies { get; set; }
+        public virtual DbSet<PaymentAppChannel> TenantPaymentAppChannels { get; set; }
+        public virtual DbSet<PaymentAppCompany> TenantPaymentAppCompanies { get; set; }
         #endregion
 
         public JKDbContext(DbContextOptions<JKDbContext> options)
@@ -169,28 +169,28 @@ namespace JK.EntityFrameworkCore
                 .WithMany(t => t.PaymentOrderPolicyChannels)
                 .HasForeignKey(pt => pt.ChannelId);
 
-            modelBuilder.Entity<TenantPaymentAppChannel>()
+            modelBuilder.Entity<PaymentAppChannel>()
                 .HasKey(t => new { t.AppId, t.ChannelId });
 
-            modelBuilder.Entity<TenantPaymentAppChannel>()
+            modelBuilder.Entity<PaymentAppChannel>()
                 .HasOne(pt => pt.App)
                 .WithMany(p => p.SupportedChannels)
                 .HasForeignKey(pt => pt.AppId);
 
-            modelBuilder.Entity<TenantPaymentAppChannel>()
+            modelBuilder.Entity<PaymentAppChannel>()
                 .HasOne(pt => pt.Channel)
                 .WithMany(t => t.AppChannels)
                 .HasForeignKey(pt => pt.ChannelId);
 
-            modelBuilder.Entity<TenantPaymentAppCompany>()
+            modelBuilder.Entity<PaymentAppCompany>()
                 .HasKey(t => new { t.AppId, t.CompanyId });
 
-            modelBuilder.Entity<TenantPaymentAppCompany>()
+            modelBuilder.Entity<PaymentAppCompany>()
                 .HasOne(pt => pt.App)
                 .WithMany(p => p.SupportedCompanies)
                 .HasForeignKey(pt => pt.AppId);
 
-            modelBuilder.Entity<TenantPaymentAppCompany>()
+            modelBuilder.Entity<PaymentAppCompany>()
                 .HasOne(pt => pt.Company)
                 .WithMany(t => t.SupportedApps)
                 .HasForeignKey(pt => pt.CompanyId);

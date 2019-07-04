@@ -8,8 +8,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JK.Payments.TenantConfigs
 {
-    [Table("TenantPaymentApps")]
-    public class TenantPaymentApp : Entity
+    [Table("PaymentApps")]
+    public class PaymentApp : Entity
     {
         public int TenantId { get; set; }
 
@@ -24,11 +24,21 @@ namespace JK.Payments.TenantConfigs
         [StringLength(32)]
         public string AppId { get; set; }
 
+        /// <summary>
+        /// 验签密钥
+        /// </summary>
         [Required]
         [StringLength(32)]
         public string Key { get; set; }
-        
-        public PaymentMode PaymentMode { get; set; }
+
+        /// <summary>
+        /// 透明密钥（内部数据防篡改）
+        /// </summary>
+        [Required]
+        [StringLength(32)]
+        public string TransparentKey { get; set; }
+
+        public DeviceType DeviceType { get; set; }
 
         /// <summary>
         /// 回调域名
@@ -40,8 +50,8 @@ namespace JK.Payments.TenantConfigs
         public bool UseSSL { get; set; }
 
 
-        public virtual ICollection<TenantPaymentAppChannel> SupportedChannels { get; set; }
+        public virtual ICollection<PaymentAppChannel> SupportedChannels { get; set; }
 
-        public virtual ICollection<TenantPaymentAppCompany> SupportedCompanies { get; set; }
+        public virtual ICollection<PaymentAppCompany> SupportedCompanies { get; set; }
     }
 }

@@ -3,13 +3,13 @@ using JK.Payments.Integration;
 
 namespace JK.Payments.TenantConfigs
 {
-    [Table("TenantPaymentAppCompany")]
-    public class TenantPaymentAppCompany
+    [Table("PaymentAppCompany")]
+    public class PaymentAppCompany
     {
         public int AppId { get; set; }
 
         [ForeignKey(nameof(AppId))]
-        public virtual TenantPaymentApp App { get; set; }
+        public virtual PaymentApp App { get; set; }
 
         public int CompanyId { get; set; }
 

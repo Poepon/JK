@@ -44,13 +44,13 @@ namespace JK.Payments.Orders
         private readonly PaymentOrderDto paymentOrder;
         private readonly CompanyAccountDto companyAccount;
         private readonly ApiConfigurationDto apiConfiguration;
-        private readonly TenantPaymentApp tenantPaymentApp;
+        private readonly PaymentApp tenantPaymentApp;
         private readonly CompanyDto company;
 
         public Dictionary<string, string> Result { get; private set; }
 
         public PaymentVariable(
-            TenantPaymentApp tenantPaymentApp,
+            PaymentApp tenantPaymentApp,
             CompanyDto company,
             ApiConfigurationDto apiConfiguration,
             CompanyAccountDto companyAccount) :
@@ -65,7 +65,7 @@ namespace JK.Payments.Orders
         }
 
         public PaymentVariable(
-            TenantPaymentApp tenantPaymentApp,
+            PaymentApp tenantPaymentApp,
             CompanyDto company,
             ApiConfigurationDto apiConfiguration,
             CompanyAccountDto companyAccount,

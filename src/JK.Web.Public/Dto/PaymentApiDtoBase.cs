@@ -6,6 +6,9 @@
 
         public string Sign { get; set; }
 
+        /// <summary>
+        /// 随机字符串
+        /// </summary>
         public string NonceStr { get; set; }
 
         public abstract string GetSignContent();

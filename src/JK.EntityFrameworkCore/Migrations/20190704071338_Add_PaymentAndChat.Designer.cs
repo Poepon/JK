@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JK.Migrations
 {
     [DbContext(typeof(JKDbContext))]
-    [Migration("20190524092557_InitPayments")]
-    partial class InitPayments
+    [Migration("20190704071338_Add_PaymentAndChat")]
+    partial class Add_PaymentAndChat
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -118,6 +118,8 @@ namespace JK.Migrations
 
                     b.Property<string>("Parameters")
                         .HasMaxLength(1024);
+
+                    b.Property<string>("ReturnValue");
 
                     b.Property<string>("ServiceName")
                         .HasMaxLength(256);
@@ -850,6 +852,33 @@ namespace JK.Migrations
                     b.ToTable("AbpOrganizationUnits");
                 });
 
+            modelBuilder.Entity("Abp.Organizations.OrganizationUnitRole", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<long>("OrganizationUnitId");
+
+                    b.Property<int>("RoleId");
+
+                    b.Property<int?>("TenantId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "OrganizationUnitId");
+
+                    b.HasIndex("TenantId", "RoleId");
+
+                    b.ToTable("AbpOrganizationUnitRoles");
+                });
+
             modelBuilder.Entity("JK.Alliance.Agent", b =>
                 {
                     b.Property<long>("Id")
@@ -1145,6 +1174,7 @@ namespace JK.Migrations
                     b.Property<DateTime?>("DeletionTime");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasMaxLength(256);
 
                     b.Property<string>("EmailConfirmationCode")
@@ -1171,9 +1201,11 @@ namespace JK.Migrations
                     b.Property<DateTime?>("LockoutEndDateUtc");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasMaxLength(64);
 
                     b.Property<string>("NormalizedEmailAddress")
+                        .IsRequired()
                         .HasMaxLength(256);
 
                     b.Property<string>("NormalizedUserName")
@@ -1194,6 +1226,7 @@ namespace JK.Migrations
                         .HasMaxLength(128);
 
                     b.Property<string>("Surname")
+                        .IsRequired()
                         .HasMaxLength(64);
 
                     b.Property<int?>("TenantId");
@@ -1622,48 +1655,6 @@ namespace JK.Migrations
                     b.ToTable("Channels");
                 });
 
-            modelBuilder.Entity("JK.Payments.Integration.ApiCallbackParameter", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ApiId");
-
-                    b.Property<int?>("DataTag");
-
-                    b.Property<string>("Desc")
-                        .HasMaxLength(32);
-
-                    b.Property<int?>("Encryption");
-
-                    b.Property<string>("EncryptionParameters")
-                        .HasMaxLength(100);
-
-                    b.Property<string>("Expression")
-                        .IsRequired()
-                        .HasMaxLength(500);
-
-                    b.Property<string>("Format")
-                        .HasMaxLength(32);
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasMaxLength(32);
-
-                    b.Property<int>("Location");
-
-                    b.Property<int>("OrderNumber");
-
-                    b.Property<bool>("Required");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApiId");
-
-                    b.ToTable("ApiCallbackParameters");
-                });
-
             modelBuilder.Entity("JK.Payments.Integration.ApiChannel", b =>
                 {
                     b.Property<int>("ApiId");
@@ -1711,16 +1702,22 @@ namespace JK.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CompanyId");
+
                     b.ToTable("ApiConfigurations");
                 });
 
-            modelBuilder.Entity("JK.Payments.Integration.ApiRequestParameter", b =>
+            modelBuilder.Entity("JK.Payments.Integration.ApiParameter", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("ApiId");
+                    b.Property<int>("ApiMethod");
+
+                    b.Property<int>("CompanyId");
+
+                    b.Property<int?>("DataTag");
 
                     b.Property<string>("Desc")
                         .HasMaxLength(32);
@@ -1733,15 +1730,19 @@ namespace JK.Migrations
                     b.Property<string>("Format")
                         .HasMaxLength(32);
 
+                    b.Property<int?>("GetLocation");
+
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(32);
 
-                    b.Property<int>("Location");
-
                     b.Property<int>("OrderNumber");
 
+                    b.Property<int>("ParameterType");
+
                     b.Property<bool>("Required");
+
+                    b.Property<int?>("SetLocation");
 
                     b.Property<string>("ValueOrExpression")
                         .IsRequired()
@@ -1749,41 +1750,9 @@ namespace JK.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApiId");
+                    b.HasIndex("CompanyId");
 
-                    b.ToTable("ApiRequestParameters");
-                });
-
-            modelBuilder.Entity("JK.Payments.Integration.ApiResponeParameter", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ApiId");
-
-                    b.Property<int?>("DataTag");
-
-                    b.Property<string>("Desc")
-                        .HasMaxLength(32);
-
-                    b.Property<string>("Expression")
-                        .IsRequired()
-                        .HasMaxLength(500);
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasMaxLength(32);
-
-                    b.Property<int>("Location");
-
-                    b.Property<int>("OrderNumber");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApiId");
-
-                    b.ToTable("ApiResponeParameters");
+                    b.ToTable("ApiParameters");
                 });
 
             modelBuilder.Entity("JK.Payments.Integration.BankOverride", b =>
@@ -1799,6 +1768,8 @@ namespace JK.Migrations
                     b.Property<string>("OverrideCode")
                         .IsRequired()
                         .HasMaxLength(16);
+
+                    b.Property<bool?>("OverrideIsActive");
 
                     b.HasKey("Id");
 
@@ -1890,6 +1861,8 @@ namespace JK.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CompanyId");
+
                     b.ToTable("CompanyLimitPolicies");
                 });
 
@@ -1941,6 +1914,19 @@ namespace JK.Migrations
                     b.ToTable("CompanyLimitPolicyRuleValues");
                 });
 
+            modelBuilder.Entity("JK.Payments.Integration.ParameterChannel", b =>
+                {
+                    b.Property<int>("ParameterId");
+
+                    b.Property<int>("ChannelId");
+
+                    b.HasKey("ParameterId", "ChannelId");
+
+                    b.HasIndex("ChannelId");
+
+                    b.ToTable("ParameterChannel");
+                });
+
             modelBuilder.Entity("JK.Payments.Integration.ResultCodeConfiguration", b =>
                 {
                     b.Property<int>("Id")
@@ -1970,6 +1956,8 @@ namespace JK.Migrations
 
                     b.Property<long>("Amount");
 
+                    b.Property<int>("AppId");
+
                     b.Property<string>("AsyncCallback")
                         .HasMaxLength(256);
 
@@ -1991,11 +1979,7 @@ namespace JK.Migrations
 
                     b.Property<long?>("CreatorUserId");
 
-                    b.Property<long?>("DeleterUserId");
-
-                    b.Property<DateTime?>("DeletionTime");
-
-                    b.Property<int>("Device");
+                    b.Property<int>("DeviceType");
 
                     b.Property<DateTime>("Expire");
 
@@ -2006,8 +1990,6 @@ namespace JK.Migrations
                         .HasMaxLength(32);
 
                     b.Property<long>("Fee");
-
-                    b.Property<bool>("IsDeleted");
 
                     b.Property<DateTime?>("LastModificationTime");
 
@@ -2177,7 +2159,78 @@ namespace JK.Migrations
 
                     b.HasIndex("CompanyId");
 
+                    b.HasIndex("TenantId");
+
                     b.ToTable("CompanyAccounts");
+                });
+
+            modelBuilder.Entity("JK.Payments.TenantConfigs.PaymentApp", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("AppId")
+                        .IsRequired()
+                        .HasMaxLength(32);
+
+                    b.Property<string>("CallbackDomain")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.Property<int>("DeviceType");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(32);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32);
+
+                    b.Property<int>("TenantId");
+
+                    b.Property<string>("TransparentKey")
+                        .IsRequired()
+                        .HasMaxLength(32);
+
+                    b.Property<bool>("UseSSL");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("PaymentApps");
+                });
+
+            modelBuilder.Entity("JK.Payments.TenantConfigs.PaymentAppChannel", b =>
+                {
+                    b.Property<int>("AppId");
+
+                    b.Property<int>("ChannelId");
+
+                    b.HasKey("AppId", "ChannelId");
+
+                    b.HasIndex("ChannelId");
+
+                    b.ToTable("PaymentAppChannel");
+                });
+
+            modelBuilder.Entity("JK.Payments.TenantConfigs.PaymentAppCompany", b =>
+                {
+                    b.Property<int>("AppId");
+
+                    b.Property<int>("CompanyId");
+
+                    b.Property<int?>("ChannelId");
+
+                    b.HasKey("AppId", "CompanyId");
+
+                    b.HasIndex("ChannelId");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("PaymentAppCompany");
                 });
 
             modelBuilder.Entity("JK.Payments.TenantConfigs.TenantLimitPolicy", b =>
@@ -2238,71 +2291,6 @@ namespace JK.Migrations
                     b.HasIndex("RuleId");
 
                     b.ToTable("TenantLimitPolicyRuleValues");
-                });
-
-            modelBuilder.Entity("JK.Payments.TenantConfigs.TenantPaymentApp", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("AppId")
-                        .IsRequired()
-                        .HasMaxLength(32);
-
-                    b.Property<string>("CallbackDomain")
-                        .IsRequired()
-                        .HasMaxLength(256);
-
-                    b.Property<int>("Device");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasMaxLength(32);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(32);
-
-                    b.Property<int>("TenantId");
-
-                    b.Property<bool>("UseSSL");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("TenantPaymentApps");
-                });
-
-            modelBuilder.Entity("JK.Payments.TenantConfigs.TenantPaymentAppChannel", b =>
-                {
-                    b.Property<int>("AppId");
-
-                    b.Property<int>("ChannelId");
-
-                    b.HasKey("AppId", "ChannelId");
-
-                    b.HasIndex("ChannelId");
-
-                    b.ToTable("TenantPaymentAppChannel");
-                });
-
-            modelBuilder.Entity("JK.Payments.TenantConfigs.TenantPaymentAppCompany", b =>
-                {
-                    b.Property<int>("AppId");
-
-                    b.Property<int>("CompanyId");
-
-                    b.Property<int?>("ChannelId");
-
-                    b.HasKey("AppId", "CompanyId");
-
-                    b.HasIndex("ChannelId");
-
-                    b.HasIndex("CompanyId");
-
-                    b.ToTable("TenantPaymentAppCompany");
                 });
 
             modelBuilder.Entity("JK.Storage.BinaryObject", b =>
@@ -2560,14 +2548,6 @@ namespace JK.Migrations
                         .HasForeignKey("LastModifierUserId");
                 });
 
-            modelBuilder.Entity("JK.Payments.Integration.ApiCallbackParameter", b =>
-                {
-                    b.HasOne("JK.Payments.Integration.ApiConfiguration", "Api")
-                        .WithMany()
-                        .HasForeignKey("ApiId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("JK.Payments.Integration.ApiChannel", b =>
                 {
                     b.HasOne("JK.Payments.Integration.ApiConfiguration", "Api")
@@ -2581,19 +2561,19 @@ namespace JK.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("JK.Payments.Integration.ApiRequestParameter", b =>
+            modelBuilder.Entity("JK.Payments.Integration.ApiConfiguration", b =>
                 {
-                    b.HasOne("JK.Payments.Integration.ApiConfiguration", "Api")
+                    b.HasOne("JK.Payments.Integration.Company", "Company")
                         .WithMany()
-                        .HasForeignKey("ApiId")
+                        .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("JK.Payments.Integration.ApiResponeParameter", b =>
+            modelBuilder.Entity("JK.Payments.Integration.ApiParameter", b =>
                 {
-                    b.HasOne("JK.Payments.Integration.ApiConfiguration", "Api")
+                    b.HasOne("JK.Payments.Integration.Company", "Company")
                         .WithMany()
-                        .HasForeignKey("ApiId")
+                        .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -2636,6 +2616,14 @@ namespace JK.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("JK.Payments.Integration.CompanyLimitPolicy", b =>
+                {
+                    b.HasOne("JK.Payments.Integration.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("JK.Payments.Integration.CompanyLimitPolicyRule", b =>
                 {
                     b.HasOne("JK.Payments.Integration.CompanyLimitPolicyRule")
@@ -2653,6 +2641,19 @@ namespace JK.Migrations
                     b.HasOne("JK.Payments.Integration.CompanyLimitPolicyRule", "Rule")
                         .WithMany()
                         .HasForeignKey("RuleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("JK.Payments.Integration.ParameterChannel", b =>
+                {
+                    b.HasOne("JK.Payments.Bacis.Channel", "Channel")
+                        .WithMany("ParameterChannels")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("JK.Payments.Integration.ApiParameter", "Parameter")
+                        .WithMany("SupportedChannels")
+                        .HasForeignKey("ParameterId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -2716,6 +2717,49 @@ namespace JK.Migrations
                         .WithMany()
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("JK.MultiTenancy.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("JK.Payments.TenantConfigs.PaymentApp", b =>
+                {
+                    b.HasOne("JK.MultiTenancy.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("JK.Payments.TenantConfigs.PaymentAppChannel", b =>
+                {
+                    b.HasOne("JK.Payments.TenantConfigs.PaymentApp", "App")
+                        .WithMany("SupportedChannels")
+                        .HasForeignKey("AppId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("JK.Payments.Bacis.Channel", "Channel")
+                        .WithMany("AppChannels")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("JK.Payments.TenantConfigs.PaymentAppCompany", b =>
+                {
+                    b.HasOne("JK.Payments.TenantConfigs.PaymentApp", "App")
+                        .WithMany("SupportedCompanies")
+                        .HasForeignKey("AppId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("JK.Payments.Bacis.Channel")
+                        .WithMany("AppCompanies")
+                        .HasForeignKey("ChannelId");
+
+                    b.HasOne("JK.Payments.Integration.Company", "Company")
+                        .WithMany("SupportedApps")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("JK.Payments.TenantConfigs.TenantLimitPolicy", b =>
@@ -2739,44 +2783,6 @@ namespace JK.Migrations
                     b.HasOne("JK.Payments.TenantConfigs.TenantLimitPolicyRule", "Rule")
                         .WithMany()
                         .HasForeignKey("RuleId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("JK.Payments.TenantConfigs.TenantPaymentApp", b =>
-                {
-                    b.HasOne("JK.MultiTenancy.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("JK.Payments.TenantConfigs.TenantPaymentAppChannel", b =>
-                {
-                    b.HasOne("JK.Payments.TenantConfigs.TenantPaymentApp", "App")
-                        .WithMany("SupportedChannels")
-                        .HasForeignKey("AppId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("JK.Payments.Bacis.Channel", "Channel")
-                        .WithMany("AppChannels")
-                        .HasForeignKey("ChannelId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("JK.Payments.TenantConfigs.TenantPaymentAppCompany", b =>
-                {
-                    b.HasOne("JK.Payments.TenantConfigs.TenantPaymentApp", "App")
-                        .WithMany("SupportedCompanies")
-                        .HasForeignKey("AppId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("JK.Payments.Bacis.Channel")
-                        .WithMany("AppCompanies")
-                        .HasForeignKey("ChannelId");
-
-                    b.HasOne("JK.Payments.Integration.Company", "Company")
-                        .WithMany("SupportedApps")
-                        .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

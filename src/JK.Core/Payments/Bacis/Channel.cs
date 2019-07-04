@@ -39,9 +39,9 @@ namespace JK.Payments.Bacis
 
         public virtual ICollection<PaymentOrderPolicyChannel> PaymentOrderPolicyChannels { get; set; }
 
-        public virtual ICollection<TenantPaymentAppChannel> AppChannels { get; set; }
+        public virtual ICollection<PaymentAppChannel> AppChannels { get; set; }
 
-        public virtual ICollection<TenantPaymentAppCompany> AppCompanies { get; set; }
+        public virtual ICollection<PaymentAppCompany> AppCompanies { get; set; }
 
         public virtual ICollection<ParameterChannel> ParameterChannels { get; set; }
 

@@ -29,12 +29,12 @@ namespace JK.Web.Public.Controllers
     public class PaymentApiController : AbpController
     {
         private readonly IHttpClientFactory httpClientFactory;
-        private readonly IRepository<TenantPaymentApp> appRepository;
+        private readonly IRepository<PaymentApp> appRepository;
         private readonly IOrderProcessingService orderProcessingService;
         private readonly IRepository<ResultCodeConfiguration> resultCodeRepository;
         public PaymentApiController(
             IHttpClientFactory httpClientFactory,
-            IRepository<TenantPaymentApp> appRepository,
+            IRepository<PaymentApp> appRepository,
             IRepository<ResultCodeConfiguration> resultCodeRepository,
             IOrderProcessingService orderProcessingService)
         {
@@ -44,7 +44,7 @@ namespace JK.Web.Public.Controllers
             this.orderProcessingService = orderProcessingService;
         }
 
-        protected Task<TenantPaymentApp> QueryApp(PaymentApiDtoBase input)
+        protected Task<PaymentApp> QueryApp(PaymentApiDtoBase input)
         {
             return appRepository.FirstOrDefaultAsync(a => a.AppId == input.AppId);
         }
@@ -156,17 +156,18 @@ namespace JK.Web.Public.Controllers
             }
         }
 
-        private CreatePaymentOrderDto BuildOrder(PlaceOrderDto input, TenantPaymentApp app)
+        private CreatePaymentOrderDto BuildOrder(PlaceOrderDto input, PaymentApp app)
         {
             return new CreatePaymentOrderDto
             {
                 TenantId = app.TenantId,
                 AppId = app.Id,
+                TransparentKey = app.TransparentKey,
                 ChannelCode = input.ChannelCode,
                 Amount = input.Amount,
                 BankCode = input.BankCode,
                 CreateIp = HttpContext.Connection.RemoteIpAddress.ToString(),
-                PaymentMode = app.PaymentMode,
+                DeviceType = app.DeviceType,
                 ExternalOrderId = input.ExternalOrderId,
                 SyncCallback = input.SyncCallback,
                 AsyncCallback = input.AsyncCallback,
@@ -184,6 +185,10 @@ namespace JK.Web.Public.Controllers
             else if (dataType == DataType.Xml)
             {
                 ProcessingXmlData(responeParameters, values, dataContent);
+            }
+            else if (dataType == DataType.Text)
+            {
+
             }
             else
             {

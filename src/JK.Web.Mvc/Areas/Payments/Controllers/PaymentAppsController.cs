@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JK.Web.Areas.Payments.Controllers
 {
-    public class AppsController : PaymentsControllerBase
+    public class PaymentAppsController : PaymentsControllerBase
     {
         public IActionResult Index()
         {

@@ -12,6 +12,9 @@ namespace JK.Payments.Integration
 
         public int CompanyId { get; set; }
 
+        [ForeignKey(nameof(CompanyId))]
+        public virtual Company Company { get; set; }
+
         public ApiMethod ApiMethod { get; set; }
 
         [StringLength(32)]

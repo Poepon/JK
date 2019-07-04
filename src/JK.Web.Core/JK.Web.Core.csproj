@@ -16,6 +16,7 @@
     <RootNamespace>JK</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\extension\JK.Abp.RedisCache.Events\JK.Abp.RedisCache.Events.csproj" />
     <ProjectReference Include="..\JK.Application\JK.Application.csproj" />
     <ProjectReference Include="..\JK.EntityFrameworkCore\JK.EntityFrameworkCore.csproj" />
   </ItemGroup>

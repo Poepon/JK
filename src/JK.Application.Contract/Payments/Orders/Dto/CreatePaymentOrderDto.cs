@@ -11,6 +11,8 @@ namespace JK.Payments.Orders.Dto
 
         public int AppId { get; set; }
 
+        public string TransparentKey { get; set; }
+
         public long Amount { get; set; }
 
         [Required]
@@ -24,7 +26,7 @@ namespace JK.Payments.Orders.Dto
         [StringLength(64)]
         public string CreateIp { get; set; }
 
-        public PaymentMode PaymentMode { get; set; }
+        public DeviceType DeviceType { get; set; }
 
         /// <summary>
         /// 同步回调

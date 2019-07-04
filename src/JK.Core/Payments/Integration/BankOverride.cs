@@ -21,5 +21,7 @@ namespace JK.Payments.Integration
         [Required]
         [StringLength(16)]
         public string OverrideCode { get; set; }
+
+        public bool? OverrideIsActive { get; set; }
     }
 }
