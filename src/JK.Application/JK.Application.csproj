@@ -19,7 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\extension\JK.Abp.RabbitMQ\JK.Abp.RabbitMQ.csproj" />
-    <ProjectReference Include="..\..\extension\JK.Abp.Redis\JK.Abp.RedisCache.Events.csproj" />
+    <ProjectReference Include="..\..\extension\JK.Abp.RedisCache.Events\JK.Abp.RedisCache.Events.csproj" />
     <ProjectReference Include="..\JK.Application.Contract\JK.Application.Contract.csproj" />
     <ProjectReference Include="..\JK.Core\JK.Core.csproj" />
   </ItemGroup>
