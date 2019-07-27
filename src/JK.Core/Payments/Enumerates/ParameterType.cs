@@ -2,8 +2,9 @@
 {
     public enum ParameterType
     {
-        Request = 1,
-        Respone = 2,
-        Callback = 3
+        FromRequest = 1,
+        ToRequest = 2,
+        FromResponse = 3,
+        ToResponse =4,
     }
 }

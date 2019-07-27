@@ -21,6 +21,8 @@ namespace JK.Payments.Integration
         [Required]
         public string Key { get; set; }
 
+        public ExpressionType ExpressionType { get; set; }
+
         [StringLength(500)]
         [Required]
         public string ValueOrExpression { get; set; }
@@ -34,9 +36,7 @@ namespace JK.Payments.Integration
         [StringLength(32)]
         public string Format { get; set; }
 
-        public GetValueLocation? GetLocation { get; set; }
-
-        public SetValueLocation? SetLocation { get; set; }
+        public Location? Location { get; set; }
 
         public EncryptionMethod? Encryption { get; set; }
 

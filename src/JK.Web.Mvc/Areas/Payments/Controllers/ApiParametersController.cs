@@ -19,7 +19,9 @@ namespace JK.Web.Areas.Payments.Controllers
         private readonly IChannelCache _channelCache;
         private readonly IApiParameterAppService _parameterAppService;
 
-        public ApiParametersController(ICompanyCache companyCache, IChannelCache channelCache, IApiParameterAppService parameterAppService)
+        public ApiParametersController(ICompanyCache companyCache,
+            IChannelCache channelCache,
+            IApiParameterAppService parameterAppService)
         {
             _companyCache = companyCache;
             _channelCache = channelCache;
@@ -33,22 +35,20 @@ namespace JK.Web.Areas.Payments.Controllers
 
         public PartialViewResult CreateOrEditModal(int? id)
         {
-            var companies = _companyCache.GetActiveList();
-            var channels = _channelCache.GetActiveList();
+            var companies = _companyCache.GetAll();
+            var channels = _channelCache.GetAll();
             if (id.HasValue && id.Value > 0)
             {
                 var dto = _parameterAppService.GetParameterForEdit(new EntityDto(id.Value));
 
-                var model = new EditApiParametersViewModel(dto, companies, channels);
+                var model = new EditViewModel(dto, companies, channels, ObjectMapper);
                 return PartialView(model);
             }
             else
             {
-                var model = new EditApiParametersViewModel(new ApiParameterEditDto(), companies, channels);
+                var model = new EditViewModel(new ApiParameterEditDto(), companies, channels, ObjectMapper);
                 return PartialView(model);
             }
-
-
         }
     }
 }

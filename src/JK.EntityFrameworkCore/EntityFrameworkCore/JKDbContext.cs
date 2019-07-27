@@ -10,7 +10,7 @@ using JK.Alliance;
 using JK.Payments.Orders;
 using JK.Payments.Bacis;
 using JK.Payments.Integration;
-using JK.Payments.TenantConfigs;
+using JK.Payments.Tenants;
 
 namespace JK.EntityFrameworkCore
 {
@@ -87,6 +87,9 @@ namespace JK.EntityFrameworkCore
         public virtual DbSet<TenantLimitPolicyRuleValue> TenantLimitPolicyRuleValues { get; set; }
         public virtual DbSet<CompanyAccount> CompanyAccounts { get; set; }
 
+        public virtual DbSet<Balance> Balances { get; set; }
+        public virtual DbSet<BalanceChangedRecord> BalanceChangedRecords { get; set; }
+
         public virtual DbSet<ApiParameter> ApiCallbackParameters { get; set; }
         public virtual DbSet<ApiChannel> ApiChannels { get; set; }
         public virtual DbSet<ApiConfiguration> ApiConfigurations { get; set; }
@@ -94,7 +97,7 @@ namespace JK.EntityFrameworkCore
         public virtual DbSet<ChannelOverride> ChannelOverrides { get; set; }
         public virtual DbSet<Company> Companies { get; set; }
         public virtual DbSet<CompanyChannel> CompanyChannels { get; set; }
-        public virtual DbSet<ResultCodeConfiguration> ResultCodeConfigurations { get; set; }
+        public virtual DbSet<ResultCode> ResultCodes { get; set; }
         public virtual DbSet<CompanyLimitPolicy> CompanyLimitPolicies { get; set; }
         public virtual DbSet<CompanyLimitPolicyRule> CompanyLimitPolicyRules { get; set; }
         public virtual DbSet<CompanyLimitPolicyRuleValue> CompanyLimitPolicyRuleValues { get; set; }

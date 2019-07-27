@@ -13,7 +13,7 @@ namespace JK.Payments.Orders.Dto
 
         public string TransparentKey { get; set; }
 
-        public long Amount { get; set; }
+        public int Amount { get; set; }
 
         [Required]
         public string ChannelCode { get; set; }

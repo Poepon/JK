@@ -6,6 +6,11 @@ using JK.Payments.Enumerates;
 namespace JK.Payments.Integration.Dto
 {
     [AutoMap(typeof(Company))]
+    public class CompanyEditDto : CompanyDto
+    {
+        public int[] ChannelIds { get; set; }
+    }
+    [AutoMap(typeof(Company))]
     public class CompanyDto : EntityDto
     {
         [Required]
@@ -21,8 +26,8 @@ namespace JK.Payments.Integration.Dto
         /// </summary>
         public decimal? DefaultFeeRate { get; set; }
 
-        public long? MinOrderAmount { get; set; }
+        public bool SupportedWithdrawals { get; set; }
 
-        public long? MaxOrderAmount { get; set; }
+        public bool SupportedQueryBalance { get; set; }
     }
 }

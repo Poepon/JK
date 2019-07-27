@@ -8,5 +8,4 @@ namespace JK.Payments.Integration
     {
         ApiParameterEditDto GetParameterForEdit(EntityDto input);
     }
-
 }

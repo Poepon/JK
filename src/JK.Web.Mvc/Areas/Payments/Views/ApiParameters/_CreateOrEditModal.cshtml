@@ -1,10 +1,10 @@
 ﻿@{
     Layout = null;
 }
-@model JK.Web.Areas.Payments.Models.ApiParameters.EditApiParametersViewModel
+@model JK.Web.Areas.Payments.Models.ApiParameters.EditViewModel
 @using JK.Web.Models.Common.Modals
 @using JK.UI
-@await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml", new ModalHeaderViewModel(Model.IsEditMode ? "编辑参数" : "新建参数"))
+@await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml", new ModalHeaderViewModel("参数",Model))
 <div class="modal-body">
     <form name="InformationsForm" role="form" novalidate class="form-validation">
         <input type="hidden" name="Id" value="@Model.Id" />
@@ -75,20 +75,13 @@
                     </div>
                     <div class="col-sm-6">
                         <div class="input-group form-float">
-                            <span class="input-group-addon">取值位置</span>
-                            <select asp-items="Model.GetLocation.ToSelectListItems()" name="GetLocation" class="form-control" required>
-                                <option value="">请选择参数取值赋值位置</option>
+                            <span class="input-group-addon">赋值取值位置</span>
+                            <select asp-items="Model.Location.ToSelectListItems()" name="Location" class="form-control" required>
+                                <option value="">请选择参数赋值取值位置</option>
                             </select>
                         </div>
                     </div>
-                    <div class="col-sm-6">
-                        <div class="input-group form-float">
-                            <span class="input-group-addon">赋值位置</span>
-                            <select asp-items="Model.SetLocation.ToSelectListItems()" name="GetLocation" class="form-control" required>
-                                <option value="">请选择参数取值赋值位置</option>
-                            </select>
-                        </div>
-                    </div>
+                   
                     <div class="col-sm-6">
                         <div class="input-group form-float">
                             <span class="input-group-addon">参数类型</span>
@@ -147,8 +140,8 @@
                             foreach (var channel in Model.Channels)
                             {
                                 <div class="col-sm-6">
-                                    <input type="checkbox" name="paymentMethod" value="@channel.Value" title="@channel.Text" class="filled-in" id="@string.Format("paymentMethod{0}",channel.Value)" @(channel.Selected ? "checked" : "") />
-                                    <label for="@string.Format("paymentMethod{0}",channel.Value)" title="@channel.Text">@channel.Text</label>
+                                    <input type="checkbox" name="channel" value="@channel.Value" title="@channel.Text" class="filled-in" id="@string.Format("channel{0}",channel.Value)" @(channel.Selected ? "checked" : "") @(channel.Disabled ?"readonly=\"readonly\"":"" )/>
+                                    <label for="@string.Format("channel{0}",channel.Value)" title="@channel.Text">@channel.Text</label>
                                 </div>
                             }
                         }

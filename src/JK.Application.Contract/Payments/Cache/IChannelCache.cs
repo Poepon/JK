@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 using Abp.Dependency;
+using Abp.Domain.Entities.Caching;
+using JK.Payments.Bacis;
+using JK.Payments.Dto;
 
 namespace JK.Payments.Cache
 {
-    public interface IChannelCache : ITransientDependency
+    public interface IChannelCache : IEntityCache<ChannelDto>, ITransientDependency
     {
-        ChannelDto Get(int id);
+        ChannelDto Get(string code);
 
         IReadOnlyList<ChannelDto> GetActiveList();
-
-        ChannelDto GetOrNull(int id);
 
         IReadOnlyList<ChannelDto> GetAll();
     }

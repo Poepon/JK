@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Abp.Application.Services.Dto;
 using Abp.Authorization.Roles;
+using Abp.AutoMapper;
 using JK.Authorization.Roles;
 
 namespace JK.Roles.Dto
 {
+    [AutoMapFrom(typeof(Role))]
     public class RoleEditDto: EntityDto<int>
     {
         [Required]

@@ -1,1 +1,41 @@
-﻿
+﻿@{
+    CurrentPageName = "Banks";
+}
+@section scripts
+{
+    <environment names="Development">
+        <script src="~/view-resources/Areas/Payments/Views/Banks/Index.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production,Docker">
+        <script src="~/view-resources/Areas/Payments/Views/Banks/Index.min.js" asp-append-version="true"></script>
+    </environment>
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    银行管理
+                </h2>
+                <ul class="header-dropdown m-r-10">
+                    <li class="dropdown">
+                        <a id="CreateNewButton" class="btn btn-primary pull-right">新建银行信息</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="body table-responsive">
+                <table class="display table table-striped table-bordered table-hover dt-responsive nowrap" id="DataTable">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>简码</th>
+                            <th>排序</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -9,9 +9,5 @@ namespace JK.Web.Areas.Payments.Controllers
             return View();
         }
 
-        public IActionResult PlaceOrderApi()
-        {
-            return View();
-        }
     }
 }

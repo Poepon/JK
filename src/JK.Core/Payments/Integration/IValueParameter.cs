@@ -10,8 +10,6 @@ namespace JK.Payments.Integration
 
         DataTag? DataTag { get; set; }
 
-        GetValueLocation? GetLocation { get; set; }
-
-        SetValueLocation? SetLocation { get; set; }
+        Location? Location { get; set; }
     }
 }

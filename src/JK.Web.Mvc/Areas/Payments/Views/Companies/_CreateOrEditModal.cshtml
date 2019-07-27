@@ -1,3 +1,67 @@
-﻿@{
+﻿@using JK.Web.Models.Common.Modals
+@model JK.Web.Areas.Payments.Models.Companies.EditViewModel
+@{
     Layout = null;
 }
+@await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml", new ModalHeaderViewModel("支付公司", Model))
+<div class="modal-body">
+    <form name="InformationsForm" role="form" novalidate class="form-validation">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <ul class="nav nav-tabs tab-nav-right" role="tablist">
+            <li role="presentation" class="active"><a href="#edit-platform-details" data-toggle="tab">公司信息</a></li>
+            <li role="presentation"><a href="#edit-platform-methods" data-toggle="tab">支付通道配置</a></li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane animated fadeIn active" id="edit-platform-details">
+                <div class="row clearfix">
+                    <div class="col-sm-12">
+                        <div class="input-group form-float">
+                            <label class="input-group-addon">名称</label>
+                            <div class="form-line">
+                                <input type="text" name="Name" value="@Model.Name" required maxlength="50" class="validate form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row clearfix">
+                    <div class="col-sm-12">
+                        <div class="input-group form-float">
+                            <label class="input-group-addon">货币单位</label>
+                            <select asp-for="CurrencyUnit" asp-items="EumnToSelectListItems(Model.CurrencyUnit,LocalizationManager)" class="form-control bootstrap-select"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row clearfix">
+                    <div class="col-sm-12">
+                        <div class="input-group form-float">
+                            <label class="input-group-addon">状态</label>
+                            <div class="form-line">
+                                <input id="IsActive" type="checkbox" name="IsActive" value="true" @(Model.IsActive ? "checked" : "") class="form-control" />
+                                <label for="IsActive" class="form-label">@L("IsActive")</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane animated fadeIn" id="edit-platform-methods">
+                <div class="row">
+                    <div class="col-sm-12 ">
+                        @if (Model.Channels != null)
+                        {
+                            foreach (var channel in Model.Channels)
+                            {
+                                <div class="col-sm-6">
+                                    <input type="checkbox" name="channel" value="@channel.Value" title="@channel.Text" class="filled-in" id="@string.Format("channel{0}",channel.Value)" @(channel.Selected ? "checked" : "") @(channel.Disabled ? "readonly=\"readonly\"" : "") />
+                                    <label for="@string.Format("channel{0}",channel.Value)" title="@channel.Text">@channel.Text</label>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="col-sm-12 col-orange"><em>Tip:勾选要启用的 @L("PaymentMethods")</em></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+@await Html.PartialAsync("~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml")

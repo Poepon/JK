@@ -2,6 +2,7 @@
 using JK.Payments.Enumerates;
 using JK.Payments.Orders.Dto;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using JK.Payments.Integration;
 
@@ -31,6 +32,35 @@ namespace JK.Payments.Orders
 
         public Dictionary<string, string> Query { get; set; }
 
+        public void SetHttpValues(ParameterValueResult values)
+        {
+            var groups = values.ToLookup(v => v.Location);
+            if (groups.Contains(Location.SetContent))
+            {
+                Content = new Dictionary<string, string>();
+                foreach (var value in groups[Location.SetContent])
+                {
+                    Content.Add(value.Key, value.Value);
+                }
+            }
+            if (groups.Contains(Location.SetHeaders))
+            {
+                Headers = new Dictionary<string, string>();
+                foreach (var value in groups[Location.SetHeaders])
+                {
+                    Headers.Add(value.Key, value.Value);
+                }
+            }
+            if (groups.Contains(Location.SetQuery))
+            {
+                Query = new Dictionary<string, string>();
+                foreach (var value in groups[Location.SetQuery])
+                {
+                    Query.Add(value.Key, value.Value);
+                }
+            }
+        }
+
         public List<ApiParameter> ApiResponeParameters { get; set; }
     }
     public interface IOrderProcessingService
@@ -43,7 +73,7 @@ namespace JK.Payments.Orders
 
         Task<BuildOrderPostRequestResult> BuildOrderPostRequest(PaymentOrderDto paymentOrder);
 
-        Task<List<ApiParameter>> GetOrderCallbackParametersAsync(int companyId,int channelId);
+        Task<List<ApiParameter>> GetApiParameters(int companyId, int channelId, ApiMethod method, ParameterType parameterType);
 
         Task<ResultDto<PaymentStatus>> MarkOrderAsPaid(long orderId);
     }

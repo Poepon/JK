@@ -5,7 +5,7 @@ namespace JK.Web.Public.Dto
     public class PlaceOrderDto : PaymentApiDtoBase
     {
 
-        public long Amount { get; set; }
+        public int Amount { get; set; }
 
         [Required]
         public string ChannelCode { get; set; }

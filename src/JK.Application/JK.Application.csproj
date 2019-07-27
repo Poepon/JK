@@ -11,7 +11,7 @@
     <RootNamespace>JK</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Abp.RedisCache" Version="4.6.0" />
+    <PackageReference Include="Abp.RedisCache" Version="4.8.1" />
     <PackageReference Include="MessagePack" Version="1.7.3.7" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
     <PackageReference Include="protobuf-net" Version="2.4.0" />
@@ -27,6 +27,6 @@
     <Compile Remove="Payments\Orders\OrderIdGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Payments\TenantConfigs\" />
+    <Folder Include="Payments\Tenants\" />
   </ItemGroup>
 </Project>

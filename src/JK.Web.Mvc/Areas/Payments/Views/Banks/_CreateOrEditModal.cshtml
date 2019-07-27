@@ -1,3 +1,42 @@
-﻿@{
+﻿@using JK.Web.Models.Common.Modals
+@model JK.Payments.Dto.BankDto
+@{
     Layout = null;
 }
+@await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml", new ModalHeaderViewModel("银行",Model))
+<div class="modal-body">
+    <form name="InformationsForm" role="form" novalidate class="form-validation">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <div class="row clearfix">
+            <div class="col-sm-12">
+                <div class="input-group form-float">
+                    <label class="input-group-addon">银行名称</label>
+                    <div class="form-line">
+                        <input type="text" name="Name" value="@Model.Name" required maxlength="50" class="validate form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row clearfix">
+            <div class="col-sm-12">
+                <div class="input-group form-float">
+                    <label class="input-group-addon">银行简码</label>
+                    <div class="form-line">
+                        <input type="text" name="BankCode" value="@Model.BankCode" required maxlength="50" class="validate form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row clearfix">
+            <div class="col-sm-12">
+                <div class="input-group form-float">
+                    <label class="input-group-addon">排序值</label>
+                    <div class="form-line">
+                        <input type="number" name="OrderNumber" value="@Model.OrderNumber" required maxlength="50" class="validate form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+@await Html.PartialAsync("~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml")

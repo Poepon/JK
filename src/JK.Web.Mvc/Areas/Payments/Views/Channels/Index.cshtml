@@ -1,1 +1,54 @@
-﻿
+﻿@{
+    CurrentPageName = "Channels";
+}
+@section scripts
+    {
+    <environment names="Development">
+        <script src="~/view-resources/Areas/Payments/Views/Channels/Index.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production,Docker">
+        <script src="~/view-resources/Areas/Payments/Views/Channels/Index.min.js" asp-append-version="true"></script>
+    </environment>
+}
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    支付渠道管理
+                </h2>
+                <ul class="header-dropdown m-r-10">
+                    <li class="dropdown">
+                        <a id="CreateNewButton" class="btn btn-primary pull-right">新建支付通道</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="table-search">
+                <button id="QueryButton" class="btn btn-default pull-right" type="button">
+                    <i class="material-icons">search</i>
+                </button>
+                <form id="paymentMethodsFilter">
+                    <label>状态：</label>
+                    <select name="IsActive">
+                        <option value="">全部</option>
+                        <option value="true">启用</option>
+                        <option value="false">禁用</option>
+                    </select>
+                </form>
+            </div>
+            <div class="body table-responsive">
+                <table class="display table table-striped table-bordered table-hover dt-responsive nowrap" id="DataTable">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>显示名称</th>
+                            <th>编码</th>
+                            <th>状态</th>
+                            <th>@L("Actions")</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

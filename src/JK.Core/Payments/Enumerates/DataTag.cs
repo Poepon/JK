@@ -9,6 +9,7 @@
         PayAppUrl = 5,
         PayQrCode = 6,
         Sign = 7,
-        GenSign = 8
+        GenSign = 8,
+        CallbackSucceed = 9
     }
 }

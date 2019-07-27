@@ -31,17 +31,17 @@ namespace JK.Payments.Orders.Dto
         /// <summary>
         /// 订单金额
         /// </summary>
-        public long Amount { get; set; }
+        public int Amount { get; set; }
 
         /// <summary>
         /// 支付金额
         /// </summary>
-        public long? PaidAmount { get; set; }
+        public int? PaidAmount { get; set; }
 
         /// <summary>
         /// 手续费
         /// </summary>
-        public long Fee { get; set; }
+        public int Fee { get; set; }
 
         /// <summary>
         /// 过期时间

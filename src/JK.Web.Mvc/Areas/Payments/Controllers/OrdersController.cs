@@ -8,5 +8,12 @@ namespace JK.Web.Areas.Payments.Controllers
         {
             return View();
         }
+
+        public PartialViewResult Detail(long id)
+        {
+            return PartialView();
+        }
+
+
     }
 }

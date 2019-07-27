@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using JK.Payments.Integration;
 using JK.Payments.Orders;
-using JK.Payments.TenantConfigs;
+using JK.Payments.Tenants;
 
 namespace JK.Payments.Bacis
 {

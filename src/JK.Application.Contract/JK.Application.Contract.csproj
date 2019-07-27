@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <RootNamespace>JK</RootNamespace>
+    <AssemblyName>JK.Application.Contract</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

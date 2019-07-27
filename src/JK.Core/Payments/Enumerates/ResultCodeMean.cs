@@ -2,9 +2,9 @@
 {
     public enum ResultCodeMean
     {
-        Succeed = 0,
-        Failed = 1,
-        Processing = 2,
+        Processing = 1,
+        Succeed = 2,
+        Failed = 3,
         Exception = 500,
         Unknown = 404
     }

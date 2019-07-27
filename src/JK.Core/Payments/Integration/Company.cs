@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Domain.Entities;
 using JK.Payments.Enumerates;
-using JK.Payments.TenantConfigs;
+using JK.Payments.Tenants;
 
 namespace JK.Payments.Integration
 {
@@ -26,13 +26,13 @@ namespace JK.Payments.Integration
         /// </summary>
         public decimal? DefaultFeeRate { get; set; }
 
-        public long? MinOrderAmount { get; set; }
+        public bool SupportedWithdrawals { get; set; }
 
-        public long? MaxOrderAmount { get; set; }
+        public bool SupportedQueryBalance { get; set; }
 
         public virtual ICollection<CompanyChannel> SupportedChannels { get; set; }
 
         public virtual ICollection<PaymentAppCompany> SupportedApps { get; set; }
-        
+
     }
 }

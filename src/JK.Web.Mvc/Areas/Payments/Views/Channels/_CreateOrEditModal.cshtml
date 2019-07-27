@@ -1,3 +1,60 @@
-﻿@{
+﻿@using JK.Web.Models.Common.Modals
+@model JK.Payments.Dto.ChannelDto
+@{
     Layout = null;
 }
+@await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml", new ModalHeaderViewModel("支付通道",Model))
+<div class="modal-body">
+    <form name="InformationsForm" role="form" novalidate class="form-validation">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <div class="row clearfix">
+            <div class="col-sm-12">
+                <div class="input-group form-float">
+                    <span class="input-group-addon">名称</span>
+                    <div class="form-line">
+                        <input id="Name" type="text" name="Name" value="@Model.Name" required maxlength="50" class="validate form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row clearfix">
+            <div class="col-sm-12">
+                <div class="input-group form-float">
+                    <span class="input-group-addon">显示名称</span>
+                    <div class="form-line">
+                        <input type="text" name="DisplayName" value="@Model.DisplayName" maxlength="20" class="validate form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row clearfix">
+            <div class="col-sm-12">
+                <div class="input-group form-float">
+                    <span class="input-group-addon">通道编码</span>
+                    <div class="form-line">
+                        <input type="text" name="Code" value="@Model.ChannelCode" maxlength="20" class="validate form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row clearfix">
+            <div class="col-sm-6">
+                <div class="form-group form-float">
+                    <div>
+                        <input id="RequiredBank" type="checkbox" name="RequiredBank" value="true" @(Model.RequiredBank ? "checked" : "") class="form-control" />
+                        <label for="RequiredBank" class="form-label">需要指定银行</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group form-float">
+                    <div>
+                        <input id="IsActive" type="checkbox" name="IsActive" value="true" @(Model.IsActive ? "checked" : "") class="form-control"/>
+                        <label for="IsActive" class="form-label">@L("IsActive")</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+@await Html.PartialAsync("~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml")

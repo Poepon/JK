@@ -1,44 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Abp.Dependency;
+﻿using Abp.Domain.Entities.Caching;
 using Abp.Domain.Repositories;
+using Abp.Events.Bus.Entities;
 using Abp.Runtime.Caching;
 using JK.Payments.Integration;
 using JK.Payments.Integration.Dto;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace JK.Payments.Cache
 {
-    public class CompanyCache : ICompanyCache
+    public class CompanyCache : EntityCache<Company, CompanyDto>, ICompanyCache
     {
-        private readonly ICacheManager _cacheManager;
-        private readonly IRepository<Company> _companyRepository;
-
-        private const string CacheName = "";
-        public CompanyCache(ICacheManager cacheManager,IRepository<Company> companyRepository)
+        public CompanyCache(ICacheManager cacheManager, IRepository<Company, int> repository, string cacheName = null) : base(cacheManager, repository, cacheName)
         {
-            _cacheManager = cacheManager;
-            _companyRepository = companyRepository;
-            _cacheManager.GetCache(CacheName);
-        }
-        public CompanyDto Get(int id)
-        {
-            throw new NotImplementedException();
         }
 
         public IReadOnlyList<CompanyDto> GetActiveList()
         {
-            throw new NotImplementedException();
+            return CacheManager.GetCache<string, List<CompanyDto>>("CompanyList").Get("ActiveList", () =>
+            {
+                var entities = Repository.GetAll().Where(c => c.IsActive).ToList();
+
+                var list = ObjectMapper.Map<List<CompanyDto>>(entities);
+
+                return list;
+            });
         }
 
         public IReadOnlyList<CompanyDto> GetAll()
         {
-            throw new NotImplementedException();
+            return CacheManager.GetCache<string, List<CompanyDto>>("CompanyList").Get("AllList", () =>
+            {
+                var entities = Repository.GetAllList();
+
+                var list = ObjectMapper.Map<List<CompanyDto>>(entities);
+
+                return list;
+            });
         }
 
-        public CompanyDto GetOrNull(int id)
+        public override void HandleEvent(EntityChangedEventData<Company> eventData)
         {
-            throw new NotImplementedException();
+            base.HandleEvent(eventData);
+            var typedCache = CacheManager.GetCache<string, List<CompanyDto>>("CompanyList");
+            typedCache.Remove("ActiveList");
+            typedCache.Remove("AllList");
         }
     }
 }

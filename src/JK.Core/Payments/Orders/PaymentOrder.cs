@@ -15,11 +15,11 @@ namespace JK.Payments.Orders
         public override long Id { get; set; }
 
         public int TenantId { get; set; }
-        
+
         public int CompanyId { get; set; }
-        
+
         public int ChannelId { get; set; }
-        
+
         public int AccountId { get; set; }
 
         public int AppId { get; set; }
@@ -46,12 +46,12 @@ namespace JK.Payments.Orders
         /// <summary>
         /// 支付金额
         /// </summary>
-        public long? PaidAmount { get; set; }
+        public int? PaidAmount { get; set; }
 
         /// <summary>
         /// 手续费
         /// </summary>
-        public long Fee { get; set; }
+        public int Fee { get; set; }
 
         /// <summary>
         /// 过期时间

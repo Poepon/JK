@@ -16,7 +16,7 @@ namespace JK.Http
 
     public class RequestParameter
     {
-
+        
     }
     public class ResponseParameter
     {

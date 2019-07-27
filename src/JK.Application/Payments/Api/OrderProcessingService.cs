@@ -12,11 +12,12 @@ using JK.Dto;
 using JK.Payments.Bacis;
 using JK.Payments.Enumerates;
 using JK.Payments.Integration;
+using JK.Payments.Orders;
 using JK.Payments.Orders.Dto;
-using JK.Payments.TenantConfigs;
+using JK.Payments.Tenants;
 using Microsoft.EntityFrameworkCore;
 
-namespace JK.Payments.Orders
+namespace JK.Payments.Api
 {
     public class OrderProcessingService : AbpServiceBase, IOrderProcessingService
     {
@@ -159,7 +160,7 @@ namespace JK.Payments.Orders
             return new ResultDto<PaymentOrderDto>
             {
                 IsSuccess = true,
-                Data = paymentOrder.MapTo<PaymentOrderDto>(),
+                Data = ObjectMapper.Map<PaymentOrderDto>(paymentOrder),
                 ErrorMessage = "提交成功"
             };
         }
@@ -216,43 +217,27 @@ namespace JK.Payments.Orders
                 DataType = apiconfig.DataType,
                 Method = apiconfig.Method,
                 RequestType = apiconfig.RequestType,
-                HasResponeParameter = apiconfig.HasResponeParameter
+                HasResponeParameter = apiconfig.HasResponseParameter
             };
-            var apiRequests = await apiParameterRepository.GetAll()
-                .Where(p => p.CompanyId == paymentOrder.CompanyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Request &&
-                            p.SupportedChannels.Any(c => c.ChannelId == paymentOrder.ChannelId))
-                .OrderBy(p => p.OrderNumber).ToListAsync();
-            if (apiconfig.HasResponeParameter)
+            var apiRequests = await GetApiParameters(paymentOrder.CompanyId, paymentOrder.ChannelId,
+                ApiMethod.PlaceOrder, ParameterType.ToRequest);
+            if (apiconfig.HasResponseParameter)
             {
-                var apiRespones = await apiParameterRepository.GetAll()
-                    .Where(p => p.CompanyId == paymentOrder.CompanyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Respone &&
-                                p.SupportedChannels.Any(c => c.ChannelId == paymentOrder.ChannelId))
-                    .OrderBy(p => p.OrderNumber).ToListAsync();
+                var apiRespones = await GetApiParameters(paymentOrder.CompanyId, paymentOrder.ChannelId,
+                    ApiMethod.PlaceOrder, ParameterType.FromResponse);
                 result.ApiResponeParameters = apiRespones;
             }
-            //TODO PaymentVariable
-            var variable = new PaymentVariable(null, null, null, null, null);
-            //TODO 区分Query Content Headers
-            var values = variable.ProcessingApiRequestParameters(apiRequests);
-            if (values.ContainsKey(SetValueLocation.Query))
-            {
-                result.Query = values[SetValueLocation.Query];
-            }
-            if (values.ContainsKey(SetValueLocation.Headers))
-            {
-                result.Headers = values[SetValueLocation.Headers];
-            }
-            if (values.ContainsKey(SetValueLocation.Content))
-            {
-                result.Content = values[SetValueLocation.Content];
-            }
+            var variable = new ParameterValueProcessor(null, null, null, null, null);
+            var values = variable.GetValues(apiRequests);
+            result.SetHttpValues(values);
+          
             return result;
         }
 
-        public async Task<List<ApiParameter>> GetOrderCallbackParametersAsync(int companyId, int channelId)
+        public Task<List<ApiParameter>> GetApiParameters(int companyId, int channelId, ApiMethod method, ParameterType parameterType)
         {
-            return await apiParameterRepository.GetAll()
-                .Where(p => p.CompanyId == companyId && p.ApiMethod == ApiMethod.PlaceOrder && p.ParameterType == ParameterType.Callback &&
+            return apiParameterRepository.GetAll()
+                .Where(p => p.CompanyId == companyId && p.ApiMethod == method && p.ParameterType == parameterType &&
                             p.SupportedChannels.Any(c => c.ChannelId == channelId))
                 .OrderBy(p => p.OrderNumber)
                 .ToListAsync();

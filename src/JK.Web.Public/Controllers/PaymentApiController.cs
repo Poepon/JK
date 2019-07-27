@@ -22,6 +22,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
+using JK.Payments.Tenants;
 
 namespace JK.Web.Public.Controllers
 {
@@ -31,11 +32,11 @@ namespace JK.Web.Public.Controllers
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IRepository<PaymentApp> appRepository;
         private readonly IOrderProcessingService orderProcessingService;
-        private readonly IRepository<ResultCodeConfiguration> resultCodeRepository;
+        private readonly IRepository<ResultCode> resultCodeRepository;
         public PaymentApiController(
             IHttpClientFactory httpClientFactory,
             IRepository<PaymentApp> appRepository,
-            IRepository<ResultCodeConfiguration> resultCodeRepository,
+            IRepository<ResultCode> resultCodeRepository,
             IOrderProcessingService orderProcessingService)
         {
             this.httpClientFactory = httpClientFactory;
@@ -117,13 +118,12 @@ namespace JK.Web.Public.Controllers
                 var response = await httpClient.SendAsync(httpRequestMessage);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    response.EnsureSuccessStatusCode();
                     if (postdata.HasResponeParameter)
                     {
                         var data = new ConcurrentDictionary<string, string>();
                         ProcessingData(data, await response.Content.ReadAsStringAsync(), postdata.DataType, postdata.ApiResponeParameters);
                         var resultCode = data[DataTag.ResultCode.ToString()];
-                        var resultCodeMean = await resultCodeRepository.FirstOrDefaultAsync(c => c.ResultCode == resultCode && c.CompanyId == paymentOrder.CompanyId);
+                        var resultCodeMean = await resultCodeRepository.FirstOrDefaultAsync(c => c.Code == resultCode && c.CompanyId == paymentOrder.CompanyId);
                         if (resultCodeMean == null)
                             throw new Exception($"ResultCode:{resultCode}未配置。");
                         if (resultCodeMean.Mean == ResultCodeMean.Succeed)
@@ -259,8 +259,15 @@ namespace JK.Web.Public.Controllers
             }
         }
 
+        /// <summary>
+        /// 异步回调
+        /// </summary>
+        /// <param name="CompanyId"></param>
+        /// <param name="ChannelId"></param>
+        /// <param name="AccountId"></param>
+        /// <returns></returns>
         [Route("Pay/Callback_{CompanyId}_{ChannelId}_{AccountId}")]
-        public async Task<IActionResult> Callback(int CompanyId, int ChannelId, int AccountId)
+        public async Task<ContentResult> Callback(int CompanyId, int ChannelId, int AccountId)
         {
             int tenantId = AbpSession.GetTenantId();
             //TODO 获取回调参数
@@ -274,16 +281,16 @@ namespace JK.Web.Public.Controllers
             IHeaderDictionary headers = Request.Headers;
             IQueryCollection query = Request.Query;
             var data = new ConcurrentDictionary<string, string>();
-            var parameters = await orderProcessingService.GetOrderCallbackParametersAsync(CompanyId, ChannelId);
+            var parameters = await orderProcessingService.GetApiParameters(CompanyId, ChannelId, ApiMethod.AsyncOrderResult, ParameterType.FromRequest);
             //TODO DataType
             var dataType = DataType.FormData;
-            var groups = parameters.ToLookup(p => p.GetLocation);
-            IGrouping<GetValueLocation?, ApiParameter> parameterGroup = null;
+            var groups = parameters.ToLookup(p => p.Location);
+            IGrouping<Location?, ApiParameter> parameterGroup = null;
             foreach (var g in groups)
             {
                 switch (g.Key)
                 {
-                    case GetValueLocation.Form:
+                    case Location.GetForm:
                         foreach (var parameter in g)
                         {
                             string key = parameter.Key;
@@ -298,10 +305,10 @@ namespace JK.Web.Public.Controllers
                             }
                         }
                         break;
-                    case GetValueLocation.Body:
+                    case Location.GetBody:
                         ProcessingData(data, bodyContent, dataType, g.ToList());
                         break;
-                    case GetValueLocation.Query:
+                    case Location.GetQuery:
                         foreach (var parameter in g)
                         {
                             string key = parameter.Key;
@@ -316,7 +323,7 @@ namespace JK.Web.Public.Controllers
                             }
                         }
                         break;
-                    case GetValueLocation.Headers:
+                    case Location.GetHeaders:
                         foreach (var parameter in g)
                         {
                             string key = parameter.Key;
@@ -346,7 +353,7 @@ namespace JK.Web.Public.Controllers
                     //        }
                     //    }
                     //    break;
-                    case GetValueLocation.Parameter:
+                    case Location.GetParameter:
                         parameterGroup = g;
                         break;
                     default:
@@ -355,9 +362,9 @@ namespace JK.Web.Public.Controllers
             }
             if (parameterGroup != null && parameterGroup.Count() > 0)
             {
-                var variable = new PaymentVariable(null, null, null, null);
+                var variable = new ParameterValueProcessor(null, null, null, null);
                 variable.InitValues(new Dictionary<string, string>(data));
-                var values = variable.ProcessingApiCallbackParameters(parameterGroup);
+                var values = variable.GetValues(parameterGroup);
                 foreach (var item in values)
                 {
                     if (!data.ContainsKey(item.Key))
@@ -370,7 +377,7 @@ namespace JK.Web.Public.Controllers
             }
             var orderNo = data[DataTag.SystemOrderId.ToString()];
             var resultCode = data[DataTag.ResultCode.ToString()];
-            var resultCodeMean = await resultCodeRepository.FirstOrDefaultAsync(c => c.ResultCode == resultCode &&
+            var resultCodeMean = await resultCodeRepository.FirstOrDefaultAsync(c => c.Code == resultCode &&
             c.CompanyId == CompanyId);
             if (resultCodeMean.Mean == ResultCodeMean.Succeed)
             {
@@ -378,15 +385,37 @@ namespace JK.Web.Public.Controllers
                 {
                     var result = await orderProcessingService.MarkOrderAsPaid(long.Parse(orderNo));
                     if (result.IsSuccess && result.Data == PaymentStatus.Paid)
-                        return Content("Success");
-                    else return Content("Failed");
+                    {
+                        var callbackParameters = await orderProcessingService.GetApiParameters(CompanyId, ChannelId, ApiMethod.SyncOrderResult, ParameterType.ToResponse);
+                        var item = callbackParameters.FirstOrDefault(p => p.DataTag == DataTag.CallbackSucceed);
+                        if (item != null)
+                        {
+                            return Content(item.ValueOrExpression);
+                        }
+                        return Content("success");
+                    }
                 }
                 else
                 {
-                    throw new Exception("验签失败");
+                    return Content("验签失败");
                 }
             }
-            return View();
+            return Content("Failed");
+        }
+
+        /// <summary>
+        /// 同步回调
+        /// </summary>
+        /// <param name="CompanyId"></param>
+        /// <param name="ChannelId"></param>
+        /// <param name="AccountId"></param>
+        /// <returns></returns>
+        [Route("Pay/Callback_{CompanyId}_{ChannelId}_{AccountId}")]
+        public async Task<IActionResult> Return(int CompanyId, int ChannelId, int AccountId)
+        {
+            var parameters = await orderProcessingService.GetApiParameters(CompanyId, ChannelId, ApiMethod.SyncOrderResult, ParameterType.FromRequest);
+
+            throw new NotImplementedException();
         }
     }
 }

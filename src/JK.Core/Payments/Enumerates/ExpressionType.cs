@@ -4,6 +4,6 @@
     {
         JPath = 0,
         Regex = 1,
-        XPath = 2
+        XPath = 2,
     }
 }

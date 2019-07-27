@@ -8,22 +8,26 @@ using JK.Chat.Dto.Output;
 using JK.Chat.WebSocketPackage;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Abp.ObjectMapping;
 
 namespace JK.Chat
 {
     public class ChatCommunicator : IChatCommunicator, ITransientDependency
     {
         private readonly ChatSender _chatSender;
+        private readonly IObjectMapper _objectMapper;
         private readonly IOnlineClientManager<ChatChannel> _onlineClientManager;
         private readonly IAppContext _appContext;
         private readonly RedisPubSub _redisPubSub;
 
         public ChatCommunicator(
             ChatSender chatPost,
+            IObjectMapper objectMapper,
             IOnlineClientManager<ChatChannel> onlineClientManager,
             IAppContext appContext, RedisPubSub redisPubSub)
         {
             _chatSender = chatPost;
+            _objectMapper = objectMapper;
             _onlineClientManager = onlineClientManager;
             _appContext = appContext;
             _redisPubSub = redisPubSub;
@@ -36,7 +40,7 @@ namespace JK.Chat
 
         private async Task SendMessageToClient(IReadOnlyList<IOnlineClient> clients, ChatMessage message)
         {
-            var data = new[] { message.MapTo<ChatMessageOutput>() }
+            var data = new[] { _objectMapper.Map<ChatMessageOutput>(message) }
                   .WrapPackage(System.Net.WebSockets.WebSocketMessageType.Binary, MessageDataType.MessagePack, CommandType.GetMessage);
             await Send(clients, data);
         }
@@ -64,7 +68,7 @@ namespace JK.Chat
 
         private async Task SendMessagesToClient(IReadOnlyList<IOnlineClient> clients, List<ChatMessage> messages)
         {
-            var data = messages.MapTo<List<ChatMessageOutput>>()
+            var data = _objectMapper.Map<List<ChatMessageOutput>>(messages)
                 .WrapPackage(System.Net.WebSockets.WebSocketMessageType.Binary, MessageDataType.MessagePack, CommandType.GetMessage);
             await Send(clients, data);
         }

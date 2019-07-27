@@ -45,7 +45,7 @@ namespace JK.Payments.Integration
         [StringLength(16)]
         public string AcceptCharset { get; set; }
 
-        public bool HasResponeParameter { get; set; }
+        public bool HasResponseParameter { get; set; }
 
         public virtual ICollection<ApiChannel> SupportedChannels { get; set; }
 

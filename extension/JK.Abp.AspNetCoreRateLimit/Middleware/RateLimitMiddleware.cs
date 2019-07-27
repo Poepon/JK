@@ -37,75 +37,100 @@ namespace JK.Abp.AspNetCoreRateLimit.Middleware
                 return;
             }
 
-            // compute identity from request
-            var identity = ResolveIdentity(context);
-
-            // check white list
-            if (_processor.IsWhitelisted(identity))
+            var data = await Check(context);
+            if (data.result)
             {
                 await _next.Invoke(context);
-                return;
             }
-
-            var rules = await _processor.GetMatchingRulesAsync(identity, context.RequestAborted);
-
-            var rulesDict = new Dictionary<RateLimitRule, RateLimitCounter>();
-
-            foreach (var rule in rules)
+            else
             {
-                // increment counter		
-                var rateLimitCounter = await _processor.ProcessRequestAsync(identity, rule, context.RequestAborted);
+                // break execution
+                await ReturnQuotaExceededResponse(context, data.message);
+            }
+        }
 
-                if (rule.Limit > 0)
+        async Task<(bool result, string message)> Check(HttpContext httpContext)
+        {
+            // compute identity from request
+            var identity = ResolveIdentity(httpContext);
+
+            // check white list
+            if (!_processor.IsWhitelisted(identity))
+            {
+                var rules = await _processor.GetMatchingRulesAsync(identity, httpContext.RequestAborted);
+
+                var rulesDict = new Dictionary<RateLimitRule, RateLimitCounter>();
+                foreach (var rule in rules)
                 {
-                    // check if key expired
-                    if (rateLimitCounter.Timestamp + rule.PeriodTimespan.Value < DateTime.UtcNow)
+                    // increment counter		
+                    var rateLimitCounter =
+                        await _processor.ProcessRequestAsync(identity, rule, httpContext.RequestAborted);
+
+                    if (rule.Limit > 0)
                     {
-                        continue;
+                        // check if key expired
+                        if (rateLimitCounter.Timestamp + rule.PeriodTimespan.Value < DateTime.UtcNow)
+                        {
+                            continue;
+                        }
+
+                        // check if limit is reached
+                        if (rateLimitCounter.Count > rule.Limit)
+                        {
+                            //compute retry after value
+                            var retryAfter = rateLimitCounter.Timestamp.RetryAfterFrom(rule);
+
+                            // log blocked request
+                            LogBlockedRequest(httpContext, identity, rateLimitCounter, rule);
+                            var message = string.Format(
+                                _options.QuotaExceededResponse?.Content ??
+                                _options.QuotaExceededMessage ??
+                                "API calls quota exceeded! maximum admitted {0} per {1}.", rule.Limit, rule.Period,
+                                retryAfter);
+                            if (!_options.DisableRateLimitHeaders)
+                            {
+                                httpContext.Response.Headers["Retry-After"] = retryAfter;
+                            }
+
+                            return (false, message);
+                        }
                     }
-
-                    // check if limit is reached
-                    if (rateLimitCounter.Count > rule.Limit)
+                    // if limit is zero or less, block the request.
+                    else
                     {
-                        //compute retry after value
-                        var retryAfter = rateLimitCounter.Timestamp.RetryAfterFrom(rule);
-
                         // log blocked request
-                        LogBlockedRequest(context, identity, rateLimitCounter, rule);
+                        LogBlockedRequest(httpContext, identity, rateLimitCounter, rule);
+                        // break execution (Int32 max used to represent infinity)
+                        var retryAfter = int.MaxValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        var message = string.Format(
+                            _options.QuotaExceededResponse?.Content ??
+                            _options.QuotaExceededMessage ??
+                            "API calls quota exceeded! maximum admitted {0} per {1}.", rule.Limit, rule.Period,
+                            retryAfter);
+                        if (!_options.DisableRateLimitHeaders)
+                        {
+                            httpContext.Response.Headers["Retry-After"] = retryAfter;
+                        }
 
-                        // break execution
-                        await ReturnQuotaExceededResponse(context, rule, retryAfter);
-
-                        return;
+                        return (false, message);
                     }
+
+                    rulesDict.Add(rule, rateLimitCounter);
                 }
-                // if limit is zero or less, block the request.
-                else
+
+                // set X-Rate-Limit headers for the longest period
+                if (rulesDict.Any() && !_options.DisableRateLimitHeaders)
                 {
-                    // log blocked request
-                    LogBlockedRequest(context, identity, rateLimitCounter, rule);
+                    var rule = rulesDict.OrderByDescending(x => x.Key.PeriodTimespan).FirstOrDefault();
+                    var headers = _processor.GetRateLimitHeaders(rule.Value, rule.Key, httpContext.RequestAborted);
 
-                    // break execution (Int32 max used to represent infinity)
-                    await ReturnQuotaExceededResponse(context, rule, int.MaxValue.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    headers.Context = httpContext;
 
-                    return;
+                    httpContext.Response.OnStarting(SetRateLimitHeaders, state: headers);
                 }
-
-                rulesDict.Add(rule, rateLimitCounter);
             }
 
-            // set X-Rate-Limit headers for the longest period
-            if (rulesDict.Any() && !_options.DisableRateLimitHeaders)
-            {
-                var rule = rulesDict.OrderByDescending(x => x.Key.PeriodTimespan).FirstOrDefault();
-                var headers = _processor.GetRateLimitHeaders(rule.Value, rule.Key, context.RequestAborted);
-
-                headers.Context = context;
-
-                context.Response.OnStarting(SetRateLimitHeaders, state: headers);
-            }
-
-            await _next.Invoke(context);
+            return (true, "");
         }
 
         public virtual ClientRequestIdentity ResolveIdentity(HttpContext httpContext)
@@ -115,7 +140,7 @@ namespace JK.Abp.AspNetCoreRateLimit.Middleware
 
             if (_config.ClientResolvers?.Any() == true)
             {
-                foreach(var resolver in _config.ClientResolvers)
+                foreach (var resolver in _config.ClientResolvers)
                 {
                     clientId = resolver.ResolveClient();
 
@@ -148,18 +173,8 @@ namespace JK.Abp.AspNetCoreRateLimit.Middleware
             };
         }
 
-        public virtual Task ReturnQuotaExceededResponse(HttpContext httpContext, RateLimitRule rule, string retryAfter)
+        public virtual Task ReturnQuotaExceededResponse(HttpContext httpContext, string message)
         {
-            var message = string.Format(
-                _options.QuotaExceededResponse?.Content ??
-                _options.QuotaExceededMessage ??
-                "API calls quota exceeded! maximum admitted {0} per {1}.", rule.Limit, rule.Period, retryAfter);
-
-            if (!_options.DisableRateLimitHeaders)
-            {
-                httpContext.Response.Headers["Retry-After"] = retryAfter;
-            }
-
             httpContext.Response.StatusCode = _options.QuotaExceededResponse?.StatusCode ?? _options.HttpStatusCode;
             httpContext.Response.ContentType = _options.QuotaExceededResponse?.ContentType ?? "text/plain";
 

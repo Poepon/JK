@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
+using Abp.ObjectMapping;
 
 namespace JK.Chat
 {
@@ -28,12 +29,14 @@ namespace JK.Chat
         private readonly RedisPubSub _redisPubSub;
 
         private readonly JKSession AbpSession;
+        private readonly IObjectMapper _objectMapper;
 
         public ChatHub(WebSocketConnectionManager webSocketConnectionManager,
             IHttpContextAccessor httpContextAccess,
             IOnlineClientManager<ChatChannel> onlineClientManager,
             IChatAppService chatAppService,
             JKSession jkSession,
+            IObjectMapper objectMapper,
             IAppContext appContext,
             RedisPubSub redisPubSub) :
             base(appContext, onlineClientManager, webSocketConnectionManager)
@@ -42,6 +45,7 @@ namespace JK.Chat
 
             this.chatAppService = chatAppService;
             AbpSession = jkSession;
+            _objectMapper = objectMapper;
             _redisPubSub = redisPubSub;
             _redisPubSub.Subscribe(appContext.LocalHostName);
         }
@@ -94,13 +98,13 @@ namespace JK.Chat
                             if (getMessageInput.Direction == QueryDirection.History)
                             {
                                 list = messages.Items.OrderBy(msg => msg.Id)
-                              .Select(msg => msg.MapTo<ChatMessageOutput>())
+                              .Select(msg => _objectMapper.Map<ChatMessageOutput>(msg))
                               .ToArray();
                             }
                             else
                             {
                                 list = messages.Items
-                                 .Select(msg => msg.MapTo<ChatMessageOutput>())
+                                 .Select(msg => _objectMapper.Map<ChatMessageOutput>(msg))
                                  .ToArray();
                             }
                             if (list.Length > 0)

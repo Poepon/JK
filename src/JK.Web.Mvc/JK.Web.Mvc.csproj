@@ -18,10 +18,12 @@
   <ItemGroup>
     <Content Remove="appMenus.config" />
     <Content Remove="appPermissions.config" />
+    <Content Remove="wwwroot\view-resources\Areas\Payments\Views\Channels\Index.min.js" />
     <Content Remove="wwwroot\view-resources\Views\Chat\Index.min.js" />
     <Content Remove="wwwroot\view-resources\Views\_Bundles\common-scripts.js" />
   </ItemGroup>
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\view-resources\Areas\Payments\Views\Channels\Index.min.js" />
     <_ContentIncludedByDefault Remove="wwwroot\view-resources\Views\Chat\Index.min.js" />
     <_ContentIncludedByDefault Remove="wwwroot\view-resources\Views\_Bundles\common-scripts.js" />
   </ItemGroup>
@@ -31,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="wwwroot\view-resources\Areas\Payments\Views\Channels\Index.min.js" />
     <None Include="wwwroot\view-resources\Views\Chat\Index.min.js" />
     <None Include="wwwroot\view-resources\Views\_Bundles\common-scripts.js" />
     <None Update="Dockerfile">
@@ -50,14 +53,15 @@
   <ItemGroup>
     <PackageReference Include="Castle.LoggingFacility.MsLogging" Version="3.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Abp.HangFire" Version="4.6.0" />
-    <PackageReference Include="Abp.RedisCache" Version="4.6.0" />
-    <PackageReference Include="Abp.Castle.Log4Net" Version="4.6.0" />
+    <PackageReference Include="Abp.HangFire" Version="4.8.1" />
+    <PackageReference Include="Abp.RedisCache" Version="4.8.1" />
+    <PackageReference Include="Abp.Castle.Log4Net" Version="4.8.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
-    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.0.165" />
-    <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.0.165" />
+    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.0.180" />
+    <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.0.180" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Payments\Data\" />
+    <Folder Include="wwwroot\view-resources\Areas\Payments\Views\Companies - 复制\" />
   </ItemGroup>
 </Project>
