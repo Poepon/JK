@@ -14,15 +14,7 @@ namespace JK.Payments.TenantConfigs.Dto
         }
         public int TenantId { get; set; }
 
-        /// <summary>
-        /// 名称
-        /// </summary>
-        [Required]
-        [StringLength(50)]
-        public string Name { get; set; }
-
         public int CompanyId { get; set; }
-
 
         [Required]
         [StringLength(32)]
@@ -36,6 +28,11 @@ namespace JK.Payments.TenantConfigs.Dto
         /// 手续费率
         /// </summary>
         public decimal? OverrideFeeRate { get; set; }
+
+        /// <summary>
+        /// 余额
+        /// </summary>
+        public long Balance { get; set; }
 
         public virtual Dictionary<string, string> Attributes { get; set; }
 

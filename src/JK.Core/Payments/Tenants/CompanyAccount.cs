@@ -16,12 +16,6 @@ namespace JK.Payments.Tenants
 
         [ForeignKey(nameof(TenantId))]
         public virtual Tenant Tenant { get; set; }
-        /// <summary>
-        /// 名称
-        /// </summary>
-        [Required]
-        [StringLength(50)]
-        public string Name { get; set; }
 
         public int CompanyId { get; set; }
 
@@ -40,6 +34,11 @@ namespace JK.Payments.Tenants
         /// 手续费率
         /// </summary>
         public decimal? OverrideFeeRate { get; set; }
+
+        /// <summary>
+        /// 余额
+        /// </summary>
+        public long Balance { get; set; }
 
     }
 }

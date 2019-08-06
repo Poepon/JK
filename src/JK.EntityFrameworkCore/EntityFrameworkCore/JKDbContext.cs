@@ -87,7 +87,6 @@ namespace JK.EntityFrameworkCore
         public virtual DbSet<TenantLimitPolicyRuleValue> TenantLimitPolicyRuleValues { get; set; }
         public virtual DbSet<CompanyAccount> CompanyAccounts { get; set; }
 
-        public virtual DbSet<Balance> Balances { get; set; }
         public virtual DbSet<BalanceChangedRecord> BalanceChangedRecords { get; set; }
 
         public virtual DbSet<ApiParameter> ApiCallbackParameters { get; set; }
