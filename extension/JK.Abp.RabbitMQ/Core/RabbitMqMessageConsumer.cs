@@ -169,7 +169,7 @@ namespace JK.Abp.RabbitMQ
                 {
                     await HandleIncomingMessage(channel, basicDeliverEventArgs);
                 };
-                channel.BasicQos(0, ConsumerConfiguration.PrefetchCount, ConsumerConfiguration.Global);
+                channel.BasicQos(ConsumerConfiguration.PrefetchSize, ConsumerConfiguration.PrefetchCount, ConsumerConfiguration.Global);
                 channel.BasicConsume(
                     queue: Queue.QueueName,
                     autoAck: false,
@@ -197,6 +197,7 @@ namespace JK.Abp.RabbitMQ
             }
             catch (Exception ex)
             {
+                channel.BasicNack(basicDeliverEventArgs.DeliveryTag, false, false);
                 Logger.Error(ex.Message, ex);
             }
         }

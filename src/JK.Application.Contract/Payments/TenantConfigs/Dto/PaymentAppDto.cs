@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Abp.Domain.Entities;
+using System.Text;
+using Abp.Application.Services.Dto;
+using AutoMapper;
 using JK.MultiTenancy;
 using JK.Payments.Enumerates;
+using JK.Payments.Tenants;
 
-namespace JK.Payments.Tenants
+namespace JK.Payments.TenantConfigs.Dto
 {
-    [Table("PaymentApps")]
-    public class PaymentApp : Entity,IPassivable
+    [AutoMap(typeof(PaymentApp))]
+    public class PaymentAppDto : EntityDto
     {
         public int TenantId { get; set; }
-
-        [ForeignKey(nameof(TenantId))]
-        public virtual Tenant Tenant { get; set; }
 
         [Required]
         [StringLength(32)]
@@ -48,11 +49,7 @@ namespace JK.Payments.Tenants
 
         public bool UseSSL { get; set; }
 
-
-        public virtual ICollection<PaymentAppChannel> SupportedChannels { get; set; }
-
-        public virtual ICollection<PaymentAppCompany> SupportedCompanies { get; set; }
-
         public bool IsActive { get; set; }
+
     }
 }

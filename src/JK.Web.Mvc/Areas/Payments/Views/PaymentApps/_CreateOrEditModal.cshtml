@@ -1,5 +1,5 @@
 ﻿@using JK.Web.Models.Common.Modals
-@model Abp.Application.Services.Dto.EntityDto
+@model JK.Web.Areas.Payments.Models.PaymentApps.EditViewModel
 @{
     Layout = null;
 }
@@ -8,7 +8,7 @@
     <form name="InformationsForm" role="form" novalidate class="form-validation">
         <input type="hidden" name="Id" value="@Model.Id" />
         <ul class="nav nav-tabs tab-nav-right" role="tablist">
-            <li role="presentation" class="active"><a href="#edit-platform-details" data-toggle="tab">支付平台信息</a></li>
+            <li role="presentation" class="active"><a href="#edit-platform-details" data-toggle="tab">APP信息</a></li>
             <li role="presentation"><a href="#edit-platform-methods" data-toggle="tab">@L("PaymentMethods")</a></li>
         </ul>
         <div class="tab-content">
@@ -23,14 +23,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="row clearfix">
-                    <div class="col-sm-12">
-                        <div class="input-group form-float">
-                            <label class="input-group-addon">货币单位</label>
-                            <select asp-for="CurrencyUnit" asp-items="EumnToSelectListItems(Model.CurrencyUnit,LocalizationManager)" class="form-control bootstrap-select"></select>
-                        </div>
-                    </div>
-                </div>
+          
 
                 <div class="row clearfix">
                     <div class="col-sm-12">
@@ -58,7 +51,7 @@
                             }
                         }
                     </div>
-                    <div class="col-sm-12 col-orange"><em>Tip:勾选要启用的 @L("PaymentMethods")</em></div>
+                    <div class="col-sm-12 col-orange"><em>Tip:勾选要启用的渠道</em></div>
                 </div>
             </div>
         </div>
